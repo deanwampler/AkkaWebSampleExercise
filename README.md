@@ -38,3 +38,11 @@ MongoDB is used for persistence. I'm not a Mongo expert, so suggestions are welc
 ## JavaScript Testing
 
 Although this app uses some JavaScript, we haven't included tests for it, which should be made dependents of the `test` target.
+
+## Web Tier
+
+The web tier uses simple HTML pages, JavaScript and AJAX. Possible enhancements would include using Lift or Play as web frameworks. Also, the AJAX calls could be replaced with HTML 5 WebSockets (only supported currently in Google Chrome and some other prerelease versions of other browsers).
+
+## PubSub
+
+A new feature on the Akka "head" is PubSub support with several back-ends. I didn't use this feature, since it's not yet in a released version of Akka, but it would be a natural feature to use for this example.
