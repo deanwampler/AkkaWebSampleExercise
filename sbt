@@ -67,5 +67,6 @@ if [ "$jettyport" != "" ] ; then
   JAVA_OPTIONS="-Djetty.port=$jettyport $JAVA_OPTIONS"
 fi
 
-echo env java $JAVA_OPTIONS -Xmx$maxheap -jar ./misc/sbt-launch-0.7.4.jar "$@"
-env java $JAVA_OPTIONS -Xmx$maxheap -jar ./misc/sbt-launch-0.7.4.jar "$@"
+# -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256m is supposed to reduce PermGen errors.
+echo env java $JAVA_OPTIONS -Xmx$maxheap -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256m -jar ./misc/sbt-launch-0.7.4.jar "$@"
+env java $JAVA_OPTIONS -Xmx$maxheap -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256m -jar ./misc/sbt-launch-0.7.4.jar "$@"

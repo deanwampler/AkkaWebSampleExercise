@@ -31,6 +31,10 @@ Please fork the repo and commit improvements, updates, *etc.*
 
 At the time of this writing, Scala 2.8.0.Beta1 is the latest release with stable builds of Akka and some other tools we're using.
 
+## MongoDB
+
+MongoDB is used for persistence. I'm not a Mongo expert, so suggestions are welcome.
+
 ## JavaScript Testing
 
 Although this app uses some JavaScript, we haven't included tests for it, which should be made dependents of the `test` target.
