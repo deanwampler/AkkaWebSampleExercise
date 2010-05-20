@@ -1,6 +1,7 @@
 package org.chicagoscala.awse.server.rest
 import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.server.persistence._
+import org.chicagoscala.awse.server.math._
 import se.scalablesolutions.akka.actor._
 import se.scalablesolutions.akka.dispatch.{Future, Futures}
 import se.scalablesolutions.akka.util.Logging
@@ -13,7 +14,7 @@ import org.joda.time._
 @Path("/ajax")
 class RestfulDataServer extends Transactor with NamedActor with Logging {
    
-  val name = "RestfulDataServer"
+  val actorName = "RestfulDataServer"
   def dataStorageServers = ActorRegistry.actorsFor(classOf[DataStorageServer]) 
   
   def receive = {

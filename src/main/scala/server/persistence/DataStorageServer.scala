@@ -16,7 +16,7 @@ import org.joda.time._
 class DataStorageServer(val service: String) 
     extends Transactor with NamedActor with Logging {
 
-  val name = "DataStoreServer("+service+")"
+  val actorName = "DataStoreServer("+service+")"
       
   def receive = {
     case Get(fromTime, untilTime) => 
@@ -25,12 +25,12 @@ class DataStorageServer(val service: String)
     case Put(time, json) => reply(putData(time, json))
 
     case Finished => 
-      val msg = name + ": Received Finished message."
+      val msg = actorName + ": Received Finished message."
       log.ifInfo (msg)
       reply (("message", msg))
 
     case x => 
-      val msg = name + ": unknown message received: " + x
+      val msg = actorName + ": unknown message received: " + x
       log.ifInfo (msg)
       reply (("error", msg))
   }
@@ -40,12 +40,12 @@ class DataStorageServer(val service: String)
       (timeStamp, json) <- dataStore.range(fromTime, untilTime)
     } yield json
     val result = toJSON(data toList)
-    log.ifDebug(name + ": GET returning response for startTime, endTime, size = " + 
+    log.ifDebug(actorName + ": GET returning response for startTime, endTime, size = " + 
       fromTime + ", " + untilTime + ", " + result.size)
     result
   } catch {
     case th => 
-      log.error(name + ": Exception thrown: ", th)
+      log.error(actorName + ": Exception thrown: ", th)
       th.printStackTrace
       throw th
   }
@@ -54,9 +54,9 @@ class DataStorageServer(val service: String)
   
   protected[persistence] def putData(time: DateTime, json: String) = {
     if (putCount % 100 == 0)
-      log.info(name + " PUT: storing 100th Pair(" + time + ", " + json + ")")
+      log.info(actorName + " PUT: storing 100th Pair(" + time + ", " + json + ")")
     else
-      log.ifTrace (name + ": PUT: storing Pair(" + time + ", " + json + ")")
+      log.ifTrace (actorName + ": PUT: storing Pair(" + time + ", " + json + ")")
     putCount += 1
       
     try {
@@ -64,7 +64,7 @@ class DataStorageServer(val service: String)
       Pair("message", "Put received for time " + time + ". Data storage started.")
     } catch {
       case ex => 
-        log.error(name + ": PUT: exception thrown while attempting to add JSON to the data store: "+json)
+        log.error(actorName + ": PUT: exception thrown while attempting to add JSON to the data store: "+json)
         ex.printStackTrace();
         throw ex
     }
@@ -85,14 +85,14 @@ object DataStorageServer extends Logging {
   /**
    * Instantiate the default type of datastore: an InMemoryDataStore with an upper limit on values.
    */
-  def makeDefaultDataStore(name: String): DataStore[String] = {
+  def makeDefaultDataStore(storeName: String): DataStore[String] = {
     val db = System.getProperty("app.datastore.type", config.getString("app.datastore.type", "mongodb"))
     if (db.toLowerCase.trim == "mongodb") {
       log.ifInfo("Using MongoDB-backed data storage.")
-      new MongoDBDataStore(name)
+      new MongoDBDataStore(storeName)
     } else {
       log.ifInfo("Using in-memory data storage.")
-      new InMemoryDataStore[String](name)
+      new InMemoryDataStore[String](storeName)
     }
   }
 }

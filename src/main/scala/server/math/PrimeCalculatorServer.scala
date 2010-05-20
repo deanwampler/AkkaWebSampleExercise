@@ -6,6 +6,11 @@ import se.scalablesolutions.akka.actor.Actor
 import se.scalablesolutions.akka.util.Logging
 import org.joda.time._
 
+sealed trait PrimeCalculationMessages
+case object StartCalculatingPrimes extends PrimeCalculationMessages
+case class  CalculatePrimes(from: Long, to: Long) extends PrimeCalculationMessages
+case class  PrimesCalculationReply(from: Long, to: Long, primesJSON: String) extends PrimeCalculationMessages
+
 class DataStorageNotAvailable(service: String) extends RuntimeException(
   "Could not get a DataStorageServer for prime calculator actor "+service)
   
@@ -15,17 +20,18 @@ class DataStorageNotAvailable(service: String) extends RuntimeException(
  */
 class PrimeCalculatorServer(val service: String) extends Actor with NamedActor with Logging {
   
-  val name = "PrimeCalculatorServer("+service+")"
+  val actorName = "PrimeCalculatorServer("+service+")"
       
   def receive = {
     case CalculatePrimes(from: Long, to: Long) => 
       val primes = Primes(from, to)
       val json = prefix(from, to, primes.size) + toJSON(primes)  + "\"}"
-      log.info(name+": Calculated "+primes.size+" primes between "+from+" and "+to)
+      log.info(actorName+": Calculated "+primes.size+" primes between "+from+" and "+to)
       dataStore ! Put(new DateTime(), json)
       reply (PrimesCalculationReply(from, to, prefix(from, to, primes.size) + "\"}"))
       
-    case Pair(String, _) => // message response
+    // TODO: Beta1 compiler bug!!! Uncomment this line and the compiler crashes.
+    // case Pair(String, _) => // message response
   }
 
   protected def toJSON(primes: List[Long]) = primes.size match {

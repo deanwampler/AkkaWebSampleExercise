@@ -25,44 +25,6 @@ class BootAWSESupervisor {
   DataStorageServerSupervisor.dataStorageServerSupervisor.start
   PrimeCalculatorServerSupervisor.primeCalculatorServerSupervisor.start
   factory.newInstance.start
-  println("DataStorageServer factory started")
-  println("PrimeCalculatorServer factory started")
-}
-
-sealed trait ActorManagementMessage
-case class GetActorFor(name: String) extends ActorManagementMessage
-case class Register(actor: Actor)    extends ActorManagementMessage
-case class Unregister(actor: Actor)  extends ActorManagementMessage
-
-trait ActorSupervision { self: Actor with Logging =>
-  
-  protected def makeActor(name: String): Actor
-  protected def getActorFor(name: String): Option[Actor] =
-    ActorRegistry.actorsFor(classOf[NamedActor]) find { actor => 
-      actor.name == name
-    }
-  
-  def handleManagementMessage: PartialFunction[Any,Unit] = {
-    case GetActorFor(name: String) => reply(getOrMakeActorFor(name))
-
-    case Register(actor) => 
-      log.ifInfo("Registering actor: "+actor)
-      link(actor)
-
-    case Unregister(actor) => 
-      log.ifInfo("Registering actor: "+actor)
-      unlink(actor)
-  }
-
-  protected def getOrMakeActorFor(name: String) = getActorFor(name) match {
-    case Some(a) => a
-    case None => 
-      log.ifInfo("Creating new Actor for "+name)
-      val actor = makeActor(name)
-      actor.start
-      this ! Register(actor)
-      actor
-  }
 }
 
 class DataStorageServerSupervisor extends Actor with ActorSupervision {
@@ -70,7 +32,7 @@ class DataStorageServerSupervisor extends Actor with ActorSupervision {
   faultHandler = Some(OneForOneStrategy(5, 5000))
   lifeCycle = Some(LifeCycle(Permanent))
   
-  protected def makeActor(name: String): Actor = new DataStorageServer(name)
+  protected def makeActor(actorName: String): Actor = new DataStorageServer(actorName)
   
   def receive = handleManagementMessage
 }
@@ -80,11 +42,6 @@ object DataStorageServerSupervisor extends Logging {
   lazy val dataStorageServerSupervisor = new DataStorageServerSupervisor
 }
   
-sealed trait PrimeCalculationMessages
-case object StartCalculatingPrimes extends PrimeCalculationMessages
-case class  CalculatePrimes(from: Long, to: Long) extends PrimeCalculationMessages
-case class  PrimesCalculationReply(from: Long, to: Long, primesJSON: String) extends PrimeCalculationMessages
-
 class PrimeCalculatorServerSupervisor extends Actor with ActorSupervision with Logging {
   trapExit = List(classOf[Throwable])
   faultHandler = Some(OneForOneStrategy(5, 5000))
@@ -93,7 +50,7 @@ class PrimeCalculatorServerSupervisor extends Actor with ActorSupervision with L
   val ONE_HUNDRED_THOUSAND = 100000
   val MILLION = 10 * ONE_HUNDRED_THOUSAND
 
-  protected def makeActor(name: String): Actor = new PrimeCalculatorServer(name)
+  protected def makeActor(actorName: String): Actor = new PrimeCalculatorServer(actorName)
 
   def handleMessage: PartialFunction[Any, Unit] = {
 

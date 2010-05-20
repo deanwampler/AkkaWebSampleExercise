@@ -40,7 +40,10 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info)  
   // Work around a problem where sbt incorrectly updated the Scala jars to the RC1 release.
   // (Still an issue?)
   override def jettyRunClasspath = 
-    super.jettyRunClasspath --- ("target" ** "scala-library*.jar") --- ("lib_managed" ** "scala-library*.jar") +++ (
+    super.jettyRunClasspath --- (
+      "target" ** "scala-*.jar") --- (
+      "project" ** "scala-*.jar") --- (
+      "lib_managed" ** "scala-*.jar") +++ (
       "lib" / "scala-*.jar")
   
   // For continuous redeployment: http://code.google.com/p/simple-build-tool/wiki/WebApplications

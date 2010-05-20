@@ -2,14 +2,11 @@ package org.chicagoscala.awse.servlet
 
 import se.scalablesolutions.akka.remote.BootableRemoteActorService
 import se.scalablesolutions.akka.actor.BootableActorLoaderService
-import se.scalablesolutions.akka.camel.service.CamelService
-import se.scalablesolutions.akka.config.Config
-import se.scalablesolutions.akka.util.{Logging, Bootable}
 import se.scalablesolutions.akka.servlet.{Initializer => AkkaInitializer}
-import javax.servlet.{ServletContextListener, ServletContextEvent}
+import javax.servlet.ServletContextEvent
  
  /**
-  * This initializer overrides a method in Akka's {@link se.scalablesolutions.akka.servlet.Initializer}
+  * This initializer overrides a method in Akka's se.scalablesolutions.akka.servlet.Initializer
   * to omit the initialization of Camel, which forces unnecessary dependent jars to be deployed if you 
   * aren't using Camel. So, the listener tag in your web.xml becomes:
   *
