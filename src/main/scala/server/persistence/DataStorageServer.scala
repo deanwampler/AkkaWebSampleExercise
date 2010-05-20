@@ -18,6 +18,8 @@ class DataStorageServer(val service: String)
 
   val actorName = "DataStoreServer("+service+")"
       
+  log.info("Creating: "+actorName)
+  
   def receive = {
     case Get(fromTime, untilTime) => 
       reply(getData(fromTime, untilTime))
@@ -53,10 +55,10 @@ class DataStorageServer(val service: String)
   var putCount = 0
   
   protected[persistence] def putData(time: DateTime, json: String) = {
-    if (putCount % 100 == 0)
-      log.info(actorName + " PUT: storing 100th Pair(" + time + ", " + json + ")")
+    if (putCount % 10 == 0)
+      log.info(actorName + " PUT: storing 10th Pair(" + time + ", " + json.substring(0, 100) + " ...)")
     else
-      log.ifTrace (actorName + ": PUT: storing Pair(" + time + ", " + json + ")")
+      log.ifTrace (actorName + ": PUT: storing Pair(" + time + ", " + json.substring(0, 100) + " ...)")
     putCount += 1
       
     try {

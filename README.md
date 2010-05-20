@@ -1,7 +1,7 @@
 # Akka Sample Exercise README 
 
 This is a a sample exercise for a web app based on [Akka](http://akkasource.org) that
-used for the May 20th, 2010 meeting of the [Chicago-Area Scala Enthusiasts](http://www.meetup.com/chicagoscala/) (CASE). It demonstrates building an Actor based, distributed application with a web interface and MongoDB persistence.
+used for the May 20th, 2010 meeting of the [Chicago-Area Scala Enthusiasts](http://www.meetup.com/chicagoscala/) (CASE). It demonstrates building an Actor based, distributed application with a web interface (forthcoming...) and MongoDB persistence.
 
 For a blog post on setting up a similar Akka web app, see [this blog post](http://roestenburg.agilesquad.com/2010/04/starting-with-akka-and-scala.html).
 
@@ -45,13 +45,19 @@ Now, back in `sbt` you can run the tests and run the app. (sbt's `>` prompt is n
      
     test              # run the test suite. It should end with "success"
     jetty-run         # run the Jetty web server
-    open http://localhost:8080/primes      # profit!
+    curl http://localhost:8080/primes/ajax/ajax/start   # start calculating primes
+    curl http://localhost:8080/primes/ajax/ajax/primes  # profit!
 
-The last command, `open http://localhost:8080/case`, works on OS X. Use the appropriate command on your OS to open the web page in a browser or just copy and past the URL.
+
+If you don't have the `curl` command or the equivalent, use a browser.
 
 # Improvements You Can Make (a.k.a. Exercises)
 
 Here are some things you might try to better understand how Akka works.
+
+## Fix the Bugs!!
+
+It breaks down after calculating a few runs of primes. Help me debug it. ;)
 
 ## Simplify the Actors
 

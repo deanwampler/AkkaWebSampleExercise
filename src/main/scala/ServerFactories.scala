@@ -40,6 +40,9 @@ class DataStorageServerSupervisor extends Actor with ActorSupervision {
 object DataStorageServerSupervisor extends Logging {
     
   lazy val dataStorageServerSupervisor = new DataStorageServerSupervisor
+
+  def getAllDataStorageServers: List[Actor] = 
+    ActorRegistry.actorsFor(classOf[DataStorageServer]) 
 }
   
 class PrimeCalculatorServerSupervisor extends Actor with ActorSupervision with Logging {

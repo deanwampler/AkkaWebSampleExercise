@@ -15,7 +15,8 @@ import org.joda.time._
 class RestfulDataServer extends Transactor with NamedActor with Logging {
    
   val actorName = "RestfulDataServer"
-  def dataStorageServers = ActorRegistry.actorsFor(classOf[DataStorageServer]) 
+  
+  def dataStorageServers = DataStorageServerSupervisor.getAllDataStorageServers
   
   def receive = {
     case message => 
