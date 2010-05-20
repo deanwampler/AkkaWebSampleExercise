@@ -18,7 +18,9 @@ trait ActorSupervision extends Actor with Logging {
   protected def makeActor(name: String): Actor
   
   def handleManagementMessage: PartialFunction[Any,Unit] = {
-    case GetActorFor(actorName) => reply(getOrMakeActorFor(actorName))
+    case GetActorFor(name) => 
+      log.ifInfo("Getting or creating actor for name "+name)
+      reply(getOrMakeActorFor(name))
 
     case Register(actor) => 
       log.ifInfo("Registering actor: "+actor)

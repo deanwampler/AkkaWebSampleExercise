@@ -54,7 +54,7 @@ class RestfulDataServerTest extends FunSuite with ShouldMatchers {
   test ("getAllDataFor should return an error message is there are appear to be no data servers available") {
     restfulServerWithNoDataStorageServers.start
     restfulServerWithNoDataStorageServers.getAllDataFor("primes", 100, 200) should equal (
-      """{"error": "No data servers appear to be available."}""")
+      """{"error": "RestfulDataServer: No DataStorageServers!!"}""")
     restfulServerWithNoDataStorageServers.stop
   }
   

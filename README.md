@@ -48,8 +48,10 @@ Now, back in `sbt` you can run the tests and run the app. (sbt's `>` prompt is n
     curl http://localhost:8080/primes/ajax/ajax/start   # start calculating primes
     curl http://localhost:8080/primes/ajax/ajax/primes  # profit!
 
+If you don't have the `curl` command or the equivalent, use a browser. (The "ajax/ajax" stuff is both redundant and used for the planned AJAX-based UI...) There is one other supported "action":
 
-If you don't have the `curl` command or the equivalent, use a browser.
+    curl http://localhost:8080/primes/ajax/ajax/ping    # You there?
+
 
 # Improvements You Can Make (a.k.a. Exercises)
 

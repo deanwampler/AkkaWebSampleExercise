@@ -44,6 +44,11 @@ class RestfulDataServer extends Transactor with NamedActor with Logging {
       @DefaultValue("0")  @QueryParam("min") fromTime: Long,
       @DefaultValue("-1") @QueryParam("max") untilTime: Long ): String = 
     action match {
+      case "ping" => 
+        log.info("Pinging!!")
+        DataStorageServerSupervisor.dataStorageServerSupervisor ! Pair("ping", "You there??")
+        """{"message": "Ping messages sent."}"""        
+        
       case "start" => 
         log.info("Starting!!")
         PrimeCalculatorServerSupervisor.primeCalculatorServerSupervisor ! StartCalculatingPrimes

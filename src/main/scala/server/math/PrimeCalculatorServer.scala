@@ -27,7 +27,10 @@ class PrimeCalculatorServer(val service: String) extends Transactor with NamedAc
       val primes = Primes(from, to)
       val json = prefix(from, to, primes.size) + ", " + toJSON(primes)  + "\"}"
       log.info(actorName+": Calculated "+primes.size+" primes between "+from+" and "+to)
-      dataStore ! Put(new DateTime(), json)
+      dataStore match {
+        case Some(dss) => dss ! Put(new DateTime(), json)
+        case None =>
+      } 
       reply (PrimesCalculationReply(from, to, prefix(from, to, primes.size) + "\"}"))
       
     // TODO: Beta1 compiler bug!!! Uncomment this line and the compiler crashes.
@@ -44,10 +47,12 @@ class PrimeCalculatorServer(val service: String) extends Transactor with NamedAc
     
   protected def dataStore = {
     val result: Option[DataStorageServer] = 
-      DataStorageServerSupervisor.dataStorageServerSupervisor !! GetActorFor(service) 
+      DataStorageServerSupervisor.dataStorageServerSupervisor !! GetActorFor(service+"_DataStoreServer") 
     result match {
-      case Some(dss) => dss
-      case None => throw new DataStorageNotAvailable(service)
+      case Some(dss) => result
+      case None => 
+        log.error("Can't get a DataStorageServer for name "+service+"_DataStoreServer!!")
+        result
     }
   }
 }

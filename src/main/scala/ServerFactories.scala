@@ -34,7 +34,11 @@ class DataStorageServerSupervisor extends Actor with ActorSupervision {
   
   protected def makeActor(actorName: String): Actor = new DataStorageServer(actorName)
   
-  def receive = handleManagementMessage
+  def pingHandler: PartialFunction[Any, Unit] = {
+    case Pair("ping", msg @ _) => log.info("DataStorageServerSupervisor received message: "+msg)
+  } 
+  
+  def receive = pingHandler orElse handleManagementMessage
 }
 
 object DataStorageServerSupervisor extends Logging {

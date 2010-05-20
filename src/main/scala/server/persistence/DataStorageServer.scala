@@ -55,10 +55,11 @@ class DataStorageServer(val service: String)
   var putCount = 0
   
   protected[persistence] def putData(time: DateTime, json: String) = {
+    val jsonShortStr = if (json.length > 100) json.substring(0,100) + "..." else json
     if (putCount % 10 == 0)
-      log.info(actorName + " PUT: storing 10th Pair(" + time + ", " + json.substring(0, 100) + " ...)")
+      log.info(actorName + " PUT: storing 10th Pair(" + time + ", " + jsonShortStr + ")")
     else
-      log.ifTrace (actorName + ": PUT: storing Pair(" + time + ", " + json.substring(0, 100) + " ...)")
+      log.ifTrace (actorName + ": PUT: storing Pair(" + time + ", " + jsonShortStr + ")")
     putCount += 1
       
     try {
