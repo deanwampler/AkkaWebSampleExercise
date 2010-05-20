@@ -1,0 +1,213 @@
+body {
+  font-family: "Lucida Grande", Palatino, Verdana, sans-serif;
+  font-size: 1.0em;
+  margin: 20px;
+  background-color: #FFF2E3;
+}
+
+font.error {
+  color: #FF1927;
+  font-family: bold;
+}
+font.warning {
+  color: #FFC30B;
+}
+font.info {
+  color: #576B4A;
+}
+font.date {
+  color: #6D5A46;
+}
+font.giant {
+  color: #3B4E09;
+  font-size: 5em;
+}
+font.quote {
+  font-style: italic;
+}
+font.attribution {
+  font-size: .8em;
+  color: #576B4A;
+}
+
+.pane {
+}
+
+.plot {
+  height: 32%;
+  width: 100%;
+  float: top;
+}
+
+.legend table {
+  border: 1px solid gray;
+  background-color: #F9FDF9; /* same as toolbar below */
+  opacity: .6;  
+}
+  
+.padding {
+  width: 100%;
+}
+.spacing {
+  width: 20px;
+}
+.fullWidth {
+  width: 100%;
+}
+.resizable {
+  padding: 0.5em;
+}
+
+div.start {
+  background-image: url("../images/the-eye-of-sauron.jpg");  
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 100%;
+  height: 100%;
+}
+
+div.quote-expand {
+  background-image: url("../images/stephen_colbert-9310.jpg");  
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 100%;
+  height: 100%;
+  display: none;
+}
+
+div.loading {
+  padding-top:200px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.icon {
+  background-image: url("../images/the-eye-of-sauron2-tiny.jpg");
+  background-repeat: no-repeat;
+  height: 30px;
+  width: 45px;
+}
+
+div.toolbar {
+  font-family: Palatino, Helvetica, "Lucida Grande", Verdana, sans-serif;
+  vertical-align: middle;
+  text-align: middle;
+  font-size: 1.0em;
+  border: 1px solid gray;
+  background-color: #F9FDF9; /* same as legend above */
+  margin-top:  5px;
+  margin-bottom:  5px;
+  padding: 5px;
+  height: 32px;
+}
+
+.toolbar-control {
+  float: left;
+  vertical-align: middle;
+  text-align: middle;
+  padding-right: 5px;
+  margin: 2px;
+}
+
+.with-left-border {
+  border-left: 1px #AAA solid;
+}
+.with-right-border {
+  border-right: 1px #AAA solid;
+}
+.float-to-right {
+/*  position: absolute;
+  right: 5px;
+*/
+  margin-top: -5px;
+  margin-right: -5px;
+  float: right;
+  text-align: right;
+  border: 1px #B5B8B6 solid;
+  background-color: #E9EDEA; 
+  padding-bottom:  5px;
+  padding-left:    5px;
+  z-index: -1;
+}
+
+.left {
+  margin-left: auto;
+}
+.right {
+  margin-right: auto;
+}
+
+#slider {
+  width: 100px;
+  float: left;
+  top: 5px;
+  left: 5px;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+.ui-slider {
+  background-color: black;
+  color: red;
+}
+
+#title {
+  float: left;
+  font-weight: bold;
+  font-family: Helvetica;
+}
+
+.rag-status {
+  border: 1px solid gray;
+  padding-left: 10px;
+  padding-right: 10px;
+  margin-right: 5px;
+}
+.rag-status-red {
+  background-color: #FF013B;
+  font-weight: bold;
+}
+.rag-status-amber {
+  background-color: #FF7E00;
+  font-weight: bold;
+}
+.rag-status-green {
+  background-color: #A8EC9E;
+}
+
+#message {
+  font-family: Palatino, Helvetica, "Lucida Grande", Verdana, sans-serif;
+}
+.message-box {
+  height: 20px;  
+  padding: 5px;
+}
+
+div.debug {
+  float: left;
+}
+
+.googleChart {
+  width: 100%;
+  height: 90%;
+  z-index: 0;
+}
+
+a.dp-choose-date {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  margin: 5px 3px 0;
+  display: inline-block;
+  text-indent: -2000px;
+  overflow: hidden;
+  background: url(../images/calendar.png) no-repeat; 
+}
+
+a.dp-choose-date.dp-disabled {
+  background-position: 0 -20px;
+  cursor: default;
+}
+
+input.dp-applied {
+  width: 140px;
+}

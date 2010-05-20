@@ -12,18 +12,20 @@ AkkaWebSampleExercise/sbt - Drive SBT for the AkkaWebSampleExercise
 (See http://github.com/deanwampler/AkkaWebSampleExercise)
 usage:
   ./sbt [-h|--help] [--jettyport port] [--jmxport port] [--maxheap NNNM] [--maxrecs N] \
-      [-Dprop=value ...] [sbt_args]
+      [--inmemory | --mongodb] [-Dprop=value ...] [sbt_args]
 where:
   -h | --help       Show this help message.
   --jettyport port  Run Jetty on the specified port (default: Jetty's default setting - 8080).
   --jmxport port    Enable JMX access on the specified port.
-  --maxheap NNNM    Override the default values for the heap size. Append the units, e.g., "M". (default: 1024M).
+  --maxheap NNNM    Override the default values for the heap size. Append the units, e.g., "M". (default: 512M).
+  --inmemory        Use in-memory data storage only. Use if you don't want to bother with Mongodb (default set in akka.conf).
+  --mongodb         Use MongoDB-backed data storage (default set in akka.conf).
   -Dprop=value      Define a Java property that is passed on to the JVM.
   sbt_args          Any other arguments are passed to SBT itself. They must come after the other script arguments.
 EOF
 }
 
-maxheap=1024M
+maxheap=512M
 
 while [ $# -ne 0 ]
 do
@@ -43,6 +45,12 @@ do
     --jmxport)
       shift
       jmxport=$1
+      ;;
+    --inmemory)
+      storage=$1
+      ;;
+    --mongodb)
+      storage=$1
       ;;
     -D*)
       JAVA_OPTIONS="$1 $JAVA_OPTIONS"
@@ -65,6 +73,10 @@ fi
 if [ "$jettyport" != "" ] ; then
   echo "Jetty port: $jettyport."
   JAVA_OPTIONS="-Djetty.port=$jettyport $JAVA_OPTIONS"
+fi
+if [ "$storage" != "" ] ; then
+  echo "Using data storage option: $storage."
+  JAVA_OPTIONS="-Dapp.datastore.type=$storage $JAVA_OPTIONS"
 fi
 
 # -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256m is supposed to reduce PermGen errors.
