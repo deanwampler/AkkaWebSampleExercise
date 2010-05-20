@@ -25,10 +25,12 @@ trait ActorSupervision extends Actor with Logging {
     case Register(actor) => 
       log.ifInfo("Registering actor: "+actor)
       link(actor)
+      Pair("message", "Actor registered")
 
     case Unregister(actor) => 
       log.ifInfo("Registering actor: "+actor)
       unlink(actor)
+      Pair("message", "Actor unregistered")
   }
 
   protected def getOrMakeActorFor(actorName: String) = getNamedActorFor(actorName) match {
