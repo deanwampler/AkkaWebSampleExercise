@@ -2,7 +2,7 @@ package org.chicagoscala.awse.server.math
 import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.math._
-import se.scalablesolutions.akka.actor.Transactor
+import se.scalablesolutions.akka.actor.{Actor, Transactor}
 import se.scalablesolutions.akka.util.Logging
 import org.joda.time._
 
@@ -45,7 +45,10 @@ class PrimeCalculatorServer(val service: String) extends Transactor with NamedAc
   protected def prefix(from: Long, to: Long, size: Long) =
     """{"from": """ + from + """, "to": """ + to + """, "number-of-primes": """ + size
     
-  protected def dataStore = {
+  protected def dataStore: Option[Actor] =
+      Some(DataStorageServerSupervisor.dataStorageServerSupervisor.getOrMakeActorFor(service+"_DataStoreServer"))
+
+  protected def dataStore2: Option[Actor] = {
     val result: Option[DataStorageServer] = 
       DataStorageServerSupervisor.dataStorageServerSupervisor !! GetActorFor(service+"_DataStoreServer") 
     result match {

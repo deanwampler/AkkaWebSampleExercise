@@ -33,7 +33,7 @@ trait ActorSupervision extends Actor with Logging {
       Pair("message", "Actor unregistered")
   }
 
-  protected def getOrMakeActorFor(actorName: String) = getNamedActorFor(actorName) match {
+  def getOrMakeActorFor(actorName: String) = getNamedActorFor(actorName) match {
     case Some(actor) => 
       log.ifInfo("Returning existing Actor named "+actorName)
       actor
@@ -45,7 +45,7 @@ trait ActorSupervision extends Actor with Logging {
       actor
   }
 
-  protected def getNamedActorFor(name: String): Option[Actor] =
+  def getNamedActorFor(name: String): Option[Actor] =
     ActorRegistry.actorsFor(classOf[NamedActor]) find { actor => 
       actor.actorName == name
     }  
