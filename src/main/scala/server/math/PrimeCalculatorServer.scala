@@ -53,7 +53,9 @@ class PrimeCalculatorServer(val service: String) extends Actor with NamedActor w
   protected def dataStore: Option[Actor] =
       Some(DataStorageServerSupervisor.dataStorageServerSupervisor.getOrMakeActorFor(service+"_DataStoreServer"))
 
-  //
+  // TODO: For some reason, sending a message to the supervisor fails! It may be that it has become
+  // unresponsive for some reason. In contrast, calling the getOrMakeActorFor() method, as above,
+  // works fine.
   protected def dataStore2: Option[Actor] = {
     val result: Option[DataStorageServer] = 
       DataStorageServerSupervisor.dataStorageServerSupervisor !! GetActorFor(service+"_DataStoreServer") 
