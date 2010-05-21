@@ -12,7 +12,7 @@ import net.liftweb.json.JsonDSL._
 import org.joda.time._
 
 @Path("/ajax")
-class RestfulDataServer extends Transactor with NamedActor with Logging {
+class RestfulDataServer extends Actor with NamedActor with Logging {
    
   val actorName = "RestfulDataServer"
   

@@ -18,7 +18,7 @@ class DataStorageNotAvailable(service: String) extends RuntimeException(
  * PrimeCalculatorServer is a worker that calculates prime numbers for a given range.
  * It sends the results to DataStorageServerSupervisor.
  */
-class PrimeCalculatorServer(val service: String) extends Transactor with NamedActor with Logging {
+class PrimeCalculatorServer(val service: String) extends Actor with NamedActor with Logging {
   
   val actorName = "PrimeCalculatorServer("+service+")"
       
@@ -28,7 +28,9 @@ class PrimeCalculatorServer(val service: String) extends Transactor with NamedAc
       val json = prefix(from, to, primes.size) + ", " + toJSON(primes)  + "\"}"
       log.info(actorName+": Calculated "+primes.size+" primes between "+from+" and "+to)
       dataStore match {
-        case Some(dss) => dss ! Put(new DateTime(), json)
+        case Some(dss) => 
+          log.info("Sending data to the DataStorageServer...")
+          dss ! Put(new DateTime(), json)
         case None =>
       } 
       reply (PrimesCalculationReply(from, to, prefix(from, to, primes.size) + "\"}"))
@@ -45,9 +47,11 @@ class PrimeCalculatorServer(val service: String) extends Transactor with NamedAc
   protected def prefix(from: Long, to: Long, size: Long) =
     """{"from": """ + from + """, "to": """ + to + """, "number-of-primes": """ + size
     
+    
   protected def dataStore: Option[Actor] =
       Some(DataStorageServerSupervisor.dataStorageServerSupervisor.getOrMakeActorFor(service+"_DataStoreServer"))
 
+  //
   protected def dataStore2: Option[Actor] = {
     val result: Option[DataStorageServer] = 
       DataStorageServerSupervisor.dataStorageServerSupervisor !! GetActorFor(service+"_DataStoreServer") 
