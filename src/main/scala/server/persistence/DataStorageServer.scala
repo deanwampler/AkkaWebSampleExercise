@@ -3,7 +3,7 @@ import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.persistence._
 import org.chicagoscala.awse.persistence.inmemory._
 import org.chicagoscala.awse.persistence.mongodb._
-import se.scalablesolutions.akka.actor.Transactor
+import se.scalablesolutions.akka.actor._
 import se.scalablesolutions.akka.stm.Transaction._
 import se.scalablesolutions.akka.util.Logging
 import net.liftweb.json.JsonAST._
@@ -14,7 +14,7 @@ import org.joda.time._
  * DataStorageServer manages storage of time-oriented data, stored as JSON.
  */
 class DataStorageServer(val service: String) 
-    extends Transactor with NamedActor with Logging {
+    extends Actor with NamedActor with Logging {
 
   val actorName = "DataStoreServer("+service+")"
       

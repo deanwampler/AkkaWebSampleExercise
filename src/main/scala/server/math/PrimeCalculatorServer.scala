@@ -2,7 +2,7 @@ package org.chicagoscala.awse.server.math
 import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.math._
-import se.scalablesolutions.akka.actor.{Actor, Transactor}
+import se.scalablesolutions.akka.actor._
 import se.scalablesolutions.akka.util.Logging
 import org.joda.time._
 
@@ -35,6 +35,8 @@ class PrimeCalculatorServer(val service: String) extends Actor with NamedActor w
       } 
       reply (PrimesCalculationReply(from, to, prefix(from, to, primes.size) + "\"}"))
       
+    case msg => log.ifTrace(actorName + ": ignoring " + msg)
+    
     // TODO: Beta1 compiler bug!!! Uncomment this line and the compiler crashes.
     // case Pair(String, _) => // message response
   }
