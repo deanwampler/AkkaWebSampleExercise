@@ -26,10 +26,11 @@ class DataStorageServer(val service: String)
             
     case Put(time, json) => reply(putData(time, json))
 
-    case Finished => 
-      val msg = actorName + ": Received Finished message."
+    case Stop => 
+      val msg = actorName + ": Received Stop message."
       log.ifInfo (msg)
-      reply (("message", msg))
+      DataStorageServerSupervisor.instance ! Unregister(this)
+      this.stop
 
     case x => 
       val msg = actorName + ": unknown message received: " + x

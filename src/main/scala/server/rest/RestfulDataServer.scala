@@ -11,7 +11,7 @@ import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 import org.joda.time._
 
-@Path("/ajax")
+@Path("/")
 class RestfulDataServer extends Actor with NamedActor with Logging {
    
   val actorName = "RestfulDataServer"
@@ -46,14 +46,19 @@ class RestfulDataServer extends Actor with NamedActor with Logging {
     action match {
       case "ping" => 
         log.info("Pinging!!")
-        DataStorageServerSupervisor.dataStorageServerSupervisor ! Pair("ping", "You there??")
+        DataStorageServerSupervisor.instance ! Pair("ping", "You there??")
         """{"message": "Ping messages sent."}"""        
         
       case "start" => 
         log.info("Starting!!")
-        PrimeCalculatorServerSupervisor.primeCalculatorServerSupervisor ! StartCalculatingPrimes
+        PrimeCalculatorServerSupervisor.instance ! StartCalculatingPrimes
         """{"message": "Started calculating primes."}"""
       
+      case "stop" => 
+        log.info("Stopping.")
+        PrimeCalculatorServerSupervisor.instance ! StopCalculatingPrimes
+        """{"message": "Started calculating primes."}"""
+
       case "primes" =>
         val from  = new DateTime(fromTime)
         val until = if (untilTime > 0) new DateTime(untilTime) else new DateTime

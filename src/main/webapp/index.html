@@ -6,7 +6,24 @@
   </head>
   <body>
     <h2>Chicago Scala Akka Web Sample Exercise</h2>
-    <p id="message"></p>
     <p>A sample Akka app with MongoDB persistence, Actors, and a web UI.</p>
+    <div class="toolbar" id="master-toolbar">
+      <div class="toolbar-control icon" id="master-toolbar-img"></div>
+      <div id="title" class="toolbar-control">Server Control:</div>
+      <div class="toolbar-control with-left-border with-right-border">
+        <input class="message control" id="start"   type="button" onclick="serverControl('start');"   value="Start!" />
+        <input class="message control" id="stop"    type="button" onclick="serverControl('stop');"    value="Stop" />
+        <input class="message control" id="restart" type="button" onclick="serverControl('restart');" value="Restart" />
+      </div>
+      <div class="toolbar-control with-right-border">
+        <input class="message" id="ping" type="button" onclick="serverControl('ping')" value="Ping" />
+      </div>
+      <span class="message-box toolbar-control" id="message"></span>
+    </div>
+    <div class="start"></div>
+    <div id="primes">
+    </div>
+    <script src="scripts/jquery-1.4.2.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="scripts/app.js"              type="text/javascript" charset="utf-8"></script>
   </body>
 </html>

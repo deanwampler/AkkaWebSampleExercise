@@ -70,6 +70,10 @@ There is actually a one-to-one mapping between the an actor instance of each `Da
 
 This goes with the previous point. If a `DataStoreServer` dies, the corresponding `PrimeCalculatorServer` should be restarted with it. Assuming you *don't* do the refactoring in the previous point, how can you manage these server pairs together? (Hint: hard code creation of the `DataStoreServers` and `PrimeCalculatorServers` in the `BootAWSESupervisor`, rather than use the current "dynamic-creation" logic.)
 
+### Improve the Server Management Logic
+
+There are UI controls for starting, stopping, and restarting the server. The stop and restart logic is somewhat simplistic and could be improved. See for example `TODO` comments in `ServerFactories.scala`.
+
 ### Make It Clustered
 
 Look at the Akka docs page for [remote actors](http://doc.akkasource.org/remote-actors). Can you make this a truly distributed application?
