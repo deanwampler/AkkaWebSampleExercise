@@ -43,6 +43,7 @@ function onError(request, textStatus, errorThrown) {
 }
 
 function sendRequest(action) {
+  if (! keepPolling) return;
   $.ajax({
     url: "ajax/"+action,
     method: 'GET',
@@ -58,13 +59,17 @@ function sendRequest(action) {
   });
 }
 
+var keepPolling = true
+
 function serverControl(action) {
   if (action != "ping") {
     $(".control").attr("disabled", "disabled");
     if (action == "start" || action == "restart") {
+      keepPolling = true;
       $("#stop").attr("disabled", "");
       $("#restart").attr("disabled", "");
     } else if (action == "stop") {
+      keepPolling = false;
       $("#start").attr("disabled", "");    
     }
   }

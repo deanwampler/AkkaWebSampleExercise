@@ -42,13 +42,19 @@ Now, back in `sbt` you can run the tests and run the app. (sbt's `>` prompt is n
      
     test              # run the test suite. It should end with "success"
     jetty-run         # run the Jetty web server
-    curl http://localhost:8080/primes/ajax/ajax/start   # start calculating primes
-    curl http://localhost:8080/primes/ajax/ajax/primes  # profit!
+    open http://localhost:8080/primes   # open the UI in a browser
+    
+If you don't have the `curl` command or the equivalent, use a browser. Click the `Start` button to tell the server to start calculating primes. (Note that the `Stop` and `Restart` options do not yet work correctly.) AJAX is used to send these commands to the server. 
 
-If you don't have the `curl` command or the equivalent, use a browser. (The "ajax/ajax" stuff is both redundant and used for the planned AJAX-based UI...) There is one other supported "action":
+After you start it, the UI will poll for the calculated primes. Currently, the returned JSON strings are printed to the UI verbatim. Don't worry if you see some `{"error": "..."}` messages at first. 
 
-    curl http://localhost:8080/primes/ajax/ajax/ping    # You there?
+You can run the AJAX calls from curl as well:
 
+    curl http://localhost:8080/primes/ajax/start     # start calculating primes
+    curl http://localhost:8080/primes/ajax/stop      # stop calculating primes (broken)
+    curl http://localhost:8080/primes/ajax/restart   # restart calculating primes (broken)
+    curl http://localhost:8080/primes/ajax/primes    # profit!
+    curl http://localhost:8080/primes/ajax/ping      # you there?
 
 # Improvements You Can Make (a.k.a. Exercises)
 
