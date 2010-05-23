@@ -6,14 +6,14 @@ body {
 }
 
 font.error {
-  color: #FF1927;
+  color: #FF0210;
   font-family: bold;
 }
 font.warning {
-  color: #FFC30B;
+  color: #FF7D15;
 }
 font.info {
-  color: #576B4A;
+  color: #416B41;
 }
 font.date {
   color: #6D5A46;
@@ -129,6 +129,16 @@ div.toolbar {
 .message-box {
   height: 20px;  
   padding: 5px;
+}
+
+.primes-table {
+  border: 1px gray solid;
+}
+.primes-head {
+  text-align: left;
+}
+.primes-row {
+  text-align: left;
 }
 
 div.debug {

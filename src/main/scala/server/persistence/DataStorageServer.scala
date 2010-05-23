@@ -27,15 +27,15 @@ class DataStorageServer(val service: String)
     case Put(time, json) => reply(putData(time, json))
 
     case Stop => 
-      val msg = actorName + ": Received Stop message."
-      log.ifInfo (msg)
+      val message = actorName + ": Received Stop message."
+      log.ifInfo (message)
       DataStorageServerSupervisor.instance ! Unregister(this)
       this.stop
 
     case x => 
-      val msg = actorName + ": unknown message received: " + x
-      log.ifInfo (msg)
-      reply (("error", msg))
+      val message = actorName + ": unknown message received: " + x
+      log.ifInfo (message)
+      reply (("error", message))
   }
     
   protected[persistence] def getData(fromTime: DateTime, untilTime: DateTime) = try {

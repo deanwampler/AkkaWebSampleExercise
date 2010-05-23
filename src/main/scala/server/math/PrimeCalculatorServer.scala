@@ -29,7 +29,7 @@ class PrimeCalculatorServer(val service: String) extends Actor with NamedActor w
       
     case StopCalculatingPrimes => handleStop
     
-    case msg => log.ifTrace(actorName + ": ignoring " + msg)
+    case message => log.ifTrace(actorName + ": ignoring " + message)
     
     // TODO: Beta1 compiler bug!!! Uncomment this line and the compiler crashes.
     // case Pair(String, _) => // message response
@@ -63,7 +63,7 @@ class PrimeCalculatorServer(val service: String) extends Actor with NamedActor w
   
   protected def calcPrimes(from: Long, to: Long) {
     val primes = Primes(from, to)
-    val json = prefix(from, to, primes.size) + ", " + toJSON(primes)  + "\"}"
+    val json = prefix(from, to, primes.size) + """, "primes": """ + toJSON(primes)  + "\"}"
     log.info(actorName+": Calculated "+primes.size+" primes between "+from+" and "+to)
     dataStore match {
       case Some(dss) => 

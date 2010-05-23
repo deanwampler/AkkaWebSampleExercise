@@ -46,8 +46,13 @@ class RestfulDataServer extends Actor with NamedActor with Logging {
     action match {
       case "ping" => 
         log.info("Pinging!!")
-        DataStorageServerSupervisor.instance ! Pair("ping", "You there??")
-        """{"message": "Ping messages sent."}"""        
+        val futures = List(
+          DataStorageServerSupervisor.instance !!! Pair("ping", "You there??"),
+          PrimeCalculatorServerSupervisor.instance !!! Pair("ping", "You there??"))
+        Futures.awaitAll(futures)
+        val replyMessage = """{"ping replies": """ + handlePingReplies(futures) + "\"}"
+        log.info("Ping replies: "+replyMessage)
+        replyMessage
         
       case "start" => 
         log.info("Starting!!")
@@ -64,17 +69,19 @@ class RestfulDataServer extends Actor with NamedActor with Logging {
         val until = if (untilTime > 0) new DateTime(untilTime) else new DateTime
         val dsServers = dataStorageServers
         if (dsServers.size == 0) {
-//          log.error("RestfulDataServer: No DataStorageServers!!")
-          """{"error": "RestfulDataServer: No DataStorageServers!!"}"""
+          val message = "RestfulDataServer: No DataStorageServers! (normal at startup)"
+          log.warning(message)
+          "{\"warn\": \"" + message + "\"}"
         } else {
           val futures = dataStorageServers map { server =>
             server !!! Get(from, until)  // fire messages to all data servers...
           }
           try {
             Futures.awaitAll(futures)        // ... and wait for all of them to reply.
+            val messageForNone = "No data available for start-end times = "+fromTime+", "+untilTime
             val jsons = for {
               future <- futures
-            } yield futureToJSON(future, from, until)
+            } yield futureToJSON(future, messageForNone)
             toJSON(jsons)
           } catch {
             case fte:se.scalablesolutions.akka.dispatch.FutureTimeoutException =>
@@ -85,16 +92,25 @@ class RestfulDataServer extends Actor with NamedActor with Logging {
       case x => """{"error": "Unrecognized 'action': """ + action + "\"}"
     }
     
-  protected def futureToJSON(future: Future, from: DateTime, until: DateTime) = future.result match {
+  protected def futureToJSON(future: Future, messageForNone: String) = future.result match {
     case Some(result) => result match {
       case json: String => json
       case _ => """{"error": "Expected JSON data, but got this: """+result+"\"}"
     }
-    case None => """{"error": "No data available for start-end times = """+from+", "+until+"\"}"
+    case None => "{\"error\": \"" + messageForNone + "\"}"
   }
 
   protected def toJSON(jsons: Iterable[String]) = jsons.size match {
     case 0 => "{\"error\": \"No data servers appear to be available.\"}"
-    case _ => "[" + jsons.reduceLeft(_ + ", " + _) + "]"
+    case _ => jsons.reduceLeft(_ + ", " + _)
   }
+  
+  protected def handlePingReplies(futures: Iterable[Future]) = {
+    val messageForNone = "failed!"
+    val replies = for { future <- futures } yield futureToJSON(future, messageForNone)
+    replies.size match {
+      case 0 => "[]"
+      case _ => "[" + (replies reduceLeft (_ + ", " + _)) + "]"
+    }
+  }  
 }
