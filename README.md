@@ -44,17 +44,20 @@ Now, back in `sbt` you can run the tests and run the app. (sbt's `>` prompt is n
     jetty-run         # run the Jetty web server
     open http://localhost:8080/primes   # open the UI in a browser
     
-If you don't have the `curl` command or the equivalent, use a browser. Click the `Start` button to tell the server to start calculating primes. (Note that the `Stop` and `Restart` options do not yet work correctly.) AJAX is used to send these commands to the server. 
+Click the `Start` button to tell the server to start calculating primes. (Note that the `Stop` and `Restart` options do not work correctly yet.) AJAX is used to send these commands to the server. There is also a `Ping` button that checks whether or not the "supervisors" for the data store and the primes calculators are still responsive.
 
-After you start it, the UI will poll for the calculated primes. Currently, the returned JSON strings are printed to the UI verbatim. Don't worry if you see some `{"error": "..."}` messages at first. 
+After you start it, the UI will poll for the calculated primes. Currently, the returned JSON strings are parsed to extract the range in which the primes were calculated and the number of primes found in that range. (TODO: graph these numbers!). Don't worry if you see some "error" messages at first. 
 
-You can run the AJAX calls from curl as well:
+You can also run the AJAX calls corresponding to the buttons on the UI, using `curl`:
 
     curl http://localhost:8080/primes/ajax/start     # start calculating primes
     curl http://localhost:8080/primes/ajax/stop      # stop calculating primes (broken)
     curl http://localhost:8080/primes/ajax/restart   # restart calculating primes (broken)
     curl http://localhost:8080/primes/ajax/primes    # profit!
     curl http://localhost:8080/primes/ajax/ping      # you there?
+
+If you don't have the `curl` command or the equivalent (*e.g.,* `wget`), paste these URLs in a browser.
+
 
 # Improvements You Can Make (a.k.a. Exercises)
 

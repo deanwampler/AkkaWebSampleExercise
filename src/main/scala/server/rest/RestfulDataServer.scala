@@ -50,7 +50,7 @@ class RestfulDataServer extends Actor with NamedActor with Logging {
           DataStorageServerSupervisor.instance !!! Pair("ping", "You there??"),
           PrimeCalculatorServerSupervisor.instance !!! Pair("ping", "You there??"))
         Futures.awaitAll(futures)
-        val replyMessage = """{"ping replies": """ + handlePingReplies(futures) + "\"}"
+        val replyMessage = """{"ping replies": """ + handlePingReplies(futures) + "}"
         log.info("Ping replies: "+replyMessage)
         replyMessage
         
@@ -102,7 +102,7 @@ class RestfulDataServer extends Actor with NamedActor with Logging {
 
   protected def toJSON(jsons: Iterable[String]) = jsons.size match {
     case 0 => "{\"error\": \"No data servers appear to be available.\"}"
-    case _ => jsons.reduceLeft(_ + ", " + _)
+    case _ => "[" + jsons.reduceLeft(_ + ", " + _) + "]"
   }
   
   protected def handlePingReplies(futures: Iterable[Future]) = {

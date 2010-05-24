@@ -133,12 +133,15 @@ div.toolbar {
 
 .primes-table {
   border: 1px gray solid;
+  background-color: #E4FFDB;
 }
 .primes-head {
   text-align: left;
+  border-bottom: 1px gray solid;
 }
 .primes-row {
   text-align: left;
+  border-bottom: 1px gray solid;
 }
 
 div.debug {

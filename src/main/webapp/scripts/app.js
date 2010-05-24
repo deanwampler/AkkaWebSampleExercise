@@ -43,14 +43,19 @@ function getNext() {
 
 function onSuccess(jsonString) {
   $('.start').fadeOut('slow');
-  appendDebug(jsonString);
+  //appendDebug(jsonString);
   var json = $.parseJSON(jsonString); 
   if (json === null) {
     writeError("Invalid data returned by AJAX query: " + jsonString);
   } else if (json["message"]) {
     writeInfo(json["message"]);
   } else if (json["ping replies"]) {
-    writeInfo("Ping replies" + json["ping replies"]);
+    var replies ="["
+    for (var i=0; i<json["ping replies"].length; i++) {
+      replies += json["ping replies"][i]["pong"] + ", "
+    }
+    replies += "]"
+    writeInfo("Ping replies received from: " + replies);
   } else if (json["info"]) {
     writeInfo(json["info"]);
   } else if (json["warn"]) {
@@ -60,11 +65,16 @@ function onSuccess(jsonString) {
   } else if (json["error"]) {
     writeInfo(json["error"]);
   } else {
+    // Plot the primes data. 
+    // TODO: Note that we currently retrieve all data calculated, including data already retrieved.
     $(".primes-table").css("display", "table");
     for (var i = 0; i < json.length; i++) {
-      var row = json[i]
-      $(".primes-table").append(
-        "<tr class='primes-row'><tr><td>"+row["from"]+"</td><td>"+row["to"]+"</td><td>"+row["number-of-primes"]+"</td></tr>");
+      var array = json[i];
+      for (var j = 0; j < array.length; j++) {
+        var row = array[j];
+        $(".primes-table").append(
+          "<tr class='primes-row'><tr><td>"+row["from"]+"</td><td>"+row["to"]+"</td><td>"+row["number-of-primes"]+"</td></tr>");
+      }
     }
   }
   setTimeout(getNext, 3000);

@@ -63,13 +63,13 @@ class PrimeCalculatorServer(val service: String) extends Actor with NamedActor w
   
   protected def calcPrimes(from: Long, to: Long) {
     val primes = Primes(from, to)
-    val json = prefix(from, to, primes.size) + """, "primes": """ + toJSON(primes)  + "\"}"
+    val json = prefix(from, to, primes.size) + """, "primes": """ + toJSON(primes)  + "}"
     log.info(actorName+": Calculated "+primes.size+" primes between "+from+" and "+to)
     dataStore match {
       case Some(dss) => 
         log.info("Sending data to the DataStorageServer...")
         dss ! Put(new DateTime(), json)
-        reply (PrimesCalculationReply(from, to, prefix(from, to, primes.size) + "\"}"))
+        reply (PrimesCalculationReply(from, to, prefix(from, to, primes.size) + "}"))
       case None =>
         // TODO Send a reply that you can't store the data, so try again...
     } 

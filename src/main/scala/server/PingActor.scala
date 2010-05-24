@@ -12,6 +12,6 @@ trait PingableActor extends NamedActor {
   def handlePing: PartialFunction[Any, Unit] = {
     case Pair("ping", message @ _) => 
       log.debug("DataStorageServerSupervisor received message: "+message)
-      reply("{\"message\": \""+actorName+" received ping message "+message+"\"}")
+      reply("{\"pong\": \""+actorName+"\"}")
   } 
 }
