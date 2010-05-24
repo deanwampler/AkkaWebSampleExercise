@@ -1,6 +1,8 @@
 #!/bin/bash
 #------------------------------------------------------------------
 # sbt driver script. See "./sbt --help" for more information.
+# Notes:
+# Thanks to "tcn" for suggesting the --debug option.
 #------------------------------------------------------------------
 
 jettyport=
@@ -11,12 +13,13 @@ function showhelp() {
 AkkaWebSampleExercise/sbt - Drive SBT for the AkkaWebSampleExercise 
 (See http://github.com/deanwampler/AkkaWebSampleExercise)
 usage:
-  ./sbt [-h|--help] [--jettyport port] [--jmxport port] [--maxheap NNNM] [--maxrecs N] \
+  ./sbt [-h|--help] [--jettyport port] [--jmxport port] [--debug port] [--maxheap NNNM] [--maxrecs N] \
       [--inmemory | --mongodb] [-Dprop=value ...] [sbt_args]
 where:
   -h | --help       Show this help message.
   --jettyport port  Run Jetty on the specified port (default: Jetty's default setting - 8080).
   --jmxport port    Enable JMX access on the specified port.
+  --debug port      Run JVM in debug mode on specified port
   --maxheap NNNM    Override the default values for the heap size. Append the units, e.g., "M". (default: 1024M).
   --inmemory        Use in-memory data storage only. Use if you don't want to bother with Mongodb (default set in akka.conf).
   --mongodb         Use MongoDB-backed data storage (default set in akka.conf).
@@ -46,6 +49,10 @@ do
       shift
       jmxport=$1
       ;;
+    --debug)
+      shift
+      debug=$1
+      ;;
     --inmemory)
       storage=$1
       ;;
@@ -66,17 +73,21 @@ done
 # managed through SBT's maven compatibility.
 export AKKA_HOME=""
 
-if [ "$jmxport" != "" ] ; then
+if [ -n "$jmxport" ] ; then
   echo "JMX monitoring enabled on port $jmxport, without authentication."
   JAVA_OPTIONS="-Dcom.sun.management.jmxremote.port=$jmxport -Dcom.sun.management.jmxremote.authenticate=false $JAVA_OPTIONS"
 fi
-if [ "$jettyport" != "" ] ; then
+if [ -n "$jettyport" ] ; then
   echo "Jetty port: $jettyport."
   JAVA_OPTIONS="-Djetty.port=$jettyport $JAVA_OPTIONS"
 fi
-if [ "$storage" != "" ] ; then
+if [ -n "$storage" ] ; then
   echo "Using data storage option: $storage."
   JAVA_OPTIONS="-Dapp.datastore.type=$storage $JAVA_OPTIONS"
+fi
+if [ -n "$debug" ] ; then
+ echo "Running in debug mode, port: $debug"
+ JAVA_OPTIONS="$JAVA_OPTIONS -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=n,address=$debug"
 fi
 
 # -XX:+CMSClassUnloadingEnabled -XX:MaxPermSize=256m is supposed to reduce PermGen errors.
