@@ -19,7 +19,7 @@ where:
   -h | --help       Show this help message.
   --jettyport port  Run Jetty on the specified port (default: Jetty's default setting - 8080).
   --jmxport port    Enable JMX access on the specified port.
-  --debug port      Run JVM in debug mode on specified port
+  --debug port      Run JVM in debug mode on the specified port.
   --maxheap NNNM    Override the default values for the heap size. Append the units, e.g., "M". (default: 1024M).
   --inmemory        Use in-memory data storage only. Use if you don't want to bother with Mongodb (default set in akka.conf).
   --mongodb         Use MongoDB-backed data storage (default set in akka.conf).
