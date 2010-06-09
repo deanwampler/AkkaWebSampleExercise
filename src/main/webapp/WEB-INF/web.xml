@@ -6,6 +6,8 @@
    version="2.5"> 
 
   <display-name>Chicago Scala Akka Web Sample Exercise</display-name>
+
+  <!-- Our initializers does not mixin Camel support, which can cause mysterious ClassNotFoundErrors. -->
   <listener>
     <listener-class>org.chicagoscala.awse.servlet.Initializer</listener-class>
   </listener>

@@ -12,7 +12,7 @@ import net.liftweb.json.JsonDSL._
 import org.joda.time._
 
 @Path("/")
-class RestfulDataServer extends Actor with NamedActor with Logging {
+class RestfulDataServer extends Actor with Logging {
    
   val actorName = "RestfulDataServer"
   
@@ -46,9 +46,11 @@ class RestfulDataServer extends Actor with NamedActor with Logging {
     action match {
       case "ping" => 
         log.info("Pinging!!")
-        val futures = List(
-          DataStorageServerSupervisor.instance !!! Pair("ping", "You there??"),
-          PrimeCalculatorServerSupervisor.instance !!! Pair("ping", "You there??"))
+        val futures = 
+          (ActorRegistry.actorsFor(classOf[PrimeCalculatorServerSupervisor]) ++
+           ActorRegistry.actorsFor(classOf[PrimeCalculatorServer])) map { 
+            _ !!! Pair("ping", "You there??")
+        }
         Futures.awaitAll(futures)
         val replyMessage = """{"ping replies": """ + handlePingReplies(futures) + "}"
         log.info("Ping replies: "+replyMessage)
@@ -56,12 +58,12 @@ class RestfulDataServer extends Actor with NamedActor with Logging {
         
       case "start" => 
         log.info("Starting!!")
-        PrimeCalculatorServerSupervisor.instance ! StartCalculatingPrimes
+        ActorRegistry.actorsFor(classOf[PrimeCalculatorServerSupervisor]) foreach { _ ! StartCalculatingPrimes }
         """{"message": "Started calculating primes."}"""
       
       case "stop" => 
         log.info("Stopping.")
-        PrimeCalculatorServerSupervisor.instance ! StopCalculatingPrimes
+        ActorRegistry.actorsFor(classOf[PrimeCalculatorServerSupervisor]) foreach { _ ! StopCalculatingPrimes }
         """{"message": "Started calculating primes."}"""
 
       case "primes" =>
@@ -92,11 +94,8 @@ class RestfulDataServer extends Actor with NamedActor with Logging {
       case x => """{"error": "Unrecognized 'action': """ + action + "\"}"
     }
     
-  protected def futureToJSON(future: Future, messageForNone: String) = future.result match {
-    case Some(result) => result match {
-      case json: String => json
-      case _ => """{"error": "Expected JSON data, but got this: """+result+"\"}"
-    }
+  protected def futureToJSON(future: Future[_], messageForNone: String) = future.result match {
+    case Some(result) => result.toString
     case None => "{\"error\": \"" + messageForNone + "\"}"
   }
 
@@ -105,7 +104,7 @@ class RestfulDataServer extends Actor with NamedActor with Logging {
     case _ => "[" + jsons.reduceLeft(_ + ", " + _) + "]"
   }
   
-  protected def handlePingReplies(futures: Iterable[Future]) = {
+  protected def handlePingReplies(futures: Iterable[Future[_]]) = {
     val messageForNone = "failed!"
     val replies = for { future <- futures } yield futureToJSON(future, messageForNone)
     replies.size match {

@@ -4,6 +4,7 @@ import org.chicagoscala.awse.persistence._
 import org.chicagoscala.awse.persistence.inmemory._
 import org.chicagoscala.awse.persistence.mongodb._
 import se.scalablesolutions.akka.actor._
+import se.scalablesolutions.akka.actor.Actor._
 import se.scalablesolutions.akka.stm.Transaction._
 import se.scalablesolutions.akka.util.Logging
 import net.liftweb.json.JsonAST._
@@ -13,29 +14,29 @@ import org.joda.time._
 /**
  * DataStorageServer manages storage of time-oriented data, stored as JSON.
  */
-class DataStorageServer(val service: String) 
-    extends Actor with NamedActor with Logging {
+class DataStorageServer(val service: String) extends Actor with PingHandler with Logging {
 
   val actorName = "DataStoreServer("+service+")"
       
   log.info("Creating: "+actorName)
   
-  def receive = {
+  def receive = defaultHandler orElse pingHandler
+  
+  def defaultHandler: PartialFunction[Any, Unit] = {
+
     case Get(fromTime, untilTime) => 
-      reply(getData(fromTime, untilTime))
+      self.reply(getData(fromTime, untilTime))
             
-    case Put(time, json) => reply(putData(time, json))
+    case Put(time, json) => self.reply(putData(time, json))
 
     case Stop => 
-      val message = actorName + ": Received Stop message."
-      log.ifInfo (message)
-      DataStorageServerSupervisor.instance ! Unregister(this)
-      this.stop
+      log.ifInfo (actorName + ": Received Stop message.")
+      self stop
 
     case x => 
       val message = actorName + ": unknown message received: " + x
       log.ifInfo (message)
-      reply (("error", message))
+      self.reply (("error", message))
   }
     
   protected[persistence] def getData(fromTime: DateTime, untilTime: DateTime) = try {

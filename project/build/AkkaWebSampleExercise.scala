@@ -14,37 +14,31 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info)  
 		"Akka Maven Repository" at "http://scalablesolutions.se/akka/repository",
 		"Java.Net" at "http://download.java.net/maven/2",
 		"Scala Tools" at "http://scala-tools.org/repo-releases",
-    "Ibiblio" at "http://www.ibiblio.org/maven2/",
     "google" at "http://undercover.googlecode.com/svn/maven/repository")
+
+  val SCALATEST_VERSION = "1.2-for-scala-2.8.0.RC3-SNAPSHOT"
+  val JETTY_VERSION     = "7.0.2.v20100331"
 
 	override def libraryDependencies = Set(
 
-    "org.scalatest" % "scalatest" % "1.0.1-for-scala-2.8.0.Beta1-with-test-interfaces-0.3-SNAPSHOT" % "test",
+    "net.lag" % "configgy" % "2.8.0.RC3-1.5.2-SNAPSHOT" % "compile",
+  
+    "org.scalatest" % "scalatest" % SCALATEST_VERSION % "test",
 
 		/* Embedded Jetty web server */
-		"org.eclipse.jetty"  % "jetty-server"   % "7.0.2.v20100331" % "test",
-		"org.eclipse.jetty"  % "jetty-webapp"   % "7.0.2.v20100331" % "test",
+    "org.eclipse.jetty"  % "jetty-server"   % JETTY_VERSION % "test",
+    "org.eclipse.jetty"  % "jetty-webapp"   % JETTY_VERSION % "test",
 
 		/* akka dependencies */
-    "se.scalablesolutions.akka" % "akka-kernel_2.8.0.Beta1"      % "0.8.1" % "compile",
-    "se.scalablesolutions.akka" % "akka-core_2.8.0.Beta1"        % "0.8.1" % "compile",
-    "se.scalablesolutions.akka" % "akka-camel_2.8.0.Beta1"       % "0.8.1" % "compile",
-    "se.scalablesolutions.akka" % "akka-servlet_2.8.0.Beta1"     % "0.8.1" % "compile",
-    "se.scalablesolutions.akka" % "akka-rest_2.8.0.Beta1"        % "0.8.1" % "compile",
+    "se.scalablesolutions.akka" % "akka-core_2.8.0.RC3"        % "0.9" % "compile",
+    "se.scalablesolutions.akka" % "akka-camel_2.8.0.RC3"       % "0.9" % "compile",
+    "se.scalablesolutions.akka" % "akka-http_2.8.0.RC3"        % "0.9" % "compile",
+    "se.scalablesolutions.akka" % "akka-kernel_2.8.0.RC3"      % "0.9" % "compile",
+    "se.scalablesolutions.akka" % "akka-persistence_2.8.0.RC3" % "0.9" % "compile",
 
-    "net.liftweb" % "lift-json" % "2.0-M5" % "compile",
-    "sjson.json" % "sjson" % "0.5-SNAPSHOT-2.8.Beta1" % "compile",
+    "net.liftweb" % "lift-json"   % "2.0-scala280-SNAPSHOT" % "compile",
 
-    "com.osinka" % "mongo-scala-driver" % "0.7.4-2.8.0.Beta1-RC6" % "compile")
-
-  // Work around a problem where sbt incorrectly updated the Scala jars to the RC1 release.
-  // (Still an issue?)
-  override def jettyRunClasspath = 
-    super.jettyRunClasspath --- (
-      "target" ** "scala-*.jar") --- (
-      "project" ** "scala-*.jar") --- (
-      "lib_managed" ** "scala-*.jar") +++ (
-      "lib" / "scala-*.jar")
+    "com.osinka" % "mongo-scala-driver_2.8.0.RC3" % "0.8.0" % "compile")
   
   // For continuous redeployment: http://code.google.com/p/simple-build-tool/wiki/WebApplications
   // Use sbt "~prepare-webapp" command for automatic redeployments.
