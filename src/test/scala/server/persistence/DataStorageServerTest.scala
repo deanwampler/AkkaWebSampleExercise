@@ -1,6 +1,8 @@
 package org.chicagoscala.awse.server.persistence
 import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.persistence.inmemory.InMemoryDataStore
+import se.scalablesolutions.akka.actor.Actor._
+import se.scalablesolutions.akka.actor._
 import org.scalatest.{FlatSpec, FunSuite, BeforeAndAfterEach}
 import org.scalatest.matchers.ShouldMatchers
 import org.joda.time._
@@ -15,21 +17,21 @@ class DataStorageServerTest extends FunSuite with ShouldMatchers with BeforeAndA
   val now        = new DateTime()
   val thenms     = now.getMillis - 3600
   
-  def populateDataStore(server: DataStorageServer, numberOfItems:Int, offset: Int = 0) = {
+  def populateDataStore(server: ActorRef, numberOfItems:Int, offset: Int = 0) = {
     val data = for {
       i <- 0 until numberOfItems
       i2 = i + offset
       time = new DateTime(thenms + (1000L * i2))
       keyValue = "{\"value_"+i2+"\": "+(i2*i2)+"}"
-    } yield server.putData(time, keyValue)
+    } yield (server !! Put(time, keyValue))
   }
   
   // Hacky: we combine what should be separate tests into one so we only have to worry
   // about setting up the server once, etc.
   test("Get message should return an JSON object") {
-    val server = new DataStorageServer("testService") {
+    val server = actorOf(new DataStorageServer("testService") {
       override lazy val dataStore = new InMemoryDataStore[String]("testDataStore")
-    }
+    })
     server.start
 
     // if there is no data

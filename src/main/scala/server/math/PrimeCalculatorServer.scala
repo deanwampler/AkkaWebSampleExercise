@@ -7,13 +7,6 @@ import se.scalablesolutions.akka.actor.Actor._
 import se.scalablesolutions.akka.util.Logging
 import org.joda.time._
 
-sealed trait PrimeCalculationMessages
-case object StartCalculatingPrimes   extends PrimeCalculationMessages
-case object StopCalculatingPrimes    extends PrimeCalculationMessages
-case object RestartCalculatingPrimes extends PrimeCalculationMessages
-case class  CalculatePrimes(from: Long, to: Long) extends PrimeCalculationMessages
-case class  PrimesCalculationReply(from: Long, to: Long, primesJSON: String) extends PrimeCalculationMessages
-
 class DataStorageNotAvailable(service: String) extends RuntimeException(
   "Could not get a DataStorageServer for prime calculator actor "+service)
   
@@ -29,7 +22,7 @@ class PrimeCalculatorServer(val service: String) extends Actor with ActorSupervi
 
   def defaultHandler: PartialFunction[Any, Unit] = {
 
-    case CalculatePrimes(from: Long, to: Long) => calcPrimes(from: Long, to: Long)
+    case StartCalculatingPrimes(min: Long, max: Long) => calcPrimes(min: Long, max: Long)
       
     case StopCalculatingPrimes => handleStop
     
@@ -41,7 +34,7 @@ class PrimeCalculatorServer(val service: String) extends Actor with ActorSupervi
 
   override protected def afterPing(ping: Pair[String,String]) = (dataStore !! ping) match {
     case Some(result) => result
-    case None => "No reply from datastore " + dataStore
+    case None => "No reply min datastore " + dataStore
   }
 
   protected def toJSON(primes: List[Long]) = primes.size match {
@@ -49,23 +42,24 @@ class PrimeCalculatorServer(val service: String) extends Actor with ActorSupervi
     case n => "[" + primes.map(_.toString).reduceLeft(_ + ", " + _) + "]"
   }
   
-  protected def prefix(from: Long, to: Long, size: Long) =
-    """{"from": """ + from + """, "to": """ + to + """, "number-of-primes": """ + size
+  protected def prefix(min: Long, max: Long, size: Long) =
+    """{"min": """ + min + """, "max": """ + max + """, "number-of-primes": """ + size
     
     
   protected lazy val dataStore: ActorRef = {
     val ds = actorOf(new DataStorageServer(service+"_DataStoreServer"))
     self link ds
+    ds.start
     ds
   }
   
-  protected def calcPrimes(from: Long, to: Long) {
-    val primes = Primes(from, to)
-    val json = prefix(from, to, primes.size) + """, "primes": """ + toJSON(primes)  + "}"
-    log.info(actorName+": Calculated "+primes.size+" primes between "+from+" and "+to)
+  protected def calcPrimes(min: Long, max: Long) {
+    val primes = Primes(min, max)
+    val json = prefix(min, max, primes.size) + """, "primes": """ + toJSON(primes)  + "}"
+    log.info(actorName+": Calculated "+primes.size+" primes between "+min+" and "+max)
     log.ifDebug("Sending data to the DataStorageServer...")
-    dataStore ! Put(new DateTime(), json)
-    self.reply (PrimesCalculationReply(from, to, prefix(from, to, primes.size) + "}"))
+    dataStore ! Put(json)
+    self.reply (PrimesCalculationReply(min, max, prefix(min, max, primes.size) + "}"))
   }
 
   // TODO: We notify the data server to stop. Would it be better to go through 

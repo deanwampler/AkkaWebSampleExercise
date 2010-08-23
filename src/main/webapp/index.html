@@ -17,6 +17,10 @@
       <div class="toolbar-control icon" id="master-toolbar-img"></div>
       <div id="title" class="toolbar-control">Server Control:</div>
       <div class="toolbar-control with-left-border with-right-border">
+        <input class="message control" id="min"     type="text"   
+          onChange="integerOnly('min');" onblur="fixMax('min', 'max');" value="1" />
+        <input class="message control" id="max"     type="text"   
+          onChange="integerOnly('max');" onblur="fixMin('min', 'max');" value="1" />
         <input class="message control" id="start"   type="button" onclick="serverControl('start');"   value="Start!" />
         <input class="message control" id="stop"    type="button" onclick="serverControl('stop');"    value="Stop" />
         <input class="message control" id="restart" type="button" onclick="serverControl('restart');" value="Restart" />
@@ -24,8 +28,8 @@
       <div class="toolbar-control with-right-border">
         <input class="message" id="ping" type="button" onclick="serverControl('ping')" value="Ping" />
       </div>
+      <div class="toolbar-control message-box" id="message"></div>
     </div>
-    <div class="message-box" id="message"></div>
     <div class="start"></div>
     <div id="primes">
       <table class="primes-table" style="display:none;">

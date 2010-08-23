@@ -24,10 +24,10 @@ class DataStorageServer(val service: String) extends Actor with PingHandler with
   
   def defaultHandler: PartialFunction[Any, Unit] = {
 
-    case Get(fromTime, untilTime) => 
-      self.reply(getData(fromTime, untilTime))
+    case Get(min, max) => 
+      self.reply(getData(min, max))
             
-    case Put(time, json) => self.reply(putData(time, json))
+    case Put(json) => self.reply(putData(json))
 
     case Stop => 
       log.ifInfo (actorName + ": Received Stop message.")
@@ -39,13 +39,13 @@ class DataStorageServer(val service: String) extends Actor with PingHandler with
       self.reply (("error", message))
   }
     
-  protected[persistence] def getData(fromTime: DateTime, untilTime: DateTime) = try {
+  protected[persistence] def getData(min: Long, max: Long) = try {
     val data = for {
-      (timeStamp, json) <- dataStore.range(fromTime, untilTime)
+      json <- dataStore.range(min, max) // TODO: doesn't work "accurately"
     } yield json
     val result = toJSON(data toList)
-    log.ifDebug(actorName + ": GET returning response for startTime, endTime, size = " + 
-      fromTime + ", " + untilTime + ", " + result.size)
+    log.ifDebug(actorName + ": GET returning response for min, max, size = " + 
+      min + ", " + max + ", " + result.size)
     result
   } catch {
     case th => 
@@ -54,13 +54,13 @@ class DataStorageServer(val service: String) extends Actor with PingHandler with
       throw th
   }
   
-  protected[persistence] def putData(time: DateTime, json: String) = {
+  protected[persistence] def putData(json: String) = {
     val jsonShortStr = if (json.length > 100) json.substring(0,100) + "..." else json
-    log.info(actorName + " PUT: storing Pair(" + time + ", " + jsonShortStr + ")")
+    log.info(actorName + " PUT: storing Pair(" + jsonShortStr + ")")
       
     try {
-      dataStore.add(Pair(time, json))
-      Pair("message", "Put received for time " + time + ". Data storage started.")
+      dataStore.add(Pair(json))
+      Pair("message", "Put received and data storage started.")
     } catch {
       case ex => 
         log.error(actorName + ": PUT: exception thrown while attempting to add JSON to the data store: "+json)
@@ -80,6 +80,11 @@ class DataStorageServer(val service: String) extends Actor with PingHandler with
 object DataStorageServer extends Logging {
 
   import se.scalablesolutions.akka.config.Config.config
+
+  // protected def makeActor(actorName: String): Actor = new DataStorageServer(actorName)
+
+  def getAllDataStorageServers: List[ActorRef] = 
+    ActorRegistry.actorsFor(classOf[DataStorageServer]) 
 
   /**
    * Instantiate the default type of datastore: an InMemoryDataStore with an upper limit on values.

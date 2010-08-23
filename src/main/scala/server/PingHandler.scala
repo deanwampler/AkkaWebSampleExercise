@@ -18,7 +18,7 @@ trait PingHandler extends Actor {
    */
   def pingHandler: PartialFunction[Any, Unit] = {
     case Pair("ping", message @ _) => 
-      log.debug("DataStorageServerSupervisor received message: "+message)
+      log.debug("Ping message: "+message)
       val afterPingResponse = afterPing(Pair("ping", message.toString))
       self.reply("{\"pong\": \"" + this + "\". " + afterPingResponse + "}")
   } 

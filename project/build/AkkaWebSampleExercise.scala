@@ -5,8 +5,11 @@ import sbt._
 class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info)  {
 
 	override def repositories = Set(
+	  "Atmosphere" at "http://oss.sonatype.org/content/repositories/snapshots/",
+    "Sun JDMK Repo" at "http://wp5.e-taxonomy.eu/cdmlib/mavenrepo/",
     "Scala-Tools Maven2 Snapshots Repository" at "http://scala-tools.org/repo-snapshots",
-		"jBoss" at "http://repository.jboss.org/maven2",
+    // "jBoss" at "http://repository.jboss.org/maven2",
+    // "JBoss2" at "http://repository.jboss.org/nexus/content/groups/public/",
 		"Multiverse Releases" at "http://multiverse.googlecode.com/svn/maven-repository/releases/",
 		"GuiceyFruit" at "http://guiceyfruit.googlecode.com/svn/repo/releases/",
 		"DataBinder" at "http://databinder.net/repo",
@@ -28,6 +31,7 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info)  
 		/* Embedded Jetty web server */
     "org.eclipse.jetty"  % "jetty-server"   % JETTY_VERSION % "test",
     "org.eclipse.jetty"  % "jetty-webapp"   % JETTY_VERSION % "test",
+    "org.eclipse.jetty"  % "jetty-servlets" % JETTY_VERSION % "test",
 
 		/* akka dependencies */
     "se.scalablesolutions.akka" % "akka-core_2.8.0.RC3"        % "0.9" % "compile",

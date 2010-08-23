@@ -2,11 +2,12 @@ package org.chicagoscala.awse.persistence
 import org.joda.time._
 
 /**
- * Trait for storage of time-oriented data, where the timestamp is in milliseconds (Longs).
+ * Trait for storage of time-oriented data, where the timestamp is in milliseconds (Longs) and
+ * it is used as the primary key.
  */
 trait DataStore[V] {
 
-  type Record = Pair[DateTime,V]
+  type Record = Pair[DateTime, V]
   
   def add(item: Record): Unit
   
@@ -16,12 +17,7 @@ trait DataStore[V] {
   
   def getAll(): Iterable[Record]
   
-  /** 
-   * Return a collection of elements within the specified range.
-   * @param fromTime  Long timestamp inclusive that is the first element in the pairs being stored, not the index into this datastructure.
-   * @param untilTime Long timestamp exclusive that is the first element in the pairs being stored, not the index into this datastructure.
-   */
-  def range(fromTime: DateTime, untilTime: DateTime): Iterable[Record]
+  def range(startAt: DateTime, upTo: DateTime): Iterable[Record]
 
   def size: Int
 }

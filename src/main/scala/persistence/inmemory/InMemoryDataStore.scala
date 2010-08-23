@@ -10,9 +10,7 @@ import org.joda.time._
  */
 class InMemoryDataStore[V](val name: String) extends DataStore[V] with Logging {
 
-  var store = SortedMap[DateTime,V]()(new scala.math.Ordering[DateTime] {
-    def compare(d1: DateTime, d2: DateTime) = d1.getMillis compare d2.getMillis
-  }) 
+  var store = SortedMap[DateTime, V]()(DateTimeOrdering)
   
   def add(item: Record): Unit = store += item
     

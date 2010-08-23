@@ -6,14 +6,12 @@ import scala.collection.immutable.SortedSet
 import org.joda.time._
 
 /**
- * MongoDB-based storage of data in a persistent map (with timestamps as keys), backed by MongoDB.
+ * MongoDB-based storage of data with timestamps as keys.
  */
 class MongoDBDataStore(name: String) extends DataStore[String] with Logging {
 
-  // Store the timestamps, used as keys, in a sorted set so we can keep the records sorted.
-  var recordKeys = SortedSet[DateTime]()(new scala.math.Ordering[DateTime] {
-    def compare(d1: DateTime, d2: DateTime) = d1.getMillis compare d2.getMillis
-  })
+  // Store the timestamps, used as keys, in an in-memory sorted set so we can keep the records sorted.
+  var recordKeys = SortedSet[DateTime]()(DateTimeOrdering)
   
   val recordMap = MongoStorage.newMap(name)
   
@@ -33,7 +31,7 @@ class MongoDBDataStore(name: String) extends DataStore[String] with Logging {
     case Some(key) => Some(recordMap(key.asInstanceOf[DateTime]).asInstanceOf[Record])
   }
   
-  // TODO: Use Mongo's Query capabilities? (Might be tricky with how Akka integrates w/ Mongo)
+  // TODO: Use Mongo's Query capabilities.
   def range(fromTime: DateTime, untilTime: DateTime) = {
     val ftime = fromTime.getMillis
     val utime = untilTime.getMillis

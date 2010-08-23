@@ -104,16 +104,47 @@ function sendRequest(action) {
 var keepPolling = true
 
 function serverControl(action) {
+  var action2 = action;
   if (action != "ping") {
     $(".control").attr("disabled", "disabled");
     if (action == "start" || action == "restart") {
       keepPolling = true;
       $("#stop").attr("disabled", "");
       $("#restart").attr("disabled", "");
+      action2 = action + "?min=" + ($("#min").val()) + "&max=" + ($("#min").val())
     } else if (action == "stop") {
       keepPolling = false;
       $("#start").attr("disabled", "");    
     }
   }
   sendRequest(action);
+}
+
+function intVal(textId) {
+  var text = $("#"+textId);
+  return parseInt(text.val(), 10);
+}
+
+function integerOnly(textId) {
+  if(intVal(textId) === NaN) {
+    alert("You must enter an integer.");
+  }
+}
+
+function fixMin(minId, maxId) {
+  var min = intVal(minId);
+  var max = intVal(maxId);
+  if (min > max) {
+    $("#"+minId).val(max-1);
+    alert("Resetting min value to "+(max-1));
+  }
+}
+
+function fixMax(minId, maxId) {
+  var min = intVal(minId);
+  var max = intVal(maxId);
+  if (min > max) {
+    $("#"+maxId).val(min+1);
+    alert("Resetting max value to "+(min+1));
+  }
 }

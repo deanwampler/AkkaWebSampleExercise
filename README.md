@@ -1,7 +1,8 @@
 # Akka Sample Exercise README 
 
 This is a a sample exercise for a web app based on [Akka](http://akkasource.org) that
-used for the May 20th, 2010 meeting of the [Chicago-Area Scala Enthusiasts](http://www.meetup.com/chicagoscala/) (CASE). When finished, it will demonstrate building an Actor based, distributed application with a web interface and optional MongoDB persistence.
+used for the May 20th, 2010 meeting of the [Chicago-Area Scala Enthusiasts](http://www.meetup.com/chicagoscala/) (CASE).
+It has since been ported to Scala 2.8.0.final, Akka 0.10, and enhanced in other ways. It demonstrates building an Actor based, distributed application with a web interface and optional MongoDB persistence.
 
 For a blog post on setting up a similar Akka web app, see [this blog post](http://roestenburg.agilesquad.com/2010/04/starting-with-akka-and-scala.html).
 

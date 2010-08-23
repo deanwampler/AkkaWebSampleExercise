@@ -35,7 +35,7 @@ object ActorSupervision {
   def getOrMakeActorFor(actorId: String, supervisorForMadeActor: Option[ActorRef])(makeActor: (String) => ActorRef) = 
     ActorRegistry.actorsFor(actorId) match {
       case Nil => 
-        log.ifInfo("Creating new actor for "+actorId)
+        log.ifInfo("Creating new actor: "+actorId)
         val actorRef = makeActor(actorId)
         actorRef.id = actorId
         actorRef.start

@@ -14,7 +14,7 @@
   
   <servlet>
 		<servlet-name>AkkaServlet</servlet-name>
-		<servlet-class>se.scalablesolutions.akka.rest.AkkaServlet</servlet-class>
+    <servlet-class>se.scalablesolutions.akka.comet.AkkaServlet</servlet-class>
 	</servlet>
 
 	<servlet-mapping>
