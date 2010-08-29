@@ -1,7 +1,7 @@
 package org.chicagoscala.awse.boot
 import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.server.persistence._
-import org.chicagoscala.awse.server.math._
+import org.chicagoscala.awse.server.finance._
 import org.chicagoscala.awse.server.rest._
 import se.scalablesolutions.akka.actor._
 import se.scalablesolutions.akka.actor.Actor._
@@ -14,7 +14,7 @@ class BootAWSESupervisor {
     SupervisorConfig(
       RestartStrategy(OneForOne, 5, 5000, List(classOf[Throwable])),
     Supervise(
-      actorOf(new PrimeCalculatorServerSupervisor),
+      actorOf(new InstrumentAnalysisServerSupervisor),
       LifeCycle(Permanent)) :: 
     Nil))
       

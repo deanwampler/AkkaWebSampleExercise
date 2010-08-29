@@ -8,18 +8,20 @@ import org.joda.time._
  * Pure, in-memory storage of data with no backing store. Note that it may not perform well
  * as the collection grows large.
  */
-class InMemoryDataStore[V](val name: String) extends DataStore[V] with Logging {
+class InMemoryDataStore[Record <: RecordWithTimestamp](val name: String) 
+    extends DataStore[Record] with Logging {
 
-  var store = SortedMap[DateTime, V]()(DateTimeOrdering)
+  var store = SortedMap[Long,Record]()
   
-  def add(item: Record): Unit = store += item
+  def add(item: Record): Unit = store += item.timestamp -> item
     
-  def map[T](f: Record => T) = (store map f).toIndexedSeq
+  // def map[T](f: Record => T) = store map f
   
-  def getAll() = store.toIndexedSeq
+  def getAll() = store map {p => p._2}
   
-  def range(start: DateTime, end: DateTime) = store.range(start, end).toIndexedSeq
+  def range(from: Long, until: Long, maxNum: Int): Iterable[Record] = 
+    store.range(from, until).map(p => p._2).take(maxNum).toIterable
   
-  def size: Int = store.size
+  def size: Long = store.size
 }
 

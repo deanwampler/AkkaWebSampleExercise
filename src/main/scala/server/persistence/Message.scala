@@ -1,10 +1,11 @@
 package org.chicagoscala.awse.server.persistence
-import org.joda.time._
+import org.chicagoscala.awse.persistence._
+import org.chicagoscala.awse.domain.finance._
 
 sealed trait Message
 
-case class Get(min: Long = 0, max: Long = java.lang.Long.MAX_VALUE) extends Message 
-  
-case class Put(json: String) extends Message
+case class Get(criteria: Map[String,Any]) extends Message
+
+case class Put(jsonRecord: JSONRecord) extends Message
 
 case object Stop extends Message

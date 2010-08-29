@@ -23,6 +23,8 @@ Everything after a `#` is a comment.
     
 The last line (after the `./sbt` line) is a command at the `sbt` prompt (`>`, by default). Note that the `sbt` script has some options; type `sbt --help` for details. (The options are supported in the `sbt.bat` script.)
 
+This application requires a [NYSE stock ticker data set](http://infochimps.org/datasets/daily-1970-current-open-close-hi-low-and-volume-nyse-exchange-up--2) from [infochimps](http://infochimps.org). Select the YAML format. Note that there are similar data sets on the site; use this one!
+
 There are two data persistence options, a MongoDB-backed persistent map and an in-memory map. Currently, the MongoDB persistence doesn't work (see the TODO items below), so the in-memory map is the default (it also makes running the app easier, when you're getting started...). 
 
 The persistence option is set in `src/main/resources/akka.conf`. Change the following statement around line 13,

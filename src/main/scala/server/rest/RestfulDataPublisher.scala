@@ -1,11 +1,12 @@
 package org.chicagoscala.awse.server.rest
 import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.server.persistence._
-import org.chicagoscala.awse.server.math._
+import org.chicagoscala.awse.server.finance._
+import org.chicagoscala.awse.domain.finance._
+import org.chicagoscala.awse.util._
 import se.scalablesolutions.akka.actor._
 import se.scalablesolutions.akka.dispatch.{Future, Futures, FutureTimeoutException}
 import se.scalablesolutions.akka.util.Logging
-import net.lag.logging.Level                                   
 import javax.ws.rs._
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
@@ -17,17 +18,21 @@ class RestfulDataPublisher extends Logging {
   val actorName = "RestfulDataPublisher"
   
   def dataStorageServers = ActorRegistry.actorsFor(classOf[DataStorageServer])
-  def primeCalculatorServerSupervisors = ActorRegistry.actorsFor(classOf[PrimeCalculatorServerSupervisor])
-  def primeCalculatorServers = ActorRegistry.actorsFor(classOf[PrimeCalculatorServer])
+  def instrumentAnalysisServerSupervisors = ActorRegistry.actorsFor(classOf[InstrumentAnalysisServerSupervisor])
+  def instrumentAnalysisServers = ActorRegistry.actorsFor(classOf[InstrumentAnalysisServer])
   
   /**
    * Handle a rest request. The following "actions" are supported:
-   *   start:   Start calculating primes, subject to the URL options: ?min=long&max=long, the minimum and maximum
-   *            range to search for values, inclusive. If not specified, they default to 1 to 1M.
-   *   stop:    Stop the calculation of primes. The calculation stops automatically once the requested range of
-   *            primes have been been calculated.
-   *   restart: Stop, then start calculating primes, subject to the URL options: ?min=long&max=long, the minimum and maximum
-   *   primes:  Return the all primes that have been calculated thus far or limited to specified range: ?min=long&max=long
+   *   start:   Start calculating statistics for the financial instruments, subject to the URL options: 
+   *              ?startat=long&upto=long&instruments=i1,i1,...&stats=s1,s2,...
+   *            where "startat" is the starting date, inclusive (default: earliest available),
+   *            where "upto" is the ending date, exclusive (default: latest available),
+   *            where "syms" (symbols) is the comma-separated list of instruments by "symbol" to analyze (default: all available), and
+   *            where "stats" is the comma-separated list of statistics to calculate (default: all available).
+   *   stop:    Stop calculating statistics. The calculation stops automatically once the calculations requested with
+   *            "start" have completed.
+   *   stats:   Return the calculated statistics subject to the same URL options described for "start". If no statistics
+   *            have been calculated for some or all of the requested options, then empty results will be returned.
    *   ping:    Send a "ping" message to each actor and return their replies.
    * @todo: It would simplify both the web code and this code to use a websocket to stream results to the browser 
    * as they are completed. Consider also Atmosphere 6 and its JQuery plugin as an abstraction that supports
@@ -39,13 +44,15 @@ class RestfulDataPublisher extends Logging {
   @Produces(Array("application/json"))
   def restRequest(
       @PathParam("action") action: String, 
-      @DefaultValue(PrimeCalculationMessages.DEFAULT_RANGE_MIN) @QueryParam("min") min: Long,
-      @DefaultValue(PrimeCalculationMessages.DEFAULT_RANGE_MAX) @QueryParam("max") max: Long ): String = 
+      @DefaultValue("0")  @QueryParam("startingAt") startingAt: Long,
+      @DefaultValue("-1") @QueryParam("upTo")    upTo: Long,
+      @DefaultValue("")   @QueryParam("syms")    instruments: String,
+      @DefaultValue("")   @QueryParam("stats")   stats: String): String = 
     action match {
       case "ping" => 
         try {
           log.info("Pinging!!")
-          val futures = (primeCalculatorServerSupervisors ++ primeCalculatorServers ++ dataStorageServers) map {
+          val futures = (instrumentAnalysisServerSupervisors ++ instrumentAnalysisServers ++ dataStorageServers) map {
             _ !!! Pair("ping", "You there??")
           }
           Futures.awaitAll(futures)
@@ -57,42 +64,51 @@ class RestfulDataPublisher extends Logging {
             """{"error": "Actors timed out (""" + fte.getMessage + ").\"}"
         }
         
-      case "start" | "stop" | "restart" =>
-        val (messageString, message) = determineMessage(action, min, max)
-        log.info(messageString)
-        ActorRegistry.actorsFor(classOf[PrimeCalculatorServerSupervisor]) foreach { _ ! message }
-        """{"message": """ + messageString + "}"
-      
-      case "primes" =>
-        val dsServers = dataStorageServers
-        if (dsServers.size == 0) {
-          val message = "RestfulDataPublisher: No DataStorageServers! (normal at startup)"
-          log.warning(message)
-          "{\"warn\": \"" + message + "\"}"
-        } else {
-          val futures = dataStorageServers map { server =>
-            server !!! Get(min, max)  // fire messages to all data servers...
-          }
-          try {
-            Futures.awaitAll(futures)        // ... and wait for all of them to reply.
-            val messageForNone = "No data available for start-end times = "+fromTime+", "+untilTime
-            val jsons = for {
-              future <- futures
-            } yield futureToJSON(future, messageForNone)
-            toJSON(jsons)
-          } catch {
-            case fte: FutureTimeoutException =>
-              """{"error": "Actors timed out (""" + fte.getMessage + ").\"}"
-          }
+      case "start" =>
+        log.info("Starting statistics calculations")
+        ActorRegistry.actorsFor(classOf[InstrumentAnalysisServerSupervisor]) foreach { 
+          _ ! CalculateStatistics(makeCriteriaFrom(instruments, stats, startingAt, upTo))
         }
+        """{"message": "Starting statistics calculations"}"""
+      
+      case "stop" =>
+        log.info("Stopping calculations")
+        ActorRegistry.actorsFor(classOf[InstrumentAnalysisServerSupervisor]) foreach { _ ! StopCalculating }
+        """{"message": "Stopping calculations"}"""
+
+      case "stats" =>
+        log.debug("Requesting statistics for instruments, stats, startingAt, upTo = "+instruments+", "+stats+", "+startingAt+", "+upTo)
+        getAllDataFor(instruments, stats, startingAt, upTo)
         
       case x => """{"error": "Unrecognized 'action': """ + action + "\"}"
     }
     
-  protected def determineMessage(action: String, min: Long, max: Long) = action match {
-    case "start"   => ("Starting calculation",   StartCalculatingPrimes(min, max))
-    case "restart" => ("Restarting calculation", RestartCalculatingPrimes(min, max))
-    case "stop"    => ("Stopping calculation",   StopCalculatingPrimes)
+  // Scoped to rest package so tests can call it directly (bypassing actor logic...)
+  protected[rest] def getAllDataFor(instruments: String, stats: String, startingAt: Long, upTo: Long): String = {
+    val dsServers = dataStorageServers
+    if (dsServers.size == 0) {
+      val message = "RestfulDataPublisher: No DataStorageServers! (normal at startup)"
+      log.warning(message)
+      "{\"warn\": \"" + message + "\"}"
+    } else {
+      val futures = dataStorageServers map { server =>
+        // fire messages to all data servers...
+        println("server!")
+        server !!! Get(makeCriteriaFrom(instruments, stats, startingAt, upTo))
+      }
+      try {
+        Futures.awaitAll(futures)        // ... and wait for all of them to reply.
+        val messageForNone = "No data available for start-end times = "+startingAt+", "+computeUpTo(upTo)
+        val jsons = for {
+          future <- futures
+        } yield futureToJSON(future, messageForNone)
+        println("jsons: "+jsons)
+        toJSON(jsons)
+      } catch {
+        case fte: FutureTimeoutException =>
+          """{"error": "Actors timed out (""" + fte.getMessage + ").\"}"
+      }
+    }
   }
   
   protected def futureToJSON(future: Future[_], messageForNone: String) = future.result match {
@@ -113,4 +129,14 @@ class RestfulDataPublisher extends Logging {
       case _ => "[" + (replies reduceLeft (_ + ", " + _)) + "]"
     }
   }  
+  
+  protected def makeCriteriaFrom(instruments: String, statistics: String, startingAt: Long, upTo: Long) = 
+    Map(
+      "instruments" -> Instrument.makeInstrumentsList(instruments), 
+      "statistics"  -> InstrumentStatistic.makeStatisticsList(statistics), 
+      "startingAt"     -> new DateTime(startingAt), 
+      "upTo"        -> computeUpTo(upTo))
+  
+  protected def computeUpTo(candidateUpTo: Long) = 
+    if (candidateUpTo > 0) new DateTime(candidateUpTo) else new DateTime
 }

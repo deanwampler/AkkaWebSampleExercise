@@ -1,5 +1,7 @@
 package org.chicagoscala.awse.server.persistence
 import org.chicagoscala.awse.server._
+import org.chicagoscala.awse.domain.finance._
+import org.chicagoscala.awse.persistence._
 import org.chicagoscala.awse.persistence.inmemory.InMemoryDataStore
 import se.scalablesolutions.akka.actor.Actor._
 import se.scalablesolutions.akka.actor._
@@ -10,46 +12,75 @@ import org.joda.time.format._
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 
-class DataStorageServerTest extends FunSuite with ShouldMatchers with BeforeAndAfterEach {
+class DataStorageServerTest extends FunSuite 
+    with ShouldMatchers with BeforeAndAfterEach {
   
-  val MAX = 100000
-  val epochStart = new DateTime(0)
-  val now        = new DateTime()
-  val thenms     = now.getMillis - 3600
+  val epochStart = 0
+  val now        = new DateTime().getMillis
+  val thenms     = now - 100000
   
-  def populateDataStore(server: ActorRef, numberOfItems:Int, offset: Int = 0) = {
+  def makeJSONRecord(time: Long, symbol: String, price: Double) = 
+    JSONRecord(("timestamp" -> time) ~ ("symbol" -> symbol) ~ ("price" -> price))
+  
+  def makeJSONString(list: JSONRecord*) = (list reduceLeft (_ ++ _)) toJSONString
+
+  def populateDataStore(server: ActorRef, numberOfItems:Int) = {
     val data = for {
       i <- 0 until numberOfItems
-      i2 = i + offset
-      time = new DateTime(thenms + (1000L * i2))
-      keyValue = "{\"value_"+i2+"\": "+(i2*i2)+"}"
-    } yield (server !! Put(time, keyValue))
+      time = thenms + (1000L * i)
+      json = makeJSONRecord(time, "A", i * 10.0)
+    } yield (server !! Put(json))
   }
   
-  // Hacky: we combine what should be separate tests into one so we only have to worry
-  // about setting up the server once, etc.
-  test("Get message should return an JSON object") {
-    val server = actorOf(new DataStorageServer("testService") {
-      override lazy val dataStore = new InMemoryDataStore[String]("testDataStore")
+  def makeGet(instruments: List[String], statistics: List[String], startingAt: Long, upTo: Long) =
+    Get(Map(
+      "instruments" -> Instrument.makeInstrumentsList(instruments),
+      "statistics" -> InstrumentStatistic.makeStatisticsList(statistics),
+      "startingAt" -> startingAt,
+      "upTo" -> upTo))
+  
+  var testDataStore: InMemoryDataStore[JSONRecord] = _
+  var dss: ActorRef = _
+
+  override def beforeEach = {
+    testDataStore = new InMemoryDataStore[JSONRecord]("testDataStore")
+    dss = actorOf(new DataStorageServer("testService") {
+      override lazy val dataStore = testDataStore 
     })
-    server.start
+    dss.start
+  }
+  override def afterEach = {
+    dss.stop
+  }
+  
+  test("Get message should return an empty JSON string if there is no data") {
 
-    // if there is no data
-    populateDataStore(server, 0)
-    val response1: Option[String] = server !! (Get(epochStart, now), 10000)
-    response1.toString should equal ("""Some([])""")
+    val response1: Option[String] = dss !! (makeGet(List("A"), List("price"), epochStart, now), 10000)
+    response1.get should equal ("{}")
+  }
+  
+  test("Get message should return an empty JSON string if there is data, but none matches the Get criteria") {
 
-    // with 1 datum
-    populateDataStore(server, 1)
-    val response2: Option[String] = server !! (Get(epochStart, now), 10000)
-    response2.toString should equal ("""Some([{"value_0": 0}])""")
-    
-    // with more than 1
-    populateDataStore(server, 1, 1)
-    val response: Option[String] = server !! (Get(epochStart, now), 10000)
-    response.toString should equal ("""Some([{"value_0": 0}, {"value_1": 1}])""")
+    populateDataStore(dss, 3)
+    val response3: Option[String] = dss !! (makeGet(List("A"), List("price"), thenms + 3000, thenms + 4000), 10000)
+    response3.get.toString should equal ("{}")
+  }
 
-    server.stop
+  test("Get message should return the one datum as a JSON string if there is one datum and it matches the Get criteria") {
+
+    populateDataStore(dss, 1)
+    val response2: Option[String] = dss !! (makeGet(List("A"), List("price"), epochStart, now), 10000)
+    response2.get.toString should equal (makeJSONString(makeJSONRecord(thenms, "A", 0.0)))
+  }
+      
+  test("Get message should return all data as a single JSON string if there is more than one datum and all match the Get criteria") {
+
+    populateDataStore(dss, 3)
+    val response3: Option[String] = dss !! (makeGet(List("A"), List("price"), epochStart, now), 10000)
+    response3.get.toString should equal (makeJSONString(
+      makeJSONRecord(thenms,        "A",  0.0),
+      makeJSONRecord(thenms + 1000, "A", 10.0),
+      makeJSONRecord(thenms + 2000, "A", 20.0)))
   }
 }
 
