@@ -62,36 +62,23 @@ class InstrumentAnalysisServer(val service: String) extends Actor with ActorSupe
 }
 
 /**
- * A separate helper so we can decouple the actor-specific code and the logic it performs.
+ * A separate helper so we can decouple (most of) the actor-specific code and the logic it performs.
+ * TODO: Handle instruments and statistics criteria
  */
 class InstrumentAnalysisServerHelper(dataStorageServer: ActorRef) {
   
   def calculateStatistics(criteria: CriteriaMap) = criteria match {
     case CriteriaMap(instruments, statistics, start, end) => 
-      val results = for {
-        instrument <- instruments
-        statistic  <- statistics
-      } yield calcStats(instrument, statistic, start, end)
-      "[" + (results mkString (", ")) + "]"
+      fetchPrices(start, end)
     case _ =>
       """{"error": "Invalid criteria: """ + criteria + "\"}"
   }
 
-  protected def calcStats(instrument: Instrument, statistic: InstrumentStatistic, start: DateTime, end: DateTime) = 
-    statistic match {
-      case p:  Price => fetchPrice(instrument, start, end)
-      case ma: MovingAverage => calcMovingAverage(instrument, ma, start, end)
-      case _ => error("Unknown statistic: " + statistic)
-    }    
-  
-  protected def fetchPrice(instrument: Instrument, start: DateTime, end: DateTime) = {
-    dataStorageServer ! Get(("instruments" -> instrument) ~ ("start" -> start.getMillis) ~ ("end" -> end.getMillis))
-  }
-  
-  protected def calcMovingAverage(instrument: Instrument, average: MovingAverage, start: DateTime, end: DateTime) = {
-    // Fetch data for instrument
-    // calculate average over instrument.
-    // return as a JSON string
-    """{"error": "Moving average calculations are not yet supported!"}"""
+  // Must make a synchronous call to the data store server
+  protected def fetchPrices(start: DateTime, end: DateTime) = {
+    (dataStorageServer !!! Get(("start" -> start.getMillis) ~ ("end" -> end.getMillis))).await.result match {
+      case None => """{"warning": "Nothing returned for query (start, end) = (""" + start + ", " + end + ")\"}"
+      case Some(x) => x
+    }
   }
 }

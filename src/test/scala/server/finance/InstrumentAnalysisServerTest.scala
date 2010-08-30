@@ -3,8 +3,9 @@ import org.chicagoscala.awse.domain.finance._
 import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.persistence.inmemory._
 import org.chicagoscala.awse.persistence._
-import se.scalablesolutions.akka.actor.ActorRef
+import se.scalablesolutions.akka.actor._
 import se.scalablesolutions.akka.actor.Actor._
+import se.scalablesolutions.akka.actor.ActorRef
 import org.scalatest.{FlatSpec, FunSuite, BeforeAndAfterEach}
 import org.scalatest.matchers.ShouldMatchers
 import org.joda.time._
@@ -34,7 +35,7 @@ class InstrumentAnalysisServerTest extends FunSuite
 
   def makeJSONString(list: List[JSONRecord]) = {
     val s = list reduceLeft (_ ++ _)
-    "[" + s.toJSONString + "]"
+    s.toJSONString
   }
 
   def makeCriteria(instruments: String, stats: String, start: Long, end: Long) = 
@@ -44,11 +45,18 @@ class InstrumentAnalysisServerTest extends FunSuite
       withStart(start). 
       withEnd(end)
   
-  def loadData = js.reverse foreach (dss !! Put(_))
+  def sendAndWait(msg: Message): Option[String] = {
+    answer = (driverActor !!! msg).await.result
+    answer
+  }
+  
+  def loadData = js.reverse foreach ((jsr: JSONRecord) => sendAndWait(Put(jsr)))
 
   var analysisServer: InstrumentAnalysisServerHelper = _
   var testDataStore: InMemoryDataStore[JSONRecord] = _
   var dss: ActorRef = _
+  var driverActor: ActorRef = _
+  var answer: Option[String] = None
 
   override def beforeEach = {
     testDataStore = new InMemoryDataStore[JSONRecord]("testDataStore")
@@ -56,10 +64,20 @@ class InstrumentAnalysisServerTest extends FunSuite
       override lazy val dataStore = testDataStore 
     })
     analysisServer = new InstrumentAnalysisServerHelper(dss) 
+    driverActor = actorOf(new Actor {
+      def receive = {
+        case msg => (dss !!! msg).await.result match {
+          case Some(s) => self.reply(s)
+          case None => fail(msg.toString)
+        }
+      }
+    })
     dss.start
+    driverActor.start
     loadData
   }
   override def afterEach = {
+    driverActor.stop
     dss.stop
   }
 

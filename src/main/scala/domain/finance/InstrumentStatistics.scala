@@ -56,7 +56,8 @@ case class Price(currency: Currency = Dollars) extends InstrumentStatistic {
 }
 object Price {
   // The 2nd (optional) capture group is the name or symbol of the currency.
-  val NAME_RE = """^\s*([pP]rice(\[[^\]]+\])?)\s*$""".r
+  // (Note there is a noncapturing group outside the 2nd group.)
+  val NAME_RE = """^\s*([pP]rice(?:\[([^\]]+)\])?)\s*$""".r
 }
 
 case class MovingAverage(length: Int) extends InstrumentStatistic {

@@ -27,7 +27,7 @@ class DataStorageServerTest extends FunSuite
   def makeGet(start: Long, end: Long) = Get(("start" -> start) ~ ("end" -> end))
   
   def sendAndWait(msg: Message): Option[String] = {
-    (driverActor !!! msg).await.result
+    answer = (driverActor !!! msg).await.result
     answer
   }
 
@@ -52,7 +52,10 @@ class DataStorageServerTest extends FunSuite
     })
     driverActor = actorOf(new Actor {
       def receive = {
-        case msg => answer = (dss !!! msg).await.result
+        case msg => (dss !!! msg).await.result match {
+          case Some(s) => self.reply(s)
+          case None => fail(msg.toString)
+        }
       }
     })
     dss.start
@@ -87,10 +90,14 @@ class DataStorageServerTest extends FunSuite
 
     populateDataStore(3)
     val response3: Option[String] = sendAndWait(makeGet(epochStart, now))
-    response3.get.toString should equal (makeJSONString(
-      makeJSONRecord(thenms,        "value: 0"),
-      makeJSONRecord(thenms + 1000, "value: 1"),
-      makeJSONRecord(thenms + 2000, "value: 2")))
+    response3 match {
+      case None => fail()
+      case Some(s) => 
+        s should equal (makeJSONString(
+          makeJSONRecord(thenms,        "value: 0"),
+          makeJSONRecord(thenms + 1000, "value: 1"),
+          makeJSONRecord(thenms + 2000, "value: 2")))
+    }
   }
 
   test("Get message should return data as a single JSON string if there is data that matches the Get value criteria") {

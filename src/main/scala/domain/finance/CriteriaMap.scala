@@ -23,8 +23,8 @@ class CriteriaMap(val map: Map[String, Any]) {
   def withStart(start: DateTime): CriteriaMap =
     new CriteriaMap(map + ("start" -> start))
 
-  def withEnd(end: String): CriteriaMap = withStart(makeDateTime(end, computeEndFromMillis _))
-  def withEnd(end: Long): CriteriaMap = withStart(new DateTime(end))
+  def withEnd(end: String): CriteriaMap = withEnd(makeDateTime(end, computeEndFromMillis _))
+  def withEnd(end: Long): CriteriaMap = withEnd(new DateTime(end))
   def withEnd(end: DateTime): CriteriaMap =
     new CriteriaMap(map + ("end" -> end))
     
@@ -55,20 +55,18 @@ class CriteriaMap(val map: Map[String, Any]) {
 
   /** 
    * Determine the end time from the criteria map, using a default value if necessary.
-   * Adds a millisecond to the end time (unless we use the default time), since the data stores treat
-   * upper time bounds as exclusive and we want them to be inclusive.
    */
   protected def determineEnd(criteria: CriteriaMap): DateTime = criteria.get("end") match {
     case None => defaultEndTime
     case Some(x) => x match {
-      case d: DateTime => d.plus(new Duration(1)) // add a millisecond
+      case d: DateTime => d
       case l: Long => computeEndFromMillis(l)
-      case _ => makeDateTime(x.toString, computeEndFromMillis _).plus(new Duration(1))
+      case _ => makeDateTime(x.toString, computeEndFromMillis _)
     }
   }
 
   protected def computeEndFromMillis(millis: Long) = 
-    if (millis > 0) new DateTime(millis + 1) else defaultEndTime
+    if (millis > 0) new DateTime(millis) else defaultEndTime
 
   protected def makeDateTime(dateTimeString: String, makeFromMillis: Long => DateTime) = tryLong(dateTimeString) match {
     case Some(millis) => makeFromMillis(millis)
@@ -91,8 +89,8 @@ object CriteriaMap {
   implicit def apply(map: Map[String, Any]) = new CriteriaMap(map)
   implicit def apply() = new CriteriaMap(Map[String,Any]())
   
-  type UnapplyType = Option[Tuple4[List[Instrument], List[InstrumentStatistic], DateTime, DateTime]]
+  type UnapplyType = Tuple4[List[Instrument], List[InstrumentStatistic], DateTime, DateTime]
   
-  def unapply(criteria: CriteriaMap): UnapplyType = 
+  def unapply(criteria: CriteriaMap): Option[UnapplyType] = 
     Some(Tuple4(criteria.instruments, criteria.statistics, criteria.start, criteria.end))
 }

@@ -10,7 +10,7 @@ class CriteriaMapTest extends FunSuite with ShouldMatchers {
     case list => 
       list.size should equal (3)
       list match {
-        case i1 :: i2 :: i3 =>
+        case i1 :: i2 :: i3 :: Nil =>
           i1 should equal (Instrument("a"))
           i2 should equal (Instrument("b"))
           i3 should equal (Instrument("c"))
@@ -23,7 +23,7 @@ class CriteriaMapTest extends FunSuite with ShouldMatchers {
     case list => 
       list.size should equal (3)
       list match {
-        case i1 :: i2 :: i3 =>
+        case i1 :: i2 :: i3 :: head =>
           i1 should equal (Price(Dollars))
           i2 should equal (Price(Dollars))
           i3 should equal (MovingAverage(50))
@@ -35,12 +35,6 @@ class CriteriaMapTest extends FunSuite with ShouldMatchers {
 
   def checkEnd(cm: CriteriaMap, expected: DateTime) = cm.end should equal (expected)
   
-  // def checkTime(cm: CriteriaMap, whichTime: String, expected: DateTime) = cm.map.get(whichTime) match {
-  //   case Some(dateTime) => 
-  //     dateTime should equal (expected)
-  //   case _ => fail("No " + whichTime + " time! ")
-  // }
-
   test ("withInstruments(String) adds a list of Instruments to a CriteriaMap") {
     val cm = CriteriaMap(Map()).withInstruments("a,b,c")
     cm.map.size should equal (1)
@@ -74,14 +68,14 @@ class CriteriaMapTest extends FunSuite with ShouldMatchers {
   }
 
   val now = new DateTime
-  val then = now.minus(new Duration(1000))
   val nowms  = now.getMillis
-  val thenms = then.getMillis
+  val thenms = nowms - 10000
+  val then = new DateTime(thenms)
   
   test ("withStart(String) adds a start time to a CriteriaMap") {
-    val cm = CriteriaMap(Map()).withStart("August 30 2010")
+    val cm = CriteriaMap(Map()).withStart("2010-10-30")
     cm.map.size should equal (1)
-    checkStart(cm, new DateTime("August 30 2010"))
+    checkStart(cm, new DateTime("2010-10-30"))
   }
   test ("withStart(Long) adds a start time to a CriteriaMap") {
     val cm = CriteriaMap(Map()).withStart(thenms)
@@ -95,9 +89,9 @@ class CriteriaMapTest extends FunSuite with ShouldMatchers {
   }
   
   test ("withEnd(String) adds a end time to a CriteriaMap") {
-    val cm = CriteriaMap(Map()).withEnd("August 30 2010")
+    val cm = CriteriaMap(Map()).withEnd("2010-10-30")
     cm.map.size should equal (1)
-    checkEnd(cm, new DateTime("August 30 2010"))
+    checkEnd(cm, new DateTime("2010-10-30"))
   }
   test ("withEnd(Long) adds a end time to a CriteriaMap") {
     val cm = CriteriaMap(Map()).withEnd(thenms)
@@ -113,26 +107,13 @@ class CriteriaMapTest extends FunSuite with ShouldMatchers {
   test ("unapply extracts the fields from a CriteriaMap") {
     val start = CriteriaMap.defaultStartTime
     val end   = CriteriaMap.defaultEndTime
-    val cm = CriteriaMap(Map()).withStart(start).withEnd(end).withInstruments("a,b,c").withStatistics("s1,s2,s3")
+    val cm = CriteriaMap(Map()).withStart(start).withEnd(end).withInstruments("a,b,c").withStatistics("price,price[$],50dma")
     cm match {
       case CriteriaMap(instruments, statistics, start1, end1) => 
-        instruments should equal (Instrument.makeInstrumentsList("a,b,c"))
-        statistics  should equal (InstrumentStatistic.makeInstrumentStatisticsList("s1,s2,s3"))
-        start1      should equal (start)
-        end1        should equal (end)
-      case _ => fail(cm.toString)
-    }
-  }
-  test ("unapply extracts the fields from a Map") {
-    val start = CriteriaMap.defaultStartTime
-    val end   = CriteriaMap.defaultEndTime
-    val cm = CriteriaMap(Map()).withStart(start).withEnd(end).withInstruments("a,b,c").withStatistics("s1,s2,s3")
-    cm.map match {
-      case CriteriaMap(instruments, statistics, start1, end1) => 
-        instruments should equal (Instrument.makeInstrumentsList("a,b,c"))
-        statistics  should equal (InstrumentStatistic.makeInstrumentStatisticsList("s1,s2,s3"))
-        start1      should equal (start)
-        end1        should equal (end)
+        checkInstruments(cm)
+        checkStatistics(cm)
+        checkStart(cm, start1)
+        checkEnd(cm, end1)
       case _ => fail(cm.toString)
     }
   }
