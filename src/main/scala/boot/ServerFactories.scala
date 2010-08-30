@@ -20,4 +20,3 @@ class BootAWSESupervisor {
       
   factory.newInstance.start
 }
-

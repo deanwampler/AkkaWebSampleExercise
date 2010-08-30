@@ -31,6 +31,6 @@ object error extends LogAndThrow with Logging {
 }
 
 object fatal extends LogAndThrow with Logging {
-  protected def _log(cause: Throwable, message: String) = log.fatal(cause, message)
-  protected def _log(message: String) = log.fatal(message)
+  protected def _log(cause: Throwable, message: String) = log.error(cause, message)
+  protected def _log(message: String) = log.error(message)
 }

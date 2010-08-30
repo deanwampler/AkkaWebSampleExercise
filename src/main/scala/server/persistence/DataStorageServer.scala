@@ -3,7 +3,6 @@ import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.persistence._
 import org.chicagoscala.awse.persistence.inmemory._
 import org.chicagoscala.awse.persistence.mongodb._
-import org.chicagoscala.awse.domain.finance._
 import org.chicagoscala.awse.util._
 import se.scalablesolutions.akka.actor._
 import se.scalablesolutions.akka.actor.Actor._
@@ -15,6 +14,7 @@ import org.joda.time._
 
 /**
  * DataStorageServer manages storage of time-oriented data, stored as JSON.
+ * TODO: Currently, the query capabilities are limited to date-time range queries.
  */
 class DataStorageServer(val service: String) extends Actor with PingHandler with Logging {
 
@@ -33,39 +33,37 @@ class DataStorageServer(val service: String) extends Actor with PingHandler with
     case Put(jsonRecord) => self.reply(putData(jsonRecord))
 
     case Stop => 
-      log.ifInfo (actorName + ": Received Stop message.")
+      log.info (actorName + ": Received Stop message.")
       self stop
 
     case x => 
       val message = actorName + ": unknown message received: " + x
-      log.ifInfo (message)
+      log.info (message)
       self.reply (("error", message))
   }
-   
-  protected[persistence] def getData(criteria: Map[String,Any]) = try {
-    val startingAt  = extractDate(criteria, "startingAt", 0)
-    val upTo        = extractDate(criteria, "upTo", (new DateTime).getMillis)
-    val instruments = extractListOf[Instrument](criteria, "instruments", s => Instrument(s))
-    val statistics  = extractListOf[InstrumentStatistic](criteria, "statistics", s => InstrumentStatistic.make(s))
-    val data = for {
-      json       <- dataStore.range(startingAt, upTo)
-      // TODO: Select by instrument, stats.
-      // instrument <- instruments
-      // statistic  <- statistics
-    } yield json
-    val result = toJSONString(data toList)
-    log.ifDebug(actorName + ": GET returning response for start, end, size = " + 
-      startingAt + ", " + upTo + ", " + result.size)
-    result
-  } catch {
-    case th => 
-      log.error(actorName + ": Exception thrown: ", th)
-      th.printStackTrace
-      throw th
-  }
   
+  // TODO: Support other query criteria besides time ranges.
+  protected[persistence] def getData(criteria: JValue) = {
+    val start = extractTime(criteria, "start", 0)
+    val end   = extractTime(criteria, "end",   (new DateTime).getMillis)
+    try {
+      val data = for {
+        json <- dataStore.range(start, end)
+      } yield json
+      val result = toJSONString(data toList)
+      log.debug(actorName + ": GET returning response for start, end, size = " + 
+        start + ", " + end + ", " + result.size)
+      result
+    } catch {
+      case th => 
+        log.error(actorName + ": Exception thrown: ", th)
+        th.printStackTrace
+        throw th
+    }
+  }
+
   protected[persistence] def putData(jsonRecord: JSONRecord) = {
-    log.ifInfo(actorName + " PUT: storing Pair(" + jsonShortStr(jsonRecord.toString) + ")")
+    log.info(actorName + " PUT: storing JSON: " + jsonShortStr(jsonRecord.toString))
       
     try {
       dataStore.add(jsonRecord)
@@ -78,39 +76,17 @@ class DataStorageServer(val service: String) extends Actor with PingHandler with
     }
   }
 
+  protected def extractTime(json: JValue, key: String, default: => Long): Long = (json \ key) match {
+    case JField(key, value) => value match {
+      case JInt(millis) => millis.longValue
+      case _ => default
+    }
+    case _ => default
+  } 
+
   protected def toJSONString(data: List[JSONRecord]): String = data.size match {
     case 0 => "{}"
     case _ => compact(render(data reduceLeft { _ ++ _ } json))
-  }
-  
-  protected def extractDate(criteria: Map[String,Any], key: String, default: Long): Long = criteria.get(key) match {
-    case None => default
-    case Some(x) => x match {
-      case millis: Long => millis
-      case dt: DateTime => dt.getMillis
-      case s: String => (new DateTime(s)).getMillis
-      case _ => error("Unrecognized object specified for date time '"+key+"'")
-    }
-  }
-  
-  protected def extractListOf[T](
-      criteria: Map[String,Any], key: String, makeT: String => T): List[T] = {
-    def makeListOf(list: List[_], accum: List[T]): List[T] = list match {
-      case Nil => accum
-      case head :: tail => 
-        val i:T = head match {
-          case s: String => makeT(s)
-          case _ => head.asInstanceOf[T]  // TODO: use manifest to make this safer.
-        } 
-        makeListOf(tail, i :: accum)
-    }
-    criteria.get(key) match {
-      case None => Nil
-      case Some(x) => x match {
-        case list: List[_] => makeListOf(list, Nil)
-        case _ => error("Unrecognized object specified for '"+key+"'")
-      }
-    }
   }
   
   private def jsonShortStr(jstr: String) = 
@@ -124,7 +100,7 @@ object DataStorageServer extends Logging {
   // protected def makeActor(actorName: String): Actor = new DataStorageServer(actorName)
 
   def getAllDataStorageServers: List[ActorRef] = 
-    ActorRegistry.actorsFor(classOf[DataStorageServer]) 
+    ActorRegistry.actorsFor(classOf[DataStorageServer]).toList 
 
   /**
    * Instantiate the default type of datastore: an InMemoryDataStore with an upper limit on values.
@@ -132,10 +108,10 @@ object DataStorageServer extends Logging {
   def makeDefaultDataStore(storeName: String): DataStore[JSONRecord] = {
     val db = System.getProperty("app.datastore.type", config.getString("app.datastore.type", "mongodb"))
     if (db.toLowerCase.trim == "mongodb") {
-      log.ifInfo("Using MongoDB-backed data storage.")
+      log.info("Using MongoDB-backed data storage.")
       new MongoDBDataStore(storeName)
     } else {
-      log.ifInfo("Using in-memory data storage.")
+      log.info("Using in-memory data storage.")
       new InMemoryDataStore[JSONRecord](storeName)
     }
   }

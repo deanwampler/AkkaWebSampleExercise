@@ -2,12 +2,14 @@ package org.chicagoscala.awse.server.rest
 import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.persistence.inmemory._
 import org.chicagoscala.awse.persistence._
-import se.scalablesolutions.akka.actor.ActorRef
+import org.chicagoscala.awse.server.finance._
+import org.chicagoscala.awse.domain.finance._
+import se.scalablesolutions.akka.actor._
 import se.scalablesolutions.akka.actor.Actor._
+import se.scalablesolutions.akka.actor.ActorRef
 import org.scalatest.{FlatSpec, FunSuite, BeforeAndAfterEach}
 import org.scalatest.matchers.ShouldMatchers
 import org.joda.time._
-import scala.collection.mutable.{Map => MMap}
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 
@@ -37,65 +39,62 @@ class RestfulDataPublisherTest extends FunSuite
     "[" + s.toJSONString + "]"
   }
   
-  def loadData = js.reverse foreach (dss !! Put(_))
-  
-  var testDataStore: InMemoryDataStore[JSONRecord] = _
-  var dss: ActorRef = _
+  var expected: String = _
+  var ias: ActorRef = _
   var restfulPublisher: RestfulDataPublisher = _
 
   override def beforeEach = {
-    testDataStore = new InMemoryDataStore[JSONRecord]("testDataStore")
-    dss = actorOf(new DataStorageServer("testService") {
-      override lazy val dataStore = testDataStore 
-    })
     restfulPublisher = new RestfulDataPublisher {
-      override def dataStorageServers = List(dss)
+      override def sendAndReturnFutures(criteria: CriteriaMap) = {
+        val fake = actorOf(new Actor {
+          def receive = {
+            case CalculateStatistics(x) => self.reply(expected)
+          }
+        }) 
+        fake.start
+        List(fake !!! CalculateStatistics(criteria))
+      }
     }
-    dss.start
-    loadData
-  }
-  override def afterEach = {
-    dss.stop
   }
   
   test ("getAllDataFor returns a JSON string containing all data when all data matches the query criteria") {
-    val result = makeJSONString (List(js(0), js(3), js(2), js(4), js(1)))
-    restfulPublisher.getAllDataFor("A,B,C","price",0,nowms) should equal (result)
+    expected = makeJSONString (List(js(0), js(3), js(2), js(4), js(1)))
+    restfulPublisher.getAllDataFor("A,B,C","price", "0", nowms.toString) should equal (expected)
   }
   
   test ("getAllDataFor returns a JSON string containing all data that matches the time criteria") {
     // Return all data for the specified time range, low (inclusive) to high (exclusive)
-    val result = makeJSONString (List(js(3), js(2), js(4)))
-    restfulPublisher.getAllDataFor("A,B,C" , "price" , thenms + 1000, thenms + 3001) should equal (result)
+    expected = makeJSONString (List(js(3), js(2), js(4)))
+    restfulPublisher.getAllDataFor("A,B,C" , "price" , (thenms + 1000).toString, (thenms + 3001).toString) should equal (expected)
   }
   
   test ("The time criteria are inclusive for the earliest time and exclusive for the latest time") {
-    val result = makeJSONString (List(js(3), js(2)))
-    restfulPublisher.getAllDataFor("A,B,C" , "price" , thenms + 1000, thenms + 3000) should equal (result)
+    expected = makeJSONString (List(js(3), js(2)))
+    restfulPublisher.getAllDataFor("A,B,C" , "price" , (thenms + 1000).toString, (thenms + 3000).toString) should equal (expected)
   }
   
   // TODO
   test ("getAllDataFor returns a JSON string containing all data that matches the instrument criteria") {
     pending
-    val result = makeJSONString (List(js(0), js(2), js(4)))
-    restfulPublisher.getAllDataFor("A", "price", 0, -1) should equal (result)
   }
   
   // TODO
   test ("getAllDataFor returns a JSON string containing all data that matches the statistics criteria") {
     pending
-    val result = makeJSONString (List(js(0), js(3), js(2), js(4), js(1)))
-    restfulPublisher.getAllDataFor("A,B,C", "price", 0, -1) should equal (result)
-    restfulPublisher.getAllDataFor("A,B,C", "50dma", 0, -1) should equal (Nil)
+  }
+  
+  test ("if one or both input times are invalid, getAllDataFor should return an error message") {
+    restfulPublisher.getAllDataFor("A,B,C", "price", "x", "y") should equal (
+      """{"error": "One or both date time arguments are invalid: start = x, end = y."}""")
   }
   
   test ("getAllDataFor should return an error message is there are appear to be no data servers available") {
     val restfulPublisherWithNoDataStorageServers = new RestfulDataPublisher {
-      override def dataStorageServers = Nil
+      override def sendAndReturnFutures(criteria: CriteriaMap) = Nil
     }
 
-    restfulPublisherWithNoDataStorageServers.getAllDataFor("A,B,C", "price", 0, -1) should equal (
-      """{"warn": "RestfulDataPublisher: No DataStorageServers! (normal at startup)"}""")
+    restfulPublisherWithNoDataStorageServers.getAllDataFor("A,B,C", "price", "0", "-1") should equal (
+      """{"error": "No data servers appear to be available."}""")
   }
-  
+
 }

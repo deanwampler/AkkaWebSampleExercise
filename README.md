@@ -39,13 +39,13 @@ If you use MongoDB persistence, download and install MongoDB from [here](http://
 
     $MONGODB_HOME/bin/mongod --dbpath some_directory/data/db
     
-Pick a `some_directory` that's convenient.
+Pick a `some_directory` that's convenient or you can omit the --dbpath option if you let MongoDB use the default location (`/data/db` on *nix systems, including OS X).
 
 Now, back in `sbt` you can run the tests and run the app. (sbt's `>` prompt is not shown.)
      
     test              # run the test suite. It should end with "success"
     jetty-run         # run the Jetty web server
-    open http://localhost:8080/primes   # open the UI in a browser
+    open http://localhost:8080/finance   # open the UI in a browser
     
 Click the `Start` button to tell the server to start calculating primes. (Note that the `Stop` and `Restart` options do not work correctly yet.) AJAX is used to send these commands to the server. There is also a `Ping` button that checks whether or not the "supervisors" for the data store and the primes calculators are still responsive.
 

@@ -11,51 +11,45 @@ import org.joda.time._
 
 sealed trait InstrumentCalculationMessages
 
-case class CalculateStatistics(criteria: Map[String,Any]) extends InstrumentCalculationMessages
+case class CalculateStatistics(criteria: CriteriaMap) extends InstrumentCalculationMessages
     
-case object StopCalculating extends InstrumentCalculationMessages
-
+/**
+ * Supervises InstrumentAnalysisServers. 
+ */
 class InstrumentAnalysisServerSupervisor extends Actor with ActorSupervision with PingHandler with Logging {
   import InstrumentAnalysisServerSupervisor._
   
   val actorName = "InstrumentAnalysisServerSupervisor"
 
-  // TODO: Instead of keeping this state field, swap a different PartialFunction for handleMessage
-  var stopRequested = false
+  val defaultHandler: PartialFunction[Any,Unit] = {
+    case CalculateStatistics(criteria) => calculate(criteria)
+  }
   
-  def handleMessage: PartialFunction[Any, Unit] = {
+  def receive = defaultHandler orElse handleManagementMessage orElse pingHandler
 
-    case CalculateStatistics(criteria) => doStartStatistics(criteria)
-      
-    // See InstrumentAnalysisServer for how it "participates" in stopping.
-    // TODO: There is probably lots of work can be done to make this process more robust 
-    // and to really clean out old actors, data, etc. Would it just be better to restart
-    // Jetty? Why or why not?
-    case StopCalculating => 
-      // TODO: Is the following logic safe?
-      if (! stopRequested) {
-        stopRequested = true
-        InstrumentAnalysisServerSupervisor.getAllInstrumentAnalysisServers foreach { _ !! Stop }
-      }
-  } 
-  
-  def receive = handleMessage orElse handleManagementMessage orElse pingHandler
-
-  // TODO: Uses one actor for each instrument, but is that more efficient than using one actor for N > 1?
-  def doStartStatistics (criteria: Map[String,Any]) = 
+  /**
+   * Calculate the statistics using one actor for each instrument and statistic combination.
+   * Used to balance the load of calculating statistics based on the input criteria. 
+   * TODO: Would it be more efficient to have each actor handle more than one instrument and/or statistic? Note that
+   * InstrumentAnalysisServer does not assume it works on only one instrument and one statistic at a time.
+   * Note: If there were many supervisors, this method could ignore criteria out this supervisor's scope, e.g., 
+   * instruments handled by another supervisor.
+   * @return a list of Futures
+   */
+  protected def calculate (criteria: CriteriaMap) = 
     for {
-      instrument <- criteria.get("instruments")
-      calculator = ActorSupervision.getOrMakeActorFor("MovingAverageCalculator_" + instrument, Some(self)) {
+      instrument <- criteria.instruments
+      statistic  <- criteria.statistics
+      calculator = ActorSupervision.getOrMakeActorFor(instrument+":"+statistic, Some(self)) {
         name => actorOf(new InstrumentAnalysisServer(name))
       }
-      statistic  <- criteria.get("statistics")
-    } calculator ! CalculateStatistics(criteria ++ Map("instrument" -> instrument, "statistic" -> statistic))
+    } yield (calculator !!! criteria.withInstruments(instrument).withStatistics(statistic))
 
 }
 
 object InstrumentAnalysisServerSupervisor extends Logging {
   
   def getAllInstrumentAnalysisServers: List[ActorRef] = 
-    ActorRegistry.actorsFor(classOf[InstrumentAnalysisServer]) 
+    ActorRegistry.actorsFor(classOf[InstrumentAnalysisServer]).toList
 }
   

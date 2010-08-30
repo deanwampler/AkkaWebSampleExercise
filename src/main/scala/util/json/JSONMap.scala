@@ -5,7 +5,7 @@ import net.liftweb.json.Implicits
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json.JsonParser.parse
-import com.mongodb.ObjectId
+import org.bson.types.ObjectId
 
 /**
  * Utility for converting between maps and map elements and the corresponding Lift JSON objects.

@@ -18,13 +18,13 @@ trait ActorSupervision extends Actor with Logging {
   }
 
   protected def doRegister(actor: ActorRef) = {
-    log.ifInfo("Registering actor: "+actor)
+    log.info("Registering actor: "+actor)
     self link actor
     Pair("message", "Actor registered")
   }
 
   def doUnregister(actor: ActorRef) = {
-    log.ifInfo("Registering actor: "+actor)
+    log.info("Registering actor: "+actor)
     self unlink actor
     Pair("message", "Actor unregistered")
   }
@@ -33,9 +33,9 @@ trait ActorSupervision extends Actor with Logging {
 object ActorSupervision {
   
   def getOrMakeActorFor(actorId: String, supervisorForMadeActor: Option[ActorRef])(makeActor: (String) => ActorRef) = 
-    ActorRegistry.actorsFor(actorId) match {
+    ActorRegistry.actorsFor(actorId).toList match {
       case Nil => 
-        log.ifInfo("Creating new actor: "+actorId)
+        log.info("Creating new actor: "+actorId)
         val actorRef = makeActor(actorId)
         actorRef.id = actorId
         actorRef.start
@@ -46,7 +46,7 @@ object ActorSupervision {
         actorRef
       case head :: tail => 
         if (tail != Nil) log.warning("More than one actor exists with id " + actorId)
-        log.ifInfo("Returning existing actor " + actorId)
+        log.info("Returning existing actor " + actorId)
         head
     }
 }

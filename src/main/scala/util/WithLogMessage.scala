@@ -12,7 +12,15 @@ import net.lag.logging.Level
 case class WithLogMessage[T](level: Level, msgFormat: String) extends Logging {
   def apply (block: => T): T = {
     val t = block
-    log.log(level, String.format(msgFormat, t.toString))
+    val message = String.format(msgFormat, t.toString)
+    // TODO: Akka .10 removed the log(level, ...) method. Ask them to add it back!
+    // log.log(level, message)
+    level match {
+      case Level.TRACE   => log trace   message
+      case Level.DEBUG   => log debug   message
+      case Level.WARNING => log warning message
+      case _             => log error   message
+    }
     t
   }
 }

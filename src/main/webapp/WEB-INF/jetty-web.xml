@@ -4,11 +4,14 @@
 <!--
 This is the jetty specific web application configuration file.  When starting
 a Web Application, the WEB-INF/web-jetty.xml file is looked for and if found, treated
-as a org.eclipse.jetty.server.server.xml.XmlConfiguration file and is applied to the
-org.eclipse.jetty.servlet.WebApplicationContext objet
+as a org.mortbay.jetty.server.server.xml.XmlConfiguration file and is applied to the
+org.mortbay.jetty.servlet.WebApplicationContext object.
+
+NOTE: If using the Eclipse distro, change "mortbay" to "eclipse" and
+"org.mortbay.jetty.util.log.Log" to "org.mortbay.log.Log".
 -->
 
-<Configure class="org.eclipse.jetty.webapp.WebAppContext">
-  <Call class="org.eclipse.jetty.util.log.Log" name="debug"><Arg>executing jetty-web.xml</Arg></Call>
-  <Set name="contextPath">/primes</Set>
+<Configure class="org.mortbay.jetty.webapp.WebAppContext">
+  <Call class="org.mortbay.log.Log" name="debug"><Arg>executing jetty-web.xml</Arg></Call>
+  <Set name="contextPath">/finance</Set>
 </Configure>
