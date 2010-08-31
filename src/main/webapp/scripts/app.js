@@ -2,9 +2,15 @@
 
 $(document).ready(function () {
   $('.icon').click(function(){
-    $('.start').fadeIn('slow');
-    $('.start').fadeOut('slow');
+    $('.banner').fadeIn('slow');
+    $('.banner').fadeOut('slow');
   });
+  $('.date-pick').datePicker({
+    clickInput: true,
+    startDate: '01/01/2010',
+    endDate: (new Date()).asString()
+  });
+  $('.date-pick').dpSetOffset(25,0);
 });
 
 function writeDebug(string) {
@@ -38,12 +44,10 @@ function writeInfo(string, whichMessageSpan) {
 }
 
 function getNext() {
-  sendRequest("primes");
+  sendRequest("results");
 }
 
 function onSuccess(jsonString) {
-  $('.start').fadeOut('slow');
-  //appendDebug(jsonString);
   var json = $.parseJSON(jsonString); 
   if (json === null) {
     writeError("Invalid data returned by AJAX query: " + jsonString);
@@ -65,15 +69,15 @@ function onSuccess(jsonString) {
   } else if (json["error"]) {
     writeInfo(json["error"]);
   } else {
-    // Plot the primes data. 
+    // Plot the results data. 
     // TODO: Note that we currently retrieve all data calculated, including data already retrieved.
-    $(".primes-table").css("display", "table");
+    $(".results-table").css("display", "table");
     for (var i = 0; i < json.length; i++) {
       var array = json[i];
       for (var j = 0; j < array.length; j++) {
         var row = array[j];
-        $(".primes-table").append(
-          "<tr class='primes-row'><tr><td>"+row["from"]+"</td><td>"+row["to"]+"</td><td>"+row["number-of-primes"]+"</td></tr>");
+        $(".results-table").append(
+          "<tr class='results-row'><tr><td>"+row["from"]+"</td><td>"+row["to"]+"</td><td>"+row["number-of-results"]+"</td></tr>");
       }
     }
   }
@@ -105,18 +109,6 @@ var keepPolling = true
 
 function serverControl(action) {
   var action2 = action;
-  if (action != "ping") {
-    $(".control").attr("disabled", "disabled");
-    if (action == "start" || action == "restart") {
-      keepPolling = true;
-      $("#stop").attr("disabled", "");
-      $("#restart").attr("disabled", "");
-      action2 = action + "?min=" + ($("#min").val()) + "&max=" + ($("#min").val())
-    } else if (action == "stop") {
-      keepPolling = false;
-      $("#start").attr("disabled", "");    
-    }
-  }
   sendRequest(action);
 }
 

@@ -9,41 +9,33 @@
 
     <title>Chicago Scala Akka Web Sample Exercise</title>
     <link href="css/layout.css" rel="stylesheet" type="text/css">
+    <link href="css/datePicker.css" rel="stylesheet" type="text/css">
   </head>
   <body>
     <h2>Akka Web Sample Exercise: NYSE Data Analysis</h2>
     <p>The <a href="http://www.meetup.com/chicagoscala/">Chicago-Area Scala Enthusiasts</a> sample Akka app with MongoDB persistence, Actors, and a web UI.</p>
     <div class="toolbar" id="master-toolbar">
       <div class="toolbar-control icon" id="master-toolbar-img"></div>
-      <div class="toolbar-control with-left-border with-right-border">
+      <div class="toolbar-control with-left-border">
         Symbols:&nbsp;<input class="message control" id="symbol" type="text"  value="Appl" />
-        Show:&nbsp;<select class='stats' label='choose...'>
-          <option class='file-name-option' value=''>No Files!</option>
-          <option class='file-name-option prototype' value='x'>xx</option>
-        </select>
-        
-        
-        
-        <input class="message control" id="max"     type="text"   
-          onChange="integerOnly('max');" onblur="fixMin('min', 'max');" value="1" />
+        Start: <input name="start" id="start" class="date-pick" />&nbsp;</span>
+        End: <input name="end" id="end" class="date-pick" />&nbsp;</span>
+        <input class="message control" id="go"   type="button" onclick="serverControl('go');"   value="Go!" />
       </div>
-      <div id="title" class="toolbar-control">Server Control:</div>
       <div class="toolbar-control with-left-border with-right-border">
-        <input class="message control" id="start"   type="button" onclick="serverControl('start');"   value="Start!" />
-        <input class="message control" id="stop"    type="button" onclick="serverControl('stop');"    value="Stop" />
-        <input class="message control" id="restart" type="button" onclick="serverControl('restart');" value="Restart" />
-        <input class="message"         id="ping"    type="button" onclick="serverControl('ping')"     value="Ping" />
+        <input class="message control" id="ping"   type="button" onclick="serverControl('ping');"   value="Ping!" />
       </div>
       <div class="toolbar-control message-box" id="message"></div>
     </div>
-    <div class="start"></div>
-    <div id="primes">
-      <table class="primes-table" style="display:none;">
-        <tr class="primes-head"><th>From</th><th>To</th><th># of Primes</th></tr>
+    <div class='banner'></div>
+    <div id="results-div">
+      <table class="results-table" style="display:none;">
+        <tr class="results-head"><th>Date</th><th>Symbol</th><th>$</th></tr>
       </table>
     </div>
     <div id="debug"></div>
-    <script src="scripts/jquery-1.4.2.min.js" type="text/javascript" charset="utf-8"></script>
-    <script src="scripts/app.js"              type="text/javascript" charset="utf-8"></script>
+    <script src="scripts/jquery-1.4.2.min.js"        type="text/javascript" charset="utf-8"></script>
+    <script src="scripts/jquery.datePicker-2.1.2.js" type="text/javascript" charset="utf-8"></script>
+    <script src="scripts/app.js"                     type="text/javascript" charset="utf-8"></script>
   </body>
 </html>

@@ -100,16 +100,16 @@ class InstrumentAnalysisServerTest extends FunSuite
   // TODO
   test ("calculateStatistics returns a JSON string containing all data that matches the instrument criteria") {
     pending
-    val result = makeJSONString (List(js(0), js(2), js(4)))
-    analysisServer.calculateStatistics(makeCriteria("A", "price", 0, -1)) should equal (result)
+    val result = makeJSONString (List(js(0), js(1), js(2)))
+    analysisServer.calculateStatistics(makeCriteria("A", "price", 0, nowms)) should equal (result)
   }
 
   // TODO
   test ("calculateStatistics returns a JSON string containing all data that matches the statistics criteria") {
     pending
     val result = makeJSONString (List(js(0), js(3), js(2), js(4), js(1)))
-    analysisServer.calculateStatistics(makeCriteria("A,B,C", "price", 0, -1)) should equal (result)
-    analysisServer.calculateStatistics(makeCriteria("A,B,C", "50dma", 0, -1)) should equal (Nil)
+    analysisServer.calculateStatistics(makeCriteria("A,B,C", "price", 0, nowms)) should equal (result)
+    analysisServer.calculateStatistics(makeCriteria("A,B,C", "50dma", 0, nowms)) should equal ("[]")
   }
 
 }

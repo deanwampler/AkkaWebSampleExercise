@@ -14,18 +14,19 @@ This is completely free and open source, with no warranty of any kind. I hacked 
 
 # Setup
 
-Everything after a `#` is a comment.
+use the following *nix shell commands to get started. (On windows, use an environment like Cygwin or make the appropriate command shell substitutions.) Everything after a `#` is a comment.
 
     git clone git://github.com/deanwampler/AkkaWebSampleExercise.git
     cd AkkaWebSampleExercise
     ./sbt             # start sbt. On Windows, use sbt.bat
-    update            # update the dependencies. This will take a whiiiiile
+    update            # update the dependencies on teh interwebs. This will take a whiiiiile
+    exit              # leave sbt (^D also works)
     
-The last line (after the `./sbt` line) is a command at the `sbt` prompt (`>`, by default). Note that the `sbt` script has some options; type `sbt --help` for details. (The options are supported in the `sbt.bat` script.)
+The last line (after the `./sbt` line) is a command at the `sbt` prompt (`>`, by default). Note that the `sbt` script has some options; type `sbt --help` for details. When I say that `update` might take a long time, I'm not kidding... Fortunately, you rarely need to run it.
 
-This application requires a [NYSE stock ticker data set](http://infochimps.org/datasets/daily-1970-current-open-close-hi-low-and-volume-nyse-exchange-up--2) from [infochimps](http://infochimps.org). Select the YAML format. Note that there are similar data sets on the site; use this one!
+This application requires a [NYSE stock ticker data set](http://infochimps.org/datasets/daily-1970-current-open-close-hi-low-and-volume-nyse-exchange-up--2) from [infochimps](http://infochimps.org). Select the YAML format. Note that there are similar data sets on the site; use this one! Put the files in a `data` directory at the root of this project.
 
-There are two data persistence options, a MongoDB-backed persistent map and an in-memory map. Currently, the MongoDB persistence doesn't work (see the TODO items below), so the in-memory map is the default (it also makes running the app easier, when you're getting started...). 
+There are two data persistence options, a MongoDB-backed persistent map and an in-memory map. Currently, the in-memory map is really the only supported option, because of the need to import the data into some form of persistent storage.
 
 The persistence option is set in `src/main/resources/akka.conf`. Change the following statement around line 13,
 
@@ -35,86 +36,66 @@ to
 
     type = MongoDB
 
-If you use MongoDB persistence, download and install MongoDB from [here](http://www.mongodb.org/display/DOCS/Downloads). In another terminal window, go to the installation directory, which we'll call `$MONGODB_HOME`, and run this command:
+Download and install MongoDB from [here](http://www.mongodb.org/display/DOCS/Downloads). In another terminal window, go to the installation directory, which we'll call `$MONGODB_HOME`, and run this command:
 
     $MONGODB_HOME/bin/mongod --dbpath some_directory/data/db
     
-Pick a `some_directory` that's convenient or you can omit the --dbpath option if you let MongoDB use the default location (`/data/db` on *nix systems, including OS X).
+Pick a `some_directory` that's convenient or you can omit the --dbpath option and MongoDB will use the default location (`/data/db` on *nix systems, including OS X).
 
-Now, back in `sbt` you can run the tests and run the app. (sbt's `>` prompt is not shown.)
+Now, start up `./sbt` again, so you can build the app and run the tests. (As before, sbt's `>` prompt is not shown.)
      
-    test              # run the test suite. It should end with "success"
-    jetty-run         # run the Jetty web server
+    test              # run the test suite (after compiling as needed). It should end with "success"
+
+Helpful hint: When your working on code, run this version of test:
+
+    ~test             # run the test suite (after compiling as needed). It should end with "success"
+
+When the `~` appears before any `sbt` action, it loops, watching for file system changes, then it runs the action every time you save changes. If you've used `autotest` for Ruby development (or a similar tool), you'll know how useful this is.
+
+# Import the Data
+
+We'll implement the data import feature in subsequent weeks. Stay tuned...
+
+
+# The Web App
+
+The web tier is incomplete. We'll add it in subsequent weeks. The following discussion will apply then:
+
+In `sbt`, start the Jetty web server
+
+    jetty-run                            # run the Jetty web server
     open http://localhost:8080/finance   # open the UI in a browser
+
+If you're working on the web pages (HTML, JavaScript, or CSS), use this command in sbt.
+
+    ~prepare-webapp   # automatically load any changes in the running server.
     
-Click the `Start` button to tell the server to start calculating primes. (Note that the `Stop` and `Restart` options do not work correctly yet.) AJAX is used to send these commands to the server. There is also a `Ping` button that checks whether or not the "supervisors" for the data store and the primes calculators are still responsive.
+Avoid those server restarts! Note that Scala code changes will also get picked up, but the turn around time is slower.
+    
+While we're at it, you can stop or restart jetty thusly:
 
-After you start it, the UI will poll for the calculated primes. Currently, the returned JSON strings are parsed to extract the range in which the primes were calculated and the number of primes found in that range. (TODO: graph these numbers!). Don't worry if you see some "error" messages at first. 
+    jetty-stop         # stop the Jetty web server
+    jetty-restart      # restart the Jetty web server
 
-You can also run the AJAX calls corresponding to the buttons on the UI, using `curl`:
-
-    curl http://localhost:8080/primes/ajax/start     # start calculating primes
-    curl http://localhost:8080/primes/ajax/stop      # stop calculating primes (broken)
-    curl http://localhost:8080/primes/ajax/restart   # restart calculating primes (broken)
-    curl http://localhost:8080/primes/ajax/primes    # profit!
-    curl http://localhost:8080/primes/ajax/ping      # you there?
-
-If you don't have the `curl` command or the equivalent (*e.g.,* `wget`), paste these URLs in a browser.
+Enter a comma-separate list of NYSE stock symbols, start and end dates, then the `Go!` button. The results are presented below.
 
 
-# Improvements You Can Make (a.k.a. Exercises)
+The `Ping` button is a diagnostic tool. It checks whether or not the Akka "actors" are still responsive in the application.
 
-Here are some things you might try to better understand how Akka works.
 
-## Simplify the Actors
-
-This sample exercise is roughly based on a more involved production system, but we don't need all the bells and whistles. Try simplifying the structure. Here are some suggestions.
-
-### "Throttle" the Behavior
-
-Right now, it runs hot and fast. Using the Akka [docs](http://doc.akkasource.org/), can you figure out ways to slow it down, *i.e.,* by inserting pauses between runs of calculating primes?
-
-### Combine the `DataStoreServer` and `PrimeCalculatorServer`
-
-There is actually a one-to-one mapping between the an actor instance of each `DataStoreServer` and `PrimeCalculatorServer`. You could move the prime calculation into the `DataStoreServer` or move the persistence logic into the calculator. What are the relative benefits and disadvantages of this refactoring?
-
-### Improve the Supervision Logic
-
-This goes with the previous point. If a `DataStoreServer` dies, the corresponding `PrimeCalculatorServer` should be restarted with it. Assuming you *don't* do the refactoring in the previous point, how can you manage these server pairs together? (Hint: hard code creation of the `DataStoreServers` and `PrimeCalculatorServers` in the `BootAWSESupervisor`, rather than use the current "dynamic-creation" logic.)
-
-### Improve the Server Management Logic
-
-There are UI controls for starting, stopping, and restarting the server. The stop and restart logic is somewhat simplistic and could be improved. See for example `TODO` comments in `ServerFactories.scala`.
-
-### Make It Clustered
-
-Look at the Akka docs page for [remote actors](http://doc.akkasource.org/remote-actors). Can you make this a truly distributed application?
-
-## Testing
-
-There aren't a lot of tests. For example, there are no tests for MongoDB persistence. Try writing more tests to better understand the code (and find bugs for me!!)
-
-### Fix the TODOs
-
-There are `TODO` items below and a few `TODO` comments in the code base. Try fixing them.
-
-## Use the New PubSub Features
-
-Akka's `head` branch has support for building "PubSub" systems using Redis and other options. Try rewriting the app to use these features.
+# TODO
 
 ## Substitute a Different Problem Domain
 
 Instead of calculating primes, do something else. I considered building a distributed version of the recent Akka version of Clojure's "ants" demo. There are two Scala variants, [here](http://github.com/azzoti/ScalaAkkaAnts) and [here](http://github.com/pvlugter/ants). Try building a larger version of ants using distributed/clustered actors.
 
-# TODO
+## Mine More of the Data
 
-1. Add web pages that make AJAX calls to retrieve the data.
-2. Clean up and simplify the actor code. In particular, fix bugs in the use of Transactors vs. Actors. Until this is sorted out, MongoDB-backed persistence won't work.
-3. Fix the errors in the JSON data.
-4. Exploit clustering.
-5. Implement graceful shutdown.
-6. Fix the `TODO` items in the code base
-7. Others?
+Currently the app just returns price data. There are other items in the data files that can be exploited, and various analytics can be applied to the data.
+
+## Implement a Clustered Solution
+
+How does the performance scale up, especially any analytics, if you use Akka's support for clustering?
 
 # Notes
 
@@ -124,4 +105,4 @@ Please fork the [repo](git://github.com/deanwampler/AkkaWebSampleExercise.git) a
 
 ## Scala Version
 
-At the time of this writing, Scala 2.8.0.Beta1 is the latest release with released builds of Akka and some other tools we're using.
+This version requires Scala 2.8.0.final and Akka 0.10 or later.

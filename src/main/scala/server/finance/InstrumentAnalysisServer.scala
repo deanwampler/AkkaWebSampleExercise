@@ -10,6 +10,8 @@ import se.scalablesolutions.akka.util.Logging
 import org.joda.time._
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
+import org.chicagoscala.awse.util._
+import net.lag.logging.Level
 
 class DataStorageNotAvailable(service: String) extends RuntimeException(
   "Could not get a DataStorageServer for "+service)
@@ -63,22 +65,33 @@ class InstrumentAnalysisServer(val service: String) extends Actor with ActorSupe
 
 /**
  * A separate helper so we can decouple (most of) the actor-specific code and the logic it performs.
- * TODO: Handle instruments and statistics criteria
+ * TODO: Handle instruments and statistics criteria.
  */
 class InstrumentAnalysisServerHelper(dataStorageServer: ActorRef) {
   
   def calculateStatistics(criteria: CriteriaMap) = criteria match {
     case CriteriaMap(instruments, statistics, start, end) => 
-      fetchPrices(start, end)
+       fetchPrices(instruments, statistics, start, end)
     case _ =>
       """{"error": "Invalid criteria: """ + criteria + "\"}"
   }
 
-  // Must make a synchronous call to the data store server
-  protected def fetchPrices(start: DateTime, end: DateTime) = {
+  /**
+   * Fetch the instrument prices between the time range. Must make a synchronous call to the data store server
+   * becuase clients calling this actor need a synchronous response.
+   * TODO: Handle instruments and statistics criteria.
+   */
+  protected def fetchPrices(
+        instruments: List[Instrument], statistics: List[InstrumentStatistic], 
+        start: DateTime, end: DateTime): String = {
     (dataStorageServer !!! Get(("start" -> start.getMillis) ~ ("end" -> end.getMillis))).await.result match {
       case None => """{"warning": "Nothing returned for query (start, end) = (""" + start + ", " + end + ")\"}"
-      case Some(x) => x
+      case Some(x) => filter(instruments, statistics, x)
     }
+  }
+  
+  // TODO: Handle instruments and statistics criteria.
+  protected def filter(instruments: List[Instrument], statistics: List[InstrumentStatistic], jsonString: String) = {
+    jsonString
   }
 }

@@ -12,6 +12,6 @@ NOTE: If using the Eclipse distro, change "mortbay" to "eclipse" and
 -->
 
 <Configure class="org.mortbay.jetty.webapp.WebAppContext">
-  <Call class="org.mortbay.log.Log" name="debug"><Arg>executing jetty-web.xml</Arg></Call>
+  <!-- <Call class="org.mortbay.log.Log" name="debug"><Arg>executing jetty-web.xml</Arg></Call> -->
   <Set name="contextPath">/finance</Set>
 </Configure>
