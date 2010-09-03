@@ -4,14 +4,35 @@ $(document).ready(function () {
   $('.icon').click(function(){
     $('.banner').fadeIn('slow');
     $('.banner').fadeOut('slow');
-  });
-  $('.date-pick').datePicker({
-    clickInput: true,
-    startDate: '01/01/2010',
-    endDate: (new Date()).asString()
-  });
-  $('.date-pick').dpSetOffset(25,0);
+  })
+  $('.date-pick').datepicker({
+		showOn:          'button',
+    // buttonImage:     'images/calendar.png',
+		buttonImageOnly: true,    
+    // clickInput:      true,
+    dateFormat:      'mm/dd/yy',
+    startDate:       '01/01/1970',
+    endDate:         (new Date()).toString()
+  })
+  $('.date-pick').dpSetOffset(25,0)
+  console.log($('.date-pick').datePicker('option'))
+  
+  submitOnCarriageReturn($('.date-pick'), $('#master-toolbar'))
 });
+
+function submitOnCarriageReturn(elements, controlsParent) {
+  $(elements).keydown(function (e) {
+    var keyCode = e.keyCode || e.which;
+
+    if (keyCode == 13) {
+  		// If used a regular HTML form, we would "submit" it here:
+      //   $(this).parents('form').submit();
+      // But we use a programmatic approach...
+      serverControl('stats');
+      return false;
+    }
+  });
+}
 
 function writeDebug(string) {
   $("#debug").html(string);
@@ -41,10 +62,6 @@ function writeWarning(string, whichMessageSpan) {
 
 function writeInfo(string, whichMessageSpan) {
   writeMessage(string, "info", whichMessageSpan);
-}
-
-function getNext() {
-  sendRequest("results");
 }
 
 function onSuccess(jsonString) {
@@ -81,7 +98,10 @@ function onSuccess(jsonString) {
       }
     }
   }
-  setTimeout(getNext, 3000);
+  // Use for continuous polling. Adjust the anon. function as appropriate.
+  //  setTimeout(function() {
+  //   sendRequest("???");
+  // }, 3000);
 }
 
 function onError(request, textStatus, errorThrown) {
@@ -89,9 +109,17 @@ function onError(request, textStatus, errorThrown) {
 }
 
 function sendRequest(action) {
-  if (! keepPolling) return;
+  var toolbar = $.find('#master-toolbar')
+  var symbols = $(toolbar).find('#symbols').val()
+  var stats   = $(toolbar).find('.stats-option:selected').val()
+  var start   = $(toolbar).find('#start').val()
+  var end     = $(toolbar).find('#end').val()
   $.ajax({
-    url: "ajax/"+action,
+    url: "ajax/" + action + 
+         "/?symbols=" + encodeURI(symbols) +
+         "&stats=" + encodeURI(stats) +
+         "&start=" + encodeURI(start) +
+         "&end=" + encodeURI(end),
     method: 'GET',
     contentType: 'text/plain',
     dataType: 'text/plain',
@@ -104,8 +132,6 @@ function sendRequest(action) {
     }
   });
 }
-
-var keepPolling = true
 
 function serverControl(action) {
   var action2 = action;

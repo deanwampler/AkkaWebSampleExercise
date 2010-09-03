@@ -40,7 +40,7 @@ object InstrumentStatistic extends Logging {
   def apply(whichKind: String) = whichKind match {
     case Price.NAME_RE(name, currency) => Price(Currency(currency))
     case MovingAverage.NAME_RE(name, length) => MovingAverage(Integer.parseInt(length))
-    case _ => error("Unrecognized statistic kind: [" + whichKind + "]")
+    case _ => error("Unrecognized type of statistic: [" + whichKind + "]")
   }
   
   def makeInstrumentStatisticsList(names: String*): List[InstrumentStatistic] = 

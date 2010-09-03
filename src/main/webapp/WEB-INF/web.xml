@@ -15,13 +15,17 @@
   <servlet>
 		<servlet-name>AkkaServlet</servlet-name>
     <servlet-class>se.scalablesolutions.akka.comet.AkkaServlet</servlet-class>
+    <init-param>
+        <param-name>com.sun.jersey.config.property.packages</param-name>
+        <param-value>org.chicagoscala</param-value>
+    </init-param>
 	</servlet>
 
 	<servlet-mapping>
 		<servlet-name>AkkaServlet</servlet-name>
 		<url-pattern>/ajax/*</url-pattern>
 	</servlet-mapping>
-	
+
 </web-app>
 
 

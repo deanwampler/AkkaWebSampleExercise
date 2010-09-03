@@ -78,6 +78,8 @@ class RestfulDataPublisher extends Logging {
         """{"error": "One or both date time arguments are invalid: start = """ + start + ", end = " + end + ".\"}"
       case fte: FutureTimeoutException =>
         """{"error": "Actors timed out (""" + fte.getMessage + ").\"}"
+      case awsee: AkkaWebSampleExerciseException =>
+        """{"error": "Invalid input: """ + awsee.getMessage + ".\"}"
     }
   
   protected def futureToJSON(future: Future[_], messageForNone: String) = future.result match {
