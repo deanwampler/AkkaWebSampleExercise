@@ -1,21 +1,33 @@
 // JavaScript for the AkkaWebSampleExercise
 
+function setupDatePicker(){
+  Date.format = 'mm/dd/yyyy';
+  $(function(){
+    $('.date-pick').datePicker({
+      clickInput: true,
+      startDate:  '01/01/1970',
+      endDate:    (new Date()).asString()
+    });
+    $('.date-pick').dpSetOffset(25,0);
+  });
+}
+    
+
 $(document).ready(function () {
   $('.icon').click(function(){
     $('.banner').fadeIn('slow');
     $('.banner').fadeOut('slow');
   })
-  $('.date-pick').datepicker({
-		showOn:          'button',
-    // buttonImage:     'images/calendar.png',
-		buttonImageOnly: true,    
-    // clickInput:      true,
-    dateFormat:      'mm/dd/yy',
-    startDate:       '01/01/1970',
-    endDate:         (new Date()).toString()
-  })
-  $('.date-pick').dpSetOffset(25,0)
-  console.log($('.date-pick').datePicker('option'))
+  setupDatePicker()
+  // $('.date-pick').datepicker({
+  //    showOn:          'button',
+  //   // buttonImage:     'images/calendar.png',
+  //    buttonImageOnly: true,    
+  //   // clickInput:      true,
+  //   dateFormat:      'mm/dd/yy',
+  //   endDate:         (new Date()).toString()
+  // })
+  // $('.date-pick').dpSetOffset(25,0)
   
   submitOnCarriageReturn($('.date-pick'), $('#master-toolbar'))
 });

@@ -43,6 +43,22 @@ font.attribution {
   padding: 0.5em;
 }
 
+.rounded-corners {
+  -webkit-border-radius: 5px;  
+}
+.top-left-rounded-corners {
+  -webkit-border-top-left-radius:  5px;
+}
+.top-right-rounded-corners {
+  -webkit-border-top-right-radius: 5px;
+}
+.bottom-left-rounded-corners {
+  -webkit-border-bottom-left-radius:  5px;
+}
+.bottom-right-rounded-corners {
+  -webkit-border-bottom-right-radius: 5px;
+}
+
 div.banner {
   background-image: url("../images/scala-staircase.jpg");  
   background-repeat: no-repeat;
@@ -70,7 +86,7 @@ div.toolbar {
   text-align: middle;
   font-size: 1.0em;
   border: 1px solid gray;
-  background-color: #F9FDF9; /* same as legend above */
+  background-color: #DEEEDD;
   margin-top:  5px;
   margin-bottom:  5px;
   padding: 5px;
@@ -131,15 +147,15 @@ div.toolbar {
   padding: 5px;
 }
 
-.primes-table {
+.data-table {
   border: 1px gray solid;
   background-color: #E4FFDB;
 }
-.primes-head {
+.data-head {
   text-align: left;
   border-bottom: 1px gray solid;
 }
-.primes-row {
+.data-row {
   text-align: left;
   border-bottom: 1px gray solid;
 }
