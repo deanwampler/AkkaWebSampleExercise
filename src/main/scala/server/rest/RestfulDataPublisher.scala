@@ -74,12 +74,15 @@ class RestfulDataPublisher extends Logging {
       } yield futureToJSON(future, messageForNone)
       toJSON(jsons)
     } catch {
-      case iae: IllegalArgumentException => 
-        """{"error": "One or both date time arguments are invalid: start = """ + start + ", end = " + end + ".\"}"
+      case iae: CriteriaMap.InvalidTimeString => 
+        makeErrorString("", iae, instruments, stats, start, end)
       case fte: FutureTimeoutException =>
-        """{"error": "Actors timed out (""" + fte.getMessage + ").\"}"
+        makeErrorString("Actors timed out", fte, instruments, stats, start, end)
       case awsee: AkkaWebSampleExerciseException =>
-        """{"error": "Invalid input: """ + awsee.getMessage + ".\"}"
+        makeErrorString("Invalid input", awsee, instruments, stats, start, end)
+      case th: Throwable => 
+        makeErrorString("An unexpected problem occurred during processing the request", 
+          th, instruments, stats, start, end)
     }
   
   protected def futureToJSON(future: Future[_], messageForNone: String) = future.result match {
@@ -107,4 +110,10 @@ class RestfulDataPublisher extends Logging {
   // Extracted this logic into a method so it can be overridden in a "test double".
   protected def sendAndReturnFutures(criteria: CriteriaMap) = 
     instrumentAnalysisServerSupervisors map { _ !!! CalculateStatistics(criteria) }
+    
+  protected def makeErrorString(message: String, th: Throwable, 
+      instruments: String, stats: String, start: String, end: String) =
+    "{\"error\": \"" + (if (message.length > 0) (message + ". ") else "") + th.getMessage + ". Investment instruments = '" + 
+      instruments + "', statistics = '" + stats + "', start = '" + start + "', end = '" + end + "'.\"}"
+
 }

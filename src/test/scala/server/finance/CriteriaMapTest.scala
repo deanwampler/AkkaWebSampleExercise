@@ -31,9 +31,13 @@ class CriteriaMapTest extends FunSuite with ShouldMatchers {
       }
   }
 
-  def checkStart(cm: CriteriaMap, expected: DateTime) = cm.start should equal (expected)
+  // Some tests may be off by up to 10 milliseconds
+  def checkTime(actual: DateTime, expected: DateTime) =
+    (math.abs(actual.getMillis - expected.getMillis) < 10) should be (true)
 
-  def checkEnd(cm: CriteriaMap, expected: DateTime) = cm.end should equal (expected)
+  def checkStart(cm: CriteriaMap, expected: DateTime) = checkTime(cm.start, expected)
+
+  def checkEnd(cm: CriteriaMap, expected: DateTime) = checkTime(cm.end, expected)
   
   test ("withInstruments(String) adds a list of Instruments to a CriteriaMap") {
     val cm = CriteriaMap(Map()).withInstruments("a,b,c")
@@ -77,6 +81,16 @@ class CriteriaMapTest extends FunSuite with ShouldMatchers {
     cm.map.size should equal (1)
     checkStart(cm, new DateTime("2010-10-30"))
   }
+  test ("withStart(\"\") adds the current time as the start time to a CriteriaMap") {
+    val cm = CriteriaMap(Map()).withStart("")
+    cm.map.size should equal (1)
+    checkStart(cm, new DateTime())
+  }
+  test ("withStart(bogus string) throws an exception") {
+    intercept[CriteriaMap.InvalidTimeString] {
+      CriteriaMap(Map()).withStart("x")
+    }
+  }
   test ("withStart(Long) adds a start time to a CriteriaMap") {
     val cm = CriteriaMap(Map()).withStart(thenms)
     cm.map.size should equal (1)
@@ -92,6 +106,16 @@ class CriteriaMapTest extends FunSuite with ShouldMatchers {
     val cm = CriteriaMap(Map()).withEnd("2010-10-30")
     cm.map.size should equal (1)
     checkEnd(cm, new DateTime("2010-10-30"))
+  }
+  test ("withEnd(\"\") adds the current time as the end time to a CriteriaMap") {
+    val cm = CriteriaMap(Map()).withEnd("")
+    cm.map.size should equal (1)
+    checkEnd(cm, new DateTime())
+  }
+  test ("withEnd(bogus string) throws an exception") {
+    intercept[CriteriaMap.InvalidTimeString] {
+      CriteriaMap(Map()).withEnd("x")
+    }
   }
   test ("withEnd(Long) adds a end time to a CriteriaMap") {
     val cm = CriteriaMap(Map()).withEnd(thenms)

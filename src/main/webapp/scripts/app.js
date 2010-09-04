@@ -1,17 +1,36 @@
 // JavaScript for the AkkaWebSampleExercise
 
 function setupDatePicker(){
-  Date.format = 'mm/dd/yyyy';
-  $(function(){
-    $('.date-pick').datePicker({
-      clickInput: true,
-      startDate:  '01/01/1970',
-      endDate:    (new Date()).asString()
-    });
-    $('.date-pick').dpSetOffset(25,0);
+  Date.format = 'mm/dd/yyyy'
+  var today = (new Date()).asString()
+  $('.date-pick').datePicker({
+    clickInput:  true,
+    startDate:   '01/01/1970',
+    endDate:     today,
+    defaultDate: today
   });
+  $('.date-pick').dpSetOffset(25,0);
 }
-    
+
+function padLeft(s, l, c) {
+  s += '';
+  while (s.length < l) {
+    s = c + s;
+  }
+  return s;
+}
+
+function formatDate(date) {
+  return padLeft((date.getMonth() + 1), 2, '0') + "/" +
+    padLeft(date.getDate(), 2, '0') + "/" +
+    date.getFullYear()
+}
+
+function setupDefaultDates() {
+  var today = new Date()
+  $('.start').val(formatDate(today))
+  $('.end').val(formatDate(today))
+}
 
 $(document).ready(function () {
   $('.icon').click(function(){
@@ -19,16 +38,7 @@ $(document).ready(function () {
     $('.banner').fadeOut('slow');
   })
   setupDatePicker()
-  // $('.date-pick').datepicker({
-  //    showOn:          'button',
-  //   // buttonImage:     'images/calendar.png',
-  //    buttonImageOnly: true,    
-  //   // clickInput:      true,
-  //   dateFormat:      'mm/dd/yy',
-  //   endDate:         (new Date()).toString()
-  // })
-  // $('.date-pick').dpSetOffset(25,0)
-  
+  setupDefaultDates()
   submitOnCarriageReturn($('.date-pick'), $('#master-toolbar'))
 });
 

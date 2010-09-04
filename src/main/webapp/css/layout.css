@@ -89,15 +89,16 @@ div.toolbar {
   background-color: #DEEEDD;
   margin-top:  5px;
   margin-bottom:  5px;
-  padding: 5px;
-  height: 30px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
+  height: 28px;
 }
 
 .toolbar-control {
   float: left;
   vertical-align: middle;
   text-align: middle;
-  padding-top: 2px;
   padding-left: 5px;
   padding-right: 5px;
   margin: 2px;

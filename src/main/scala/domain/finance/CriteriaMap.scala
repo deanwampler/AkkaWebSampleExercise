@@ -68,17 +68,29 @@ class CriteriaMap(val map: Map[String, Any]) {
   protected def computeEndFromMillis(millis: Long) = 
     if (millis > 0) new DateTime(millis) else defaultEndTime
 
-  protected def makeDateTime(dateTimeString: String, makeFromMillis: Long => DateTime) = tryLong(dateTimeString) match {
-    case Some(millis) => makeFromMillis(millis)
-    case None => new DateTime(dateTimeString)
-  }
+  // TODO: Move this date time parsing to a separate Utils class.
+  protected def makeDateTime(dateTimeString: String, makeFromMillis: Long => DateTime): DateTime = 
+    (tryBlank(dateTimeString) orElse tryLong(dateTimeString, makeFromMillis) orElse tryDateTimeString(dateTimeString)) match {
+      case Some(dateTime) => dateTime
+      case None => throw CriteriaMap.InvalidTimeString(dateTimeString)
+    }
 
-  protected def tryLong(candidate: String): Option[Long] = try {
-    Some(java.lang.Long.parseLong(candidate))
+  protected def tryBlank(candidate: String): Option[DateTime] = candidate.trim match {
+    case "" => Some(new DateTime)
+    case _  => None
+  }
+  
+  protected def tryLong(candidate: String, makeFromMillis: Long => DateTime): Option[DateTime] = try {
+    Some(makeFromMillis(java.lang.Long.parseLong(candidate)))
   } catch {
     case ex => None
   }
   
+  protected def tryDateTimeString(candidate: String): Option[DateTime] = try {
+    Some(new DateTime(candidate))
+  } catch {
+    case ex => throw CriteriaMap.InvalidTimeString(candidate)
+  }
 }
 
 object CriteriaMap {
@@ -93,4 +105,6 @@ object CriteriaMap {
   
   def unapply(criteria: CriteriaMap): Option[UnapplyType] = 
     Some(Tuple4(criteria.instruments, criteria.statistics, criteria.start, criteria.end))
+    
+  case class InvalidTimeString(timeString: String) extends RuntimeException("Invalid date time string: "+timeString)
 }
