@@ -5,11 +5,11 @@ import se.scalablesolutions.akka.util.Logging
 
 trait ActorSupervision extends Actor { this:Logging =>
     
-  def getOrMakeActorFor(actorId: String)(makeActor: (String) => ActorRef): ActorRef = 
+  def getOrMakeActorFor(actorId: String)(makeActor: (String) => Actor): ActorRef = 
     ActorRegistry.actorsFor(actorId).toList match {
       case Nil => 
         log.info("Created new actor with id "+actorId+".")
-        val actorRef = makeActor(actorId)
+        val actorRef = actorOf(makeActor(actorId))
         actorRef.id = actorId
         actorRef.start
         log.info("Registering actor.")

@@ -14,7 +14,7 @@ import net.liftweb.json.JsonDSL._
 import org.joda.time._
 
 /**
- * DataStorageServer manages storage of time-oriented data, stored as JSON.
+ * DataStorageServer manages access to time-oriented data, stored as JSON.
  * TODO: Currently, the query capabilities are limited to date-time range queries.
  */
 class DataStorageServer(val service: String) extends Transactor with PingHandler with Logging {

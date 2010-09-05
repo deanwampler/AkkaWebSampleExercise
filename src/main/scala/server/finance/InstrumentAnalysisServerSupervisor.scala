@@ -63,7 +63,7 @@ class InstrumentAnalysisServerSupervisor extends Actor with ActorSupervision wit
   def getOrMakeInstrumentAnalysisServerFor(instrument: Instrument, statistic: InstrumentStatistic): Some[ActorRef] = {
     val newActorName = instrument.toString+":"+statistic.toString
     Some(getOrMakeActorFor(newActorName) {
-      name => actorOf(new InstrumentAnalysisServer(name))
+      name => new InstrumentAnalysisServer(name)
     })
   }  
 }
