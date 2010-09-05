@@ -13,6 +13,8 @@ import net.liftweb.json.JsonDSL._
 import javax.ws.rs._
 import org.joda.time._
 
+case object NoWorkersAvailable extends RuntimeException("No worker servers appear to be available!")
+
 @Path("/")
 class RestfulDataPublisher extends Logging {
    
@@ -66,16 +68,13 @@ class RestfulDataPublisher extends Logging {
   protected[rest] def getAllDataFor(instruments: String, stats: String, start: String, end: String): String = 
     try {
       val allCriteria = CriteriaMap().withInstruments(instruments).withStatistics(stats).withStart(start).withEnd(end)
-      val results = instrumentAnalysisServerSupervisors map { supervisor =>
-        (supervisor !! CalculateStatistics(allCriteria)) match {
-          case Some(x) => JSONMap.toJValue(x)
-          case None => JNothing
-        }
-      } reduceLeft (_ ++ _)
+      val results = getStatsFromInstrumentAnalysisServerSupervisors(allCriteria)
       val result = compact(render(JSONMap.toJValue(Map("financial-data" -> results))))
       log.info("financial data result = "+result)
       result
     } catch {
+      case NoWorkersAvailable =>
+        makeErrorString("", NoWorkersAvailable, instruments, stats, start, end)
       case iae: CriteriaMap.InvalidTimeString => 
         makeErrorString("", iae, instruments, stats, start, end)
       case fte: FutureTimeoutException =>
@@ -87,6 +86,17 @@ class RestfulDataPublisher extends Logging {
           th, instruments, stats, start, end)
     }
   
+  protected def getStatsFromInstrumentAnalysisServerSupervisors(allCriteria: CriteriaMap): JValue =
+    instrumentAnalysisServerSupervisors match {
+      case Nil => throw NoWorkersAvailable
+      case supervisors => supervisors map { supervisor =>
+        (supervisor !! CalculateStatistics(allCriteria)) match {
+          case Some(x) => JSONMap.toJValue(x)
+          case None => JNothing
+        }
+      } reduceLeft (_ ++ _)
+    }
+    
   protected def instrumentAnalysisServerSupervisors =
     ActorRegistry.actorsFor(classOf[InstrumentAnalysisServerSupervisor]).toList
   

@@ -88,7 +88,8 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
   // TODO: Handle instruments and statistics criteria.
   protected def filter(json: JValue): JValue = json
 
-  protected def formatPriceResults(
+  // Public for testing purposes.
+  def formatPriceResults(
       json: JValue, instruments: List[Instrument], statistics: List[InstrumentStatistic], start: Long, end: Long): JValue = {
     val results = json match {
       case JNothing => toJValue(Nil)  // Use an empty array as the result

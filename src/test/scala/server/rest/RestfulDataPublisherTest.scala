@@ -1,4 +1,5 @@
 package org.chicagoscala.awse.server.rest
+import org.chicagoscala.awse.util.json._
 import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.persistence.inmemory._
 import org.chicagoscala.awse.persistence._
@@ -34,44 +35,46 @@ class RestfulDataPublisherTest extends FunSuite
     JSONRecord(json)
   }
   
-  def makeJSON(list: List[JSONRecord]): JValue = list reduceLeft (_ ++ _) json
-  
   def makeJSONString(json: JValue): String = compact(render(json))
   
-  var expected: JValue = _
+  def makeJSON(list: List[JSONRecord]): JValue = list reduceLeft (_ ++ _) json
+
+  def makeExpected(result: JValue): JValue = JSONMap toJValue Map("financial-data" -> result)
+  
+  var returnedJSON: JValue = _
   var ias: ActorRef = _
   var restfulPublisher: RestfulDataPublisher = _
 
   override def beforeEach = {
     restfulPublisher = new RestfulDataPublisher {
-      override def sendAndReturnFutures(criteria: CriteriaMap) = {
+      override def instrumentAnalysisServerSupervisors = {
         val fake = actorOf(new Actor {
           def receive = {
-            case CalculateStatistics(x) => self.reply(expected)
+            case CalculateStatistics(x) => self.reply(returnedJSON)
           }
         }) 
         fake.start
-        List(fake !!! CalculateStatistics(criteria))
+        List(fake)
       }
     }
   }
   
   test ("getAllDataFor returns a JSON string containing all data when all data matches the query criteria") {
-    expected = makeJSON (List(js(0), js(3), js(2), js(4), js(1)))
-    restfulPublisher.getAllDataFor("A,B,C","price", "0", nowms.toString) should equal (makeJSONString(expected))
+    returnedJSON = makeJSON (List(js(0), js(3), js(2), js(4), js(1)))
+    restfulPublisher.getAllDataFor("A,B,C","price", "0", nowms.toString) should equal (makeJSONString(makeExpected(returnedJSON)))
   }
   
   test ("getAllDataFor returns a JSON string containing all data that matches the time criteria") {
     // Return all data for the specified time range, low (inclusive) to high (exclusive)
-    expected = makeJSON (List(js(3), js(2), js(4)))
+    returnedJSON = makeJSON (List(js(3), js(2), js(4)))
     restfulPublisher.getAllDataFor("A,B,C" , "price" , (thenms + 1000).toString, (thenms + 3001).toString) should equal (
-      makeJSONString(expected))
+      makeJSONString(makeExpected(returnedJSON)))
   }
   
   test ("The time criteria are inclusive for the earliest time and exclusive for the latest time") {
-    expected = makeJSON (List(js(3), js(2)))
+    returnedJSON = makeJSON (List(js(3), js(2)))
     restfulPublisher.getAllDataFor("A,B,C" , "price" , (thenms + 1000).toString, (thenms + 3000).toString) should equal (
-      makeJSONString(expected))
+      makeJSONString(makeExpected(returnedJSON)))
   }
   
   // TODO
@@ -91,13 +94,13 @@ class RestfulDataPublisherTest extends FunSuite
         """{"error": "Invalid date time string: y. Investment instruments = 'A,B,C', statistics = 'price', start = '2010-01-01', end = 'y'."}""")
   }
   
-  test ("getAllDataFor should return an error message is there are appear to be no data servers available") {
+  test ("getAllDataFor should return an error message is there are appear to be no worker servers available") {
     val restfulPublisherWithNoDataStorageServers = new RestfulDataPublisher {
-      override def sendAndReturnFutures(criteria: CriteriaMap) = Nil
+      override def instrumentAnalysisServerSupervisors = Nil
     }
 
     restfulPublisherWithNoDataStorageServers.getAllDataFor("A,B,C", "price", "0", "-1") should equal (
-      """{"error": "No data servers appear to be available."}""")
+      """{"error": "No worker servers appear to be available!. Investment instruments = 'A,B,C', statistics = 'price', start = '0', end = '-1'."}""")
   }
 
 }
