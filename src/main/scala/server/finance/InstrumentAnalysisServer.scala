@@ -16,6 +16,10 @@ import net.liftweb.json.JsonDSL._
 import org.chicagoscala.awse.util._
 import net.lag.logging.Level
 
+sealed trait InstrumentCalculationMessages
+
+case class CalculateStatistics(criteria: CriteriaMap) extends InstrumentCalculationMessages
+    
 class DataStorageNotAvailable(service: String) extends RuntimeException(
   "Could not get a DataStorageServer for "+service)
   
@@ -23,24 +27,20 @@ class DataStorageNotAvailable(service: String) extends RuntimeException(
  * InstrumentAnalysisServer is a worker that calculates (or simply fetches...) statistics for financial instruments.
  * It reads data from and writes results to a DataStorageServer, which it supervises.
  */
-class InstrumentAnalysisServer(val service: String) extends Transactor with ActorSupervision with ActorUtil with PingHandler with Logging {
+class InstrumentAnalysisServer(val service: String) extends Transactor 
+    with ActorSupervision with ActorUtil with PingHandler with Logging {
   
   val actorName = "InstrumentAnalysisServer("+service+")"
   
   /**
    * The message handler calls the "pingHandler" first. If it doesn't match on the
    * message (because it is a PartialFunction), then its own "defaultHandler" is tried,
-   * and finally "unrecognizedMessageHandler" (from the ActoruUtil trait) is tried.
+   * and finally "unrecognizedMessageHandler" (from the ActorUtil trait) is tried.
    */
   def receive = pingHandler orElse defaultHandler orElse unrecognizedMessageHandler
 
   def defaultHandler: PartialFunction[Any, Unit] = {
-
     case CalculateStatistics(criteria) => self.reply(helper.calculateStatistics(criteria))
-        
-    case message => 
-      log.debug(actorName + ": unexpected message: " + message)
-      self.reply(toJValue(Map("error" -> ("Unexpected message: "+message.toString+". Did you forgot to wrap it in a CalculateStatistics object?"))))
   }
   
   lazy val dataStorageServer = getOrMakeActorFor(service+"_data_storage_server") {
@@ -53,9 +53,9 @@ class InstrumentAnalysisServer(val service: String) extends Transactor with Acto
 }
 
 /**
- * A separate helper so we can decouple (most of) the actor-specific code and the logic it performs.
- * TODO: Handle instruments and statistics criteria.
- @ param dataStorageServer by-name parameter to make it lazy!
+ * A separate helper so we can decouple (most of) the actor-specific code 
+ * and the logic it performs, primarily when testing this code.
+ @ param dataStorageServer a by-name parameter so it is lazy!
  */
 class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
   
@@ -68,15 +68,14 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
 
   /**
    * Fetch the instrument prices between the time range. Must make a synchronous call to the data store server
-   * becuase clients calling this actor need a synchronous response.
-   * TODO: Handle instruments and statistics criteria.
+   * because clients calling this actor need a synchronous response.
+   * TODO: Ignores the instruments criteria. Fix!
    */
   protected def fetchPrices(
         instruments: List[Instrument], statistics: List[InstrumentStatistic], 
         start: DateTime, end: DateTime): JValue = {
     val startMillis = start.getMillis
     val endMillis   = end.getMillis
-    log.info("""dataStorageServer !!! Get(("start" -> """+startMillis+""") ~ ("end" -> """+endMillis+")))")
     (dataStorageServer !! Get(("start" -> startMillis) ~ ("end" -> endMillis))) match {
       case None => 
         Pair("warning", "Nothing returned for query (start, end) = (" + start + ", " + end + ")")
@@ -85,10 +84,13 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
     }
   }
   
-  // TODO: Handle instruments and statistics criteria.
+  /**
+   * A "hook" method that could be used to filter by instrument (and maybe statistics) criteria. 
+   * However, in general, it would be better to filter in the DB query itself!
+   */
   protected def filter(json: JValue): JValue = json
 
-  // Public for testing purposes.
+  // Public visibility, for testing purposes.
   def formatPriceResults(
       json: JValue, instruments: List[Instrument], statistics: List[InstrumentStatistic], start: Long, end: Long): JValue = {
     val results = json match {
@@ -100,7 +102,7 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
     fullResults
   }
   
-  // Extract and format the data so it's more convenient for the UI
+  /** Extract and format the data so it's more convenient when returned to the UI. */
   protected def toNiceFormat(instruments: List[Instrument], statistics: List[InstrumentStatistic], start: Long, end: Long): Map[String, Any] = 
     Map(
       "instruments" -> Instrument.toSymbolNames(instruments),

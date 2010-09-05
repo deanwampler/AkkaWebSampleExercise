@@ -17,6 +17,7 @@ import javax.servlet.ServletContextEvent
   *  </listener>
   * ...
   *</web-app>
+  * TODO: This was useful for Akka .8 and .9, but might be obsolete for 0.10.
   */ 
 class Initializer extends AkkaInitializer {
      

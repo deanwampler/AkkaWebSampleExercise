@@ -13,22 +13,19 @@ import org.joda.time._
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 
-sealed trait InstrumentCalculationMessages
-
-case class CalculateStatistics(criteria: CriteriaMap) extends InstrumentCalculationMessages
-    
 /**
  * Supervisor for InstrumentAnalysisServers. It also has methods that are called directly to
  * invoke InstrumentAnalysisServers to do calculations, return data, etc.
  */
-class InstrumentAnalysisServerSupervisor extends Actor with ActorSupervision with ActorUtil with PingHandler with Logging {
+class InstrumentAnalysisServerSupervisor extends Actor 
+    with ActorSupervision with ActorUtil with PingHandler with Logging {
   
   val actorName = "InstrumentAnalysisServerSupervisor"
 
   /**
    * The message handler calls "pingHandler" first. If it doesn't match on the message
    * (because it is a PartialFunction), then the "defaultHandler" is tried, and finally
-   * "unrecognizedMessageHandler" (from the ActoruUtil trait) is tried.
+   * "unrecognizedMessageHandler" (from the ActorUtil trait) is tried.
    */
   def receive = pingHandler orElse defaultHandler orElse unrecognizedMessageHandler
 
@@ -37,26 +34,21 @@ class InstrumentAnalysisServerSupervisor extends Actor with ActorSupervision wit
   }
   
   /**
-   * Ping the InstrumentAnalysisServers and return their response.
+   * Ping the InstrumentAnalysisServers (if any currently exist) and return their responses.
    */
-  override protected def subordinatesToPing: List[ActorRef] = {
-    println("ias? "+getAllInstrumentAnalysisServers)
+  override protected def subordinatesToPing: List[ActorRef] =
     getAllInstrumentAnalysisServers
-  }
     
   def getAllInstrumentAnalysisServers: List[ActorRef] = 
     ActorRegistry.actorsFor(classOf[InstrumentAnalysisServer]).toList
 
   def calculate (criteria: CriteriaMap) = {
-    log.debug("calling InstrumentAnalysisServer(s)....")
     val futures = for {
       instrument <- criteria.instruments
       statistic  <- criteria.statistics
       calculator <- getOrMakeInstrumentAnalysisServerFor(instrument, statistic)
     } yield (calculator !!! CalculateStatistics(criteria.withInstruments(instrument).withStatistics(statistic)))
-    log.debug("... now waiting on futures....")
     Futures.awaitAll(futures)
-    log.debug("... and we're back!")
     futuresToJSON(futures, "None!")
   }
   

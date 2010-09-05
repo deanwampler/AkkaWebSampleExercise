@@ -32,6 +32,7 @@ class RestfulDataPublisher extends Logging {
    *            The allowed date time formats include milliseconds (Long) and any date time string that can be parsed
    *            by JodaTime.
    *   ping:    Send a "ping" message to each actor and return the responses.
+   *   <other>  If any other message is received, an error response is returned.
    * @todo: It would be nice to use an HTML websocket to stream results to the browser more dynamically.
    * Consider also Atmosphere 6 and its JQuery plugin as an abstraction that supports
    * websockets, but can degrade to Comet, etc., when used with a browser-server combination that doesn't support
@@ -88,7 +89,7 @@ class RestfulDataPublisher extends Logging {
   
   protected def getStatsFromInstrumentAnalysisServerSupervisors(allCriteria: CriteriaMap): JValue =
     instrumentAnalysisServerSupervisors match {
-      case Nil => throw NoWorkersAvailable
+      case Nil => error(NoWorkersAvailable)
       case supervisors => supervisors map { supervisor =>
         (supervisor !! CalculateStatistics(allCriteria)) match {
           case Some(x) => JSONMap.toJValue(x)
@@ -100,10 +101,6 @@ class RestfulDataPublisher extends Logging {
   protected def instrumentAnalysisServerSupervisors =
     ActorRegistry.actorsFor(classOf[InstrumentAnalysisServerSupervisor]).toList
   
-  // Extracted this logic into a method so it can be overridden in a "test double".
-  protected def sendAndReturnFutures(criteria: CriteriaMap) = 
-    instrumentAnalysisServerSupervisors map { _ !!! CalculateStatistics(criteria) } toList
-    
   protected def makeErrorString(message: String, th: Throwable, 
       instruments: String, stats: String, start: String, end: String) =
     "{\"error\": \"" + (if (message.length > 0) (message + ". ") else "") + th.getMessage + ". Investment instruments = '" + 

@@ -3,6 +3,9 @@ import se.scalablesolutions.akka.actor._
 import se.scalablesolutions.akka.actor.Actor._
 import se.scalablesolutions.akka.util.Logging
 
+/**
+ * Methods to assist in the dynamic creation and supervision of subordinate actors.
+ */
 trait ActorSupervision extends Actor { this:Logging =>
     
   def getOrMakeActorFor(actorId: String)(makeActor: (String) => Actor): ActorRef = 

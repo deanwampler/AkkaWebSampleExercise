@@ -3,8 +3,14 @@ import se.scalablesolutions.akka.dispatch.{Future, Futures}
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 
+/**
+ * A trait to add "utility" methods to actors, such as extracting JSON from Futures.
+ */
 trait ActorUtil {
 
+  /**
+   * When an unknown message is received, return a uniform error message.
+   */
   def unrecognizedMessageHandler: PartialFunction[Any, Unit] = {
     case message => Pair("error", "Unrecognized message received: " + message)
   }
@@ -21,7 +27,7 @@ trait ActorUtil {
    }
    
   /**
-   * Process the result of an Actor future in a uniform way.
+   * Process the result of a single Actor future in a uniform way.
    */
   def futureToJSON(future: Future[_], messageForNone: String): JValue = future.result match {
     case Some(result) => result match {

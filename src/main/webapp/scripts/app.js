@@ -1,17 +1,5 @@
 // JavaScript for the AkkaWebSampleExercise
 
-function setupDatePicker(){
-  Date.format = 'mm/dd/yyyy'
-  var today = (new Date()).asString()
-  $('.date-pick').datePicker({
-    clickInput:  true,
-    startDate:   '01/01/1970',
-    endDate:     today,
-    defaultDate: today
-  });
-  $('.date-pick').dpSetOffset(25,0);
-}
-
 function padLeft(s, l, c) {
   s += '';
   while (s.length < l) {
@@ -81,10 +69,9 @@ function writeInfo(string, whichMessageSpan) {
 }
 
 function onSuccess(jsonString) {
+  $('.banner').fadeOut(2000);
   writeInfo("Response received")
-  console.log("onSuccess: "+jsonString)
   var json = $.parseJSON(jsonString)
-  console.log("json: "+json)
   if (json === null || json === undefined) {
     writeError("Invalid data returned by AJAX query: " + jsonString)
   } else if (json["message"]) {
@@ -109,7 +96,6 @@ function onSuccess(jsonString) {
   } else if (json["error"]) {
     writeInfo(json["error"])
   } else if (json["financial-data"]) {
-    console.log("Financial data returned.")
     // Plot the financial data. 
     // TODO: we more or less assume that there is really one instrument and
     // one statistic in each "row", because that's how the data is currently
@@ -131,10 +117,13 @@ function onSuccess(jsonString) {
       } else {
         $.each(results, function(j, result) {
           $("#finance-table tbody").append(
-            "<tr class='results-row'><tr><td>"+instruments+"</td><td>"+statistics+"</td><td>"+result+"</td></tr>")        
+            "<tr class='results-row'><td class='instruments'>" + instruments +
+            "</td><td class='statistics'>" + statistics + 
+            "</td><td class='results'>" + result + "</td></tr>")        
         })
       }
     })
+    setUpTableSorting()
     $('#finance-display').show()
   } else {
     writeError("Unexpected JSON returned. Listed below and also written to the JavaScript console")
@@ -148,8 +137,7 @@ function onSuccess(jsonString) {
 }
 
 function onError(request, textStatus, errorThrown) {
-  console.log("onError: "+request.responseText)
-  writeError("Ajax request failed: XMLHttpRequest="+request.responseText+", textStatus: "+textStatus+", errorThrown: "+errorThrown);
+  writeDebug("Ajax request failed: XMLHttpRequest="+request.responseText+", textStatus: "+textStatus+", errorThrown: "+errorThrown);
 }
 
 function sendRequest(action) {
@@ -161,7 +149,6 @@ function sendRequest(action) {
   $('#pong-display').hide()
   $('#finance-display').hide()
   
-  console.log("sending request for '"+action+"'.")
   $.ajax({
     url: "ajax/" + action + 
          "/?symbols=" + encodeURI(symbols) +
@@ -186,33 +173,40 @@ function serverControl(action) {
   sendRequest(action);
 }
 
-function intVal(textId) {
-  var text = $("#"+textId);
-  return parseInt(text.val(), 10);
+function setUpTableSorting() {
+  return // disabled until I can figure out a JS error that occurs.
+  $('table.tablesorter').tablesorter({
+    sortList:[[0,0], [1,0], [2,0]],
+    headers: { 
+       // disable some columns,
+       // 0: { sorter: false },
+    },
+    widgets:['zebra']
+  });  
+  
+  $("table.tablesorter").bind("sortStart", function() { 
+  }).bind("sortEnd",function(doc) {
+    // make sure the correct td's have the rounded corners.
+    $("table.tablesorter").find(".results-row > td").removeClass('bottom-left-rounded-corners').removeClass('bottom-right-rounded-corners'); 
+    $.each($("table.tablesorter"), function(index, table) {
+      var rows = $(table).find(".results-row")
+      var lastRow = rows[rows.size()-1]
+      $(lastRow).find('.instruments').addClass('bottom-left-rounded-corners')
+      $(lastRow).find('.results').addClass('bottom-right-rounded-corners')        
+    })
+  })  
 }
 
-function integerOnly(textId) {
-  if(intVal(textId) === NaN) {
-    alert("You must enter an integer.");
-  }
-}
-
-function fixMin(minId, maxId) {
-  var min = intVal(minId);
-  var max = intVal(maxId);
-  if (min > max) {
-    $("#"+minId).val(max-1);
-    alert("Resetting min value to "+(max-1));
-  }
-}
-
-function fixMax(minId, maxId) {
-  var min = intVal(minId);
-  var max = intVal(maxId);
-  if (min > max) {
-    $("#"+maxId).val(min+1);
-    alert("Resetting max value to "+(min+1));
-  }
+function setupDatePicker(){
+  Date.format = 'mm/dd/yyyy'
+  var today = (new Date()).asString()
+  $('.date-pick').datePicker({
+    clickInput:  true,
+    startDate:   '01/01/1970',
+    endDate:     today,
+    defaultDate: today
+  });
+  $('.date-pick').dpSetOffset(25,0);
 }
 
 $(document).ready(function () {
@@ -220,9 +214,10 @@ $(document).ready(function () {
     $('.banner').fadeIn('slow');
     $('.banner').fadeOut(2000);
   })
+  // Call the following each time the finance table is set up!
+  // setUpTableSorting()
   setupDatePicker()
   setupDefaultDates()
   submitOnCarriageReturn($('.date-pick'), $('#master-toolbar'))
-  $('.banner').fadeOut(2000);
 });
 

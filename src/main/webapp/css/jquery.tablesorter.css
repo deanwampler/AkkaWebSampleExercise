@@ -1,0 +1,17 @@
+table.tablesorter  th.header {
+  background-image: url(/images/asc_desc.gif);     
+  cursor: pointer; 
+  background-repeat: no-repeat; 
+  background-position: center right; 
+}
+
+table.tablesorter  th.headerSortUp { 
+    background-image: url(/images/asc.gif); 
+    background-color: #D1D2D5; 
+}
+
+table.tablesorter  th.headerSortDown { 
+    background-image: url(/images/desc.gif); 
+    background-color: #D1D2D5; 
+}
+

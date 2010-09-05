@@ -52,7 +52,6 @@ class MongoDBDataStore(
   }
   
   def range(from: Long, until: Long, maxNum: Int): Iterable[JSONRecord] = try {
-    // JSONRecord where { (JSONRecord.timestamp is_>= from) and (JSONRecord.timestamp is_< until) } sortBy JSONRecord.timestamp.ascending in collection
     val query = new BasicDBObject()
     query.put("timestamp", new BasicDBObject("$gte", from).append("$lt", until))
 

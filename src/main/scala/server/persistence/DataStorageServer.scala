@@ -103,13 +103,12 @@ object DataStorageServer extends Logging {
 
   import se.scalablesolutions.akka.config.Config.config
 
-  // protected def makeActor(actorName: String): Actor = new DataStorageServer(actorName)
-
   def getAllDataStorageServers: List[ActorRef] = 
     ActorRegistry.actorsFor(classOf[DataStorageServer]).toList 
 
   /**
-   * Instantiate the default type of datastore: an InMemoryDataStore with an upper limit on values.
+   * Instantiate the default type of datastore, based on the configuration setting in "akk.conf"
+   * or a system property. Defaults to MongoDB.
    */
   def makeDefaultDataStore(storeName: String): DataStore[JSONRecord] = {
     val db = System.getProperty("app.datastore.type", config.getString("app.datastore.type", "mongodb"))

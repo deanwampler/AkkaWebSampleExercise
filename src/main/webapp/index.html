@@ -9,6 +9,7 @@
     <link href='http://polyglotprogramming.com/images/scala-logo-small.png' rel='icon' type='image/png'/>     
     <link rel="stylesheet" type="text/css" href="css/ui-lightness/jquery-ui-1.7.2.custom.css">
     <link rel="stylesheet" type="text/css" href="css/jquery.notice.css">
+    <link rel="stylesheet" type="text/css" href="css/jquery.tablesorter.css">
     <link rel="stylesheet" type="text/css" href="http://static.jquery.com/ui/themeroller/app_css/app_screen.css" media="all" />
     <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.1/themes/base/jquery-ui.css" media="all" />
     <link rel="stylesheet" type="text/css" href="/themeroller/css/parseTheme.css.php?ctl=themeroller" media="all" />
@@ -32,6 +33,7 @@
     <script language="javascript" type="text/javascript" src="scripts/util/date.format.js"></script>
     <script language="javascript" type="text/javascript" src="scripts/util/date.js"></script>
     <script language="javascript" type="text/javascript" src="scripts/jquery/jquery.datePicker-2.1.2.js"></script>
+    <script language="javascript" type="text/javascript" src="scripts/jquery/jquery.tablesorter.min.js"></script>
     <script language="javascript" type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript" src="scripts/app.js"></script>
   </head>
@@ -57,9 +59,11 @@
     <div class='banner'></div>
     <div id='results-display'>
       <div id='finance-display' class='hidden'>
-        <table id='finance-table'>
+        <table id='finance-table' class='tablesorter rounded-corners'>
           <thead>
-            <tr class="finance-head"><th>Symbol</th><th>Stat</th><th>Value</th></tr>
+            <tr class="finance-head">
+              <th class='top-left-rounded-corners'>Symbol</th><th>Stat</th><th class='top-right-rounded-corners'>Value</th>
+            </tr>
           </thead>
           <tbody></tbody>
         </table>

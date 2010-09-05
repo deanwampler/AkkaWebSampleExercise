@@ -8,8 +8,8 @@ import com.mongodb._
 /**
  * A Utility that handles conversion between MongoDB JSON objects and JSONRecords.
  * @note I attempted to use scala-mongo-driver's protocol for wrapping DBObject, 
- * but it seems to only worked for fixed "schema" objects, not arbitrary maps, which
- * prefer to use (TODO -fix?).
+ * but it seems to only work for fixed "schema" objects, not arbitrary maps, which
+ * we prefer to use (TODO - fix?).
  */
 object MongoDBJSONRecord {
   

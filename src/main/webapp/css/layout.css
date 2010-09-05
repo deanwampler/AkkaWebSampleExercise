@@ -30,6 +30,21 @@ font.attribution {
   color: #576B4A;
 }
 
+table {
+  border:  1px solid gray;
+  padding: 0px;
+  background-color: #DEDEEE;
+}
+th {
+  border-bottom:  1px solid gray;
+  padding: 5px;
+  background-color: #EEE9E4;
+}
+td {
+  padding: 5px;
+  background-color: #F5F4E2;
+}
+
 .hidden {
   display: none;
 }
@@ -74,11 +89,6 @@ div.banner {
 div#finance-display {
 }
 div#pong-display {
-}
-#finance-table {
-  border:  1px solid gray;
-  padding: 5px;
-  background-color: #DEDEEE;
 }
 
 div.loading {
