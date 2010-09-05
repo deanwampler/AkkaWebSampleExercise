@@ -55,6 +55,10 @@ function appendDebug(string) {
   dbg.html(dbg.html() + "<br/>" + string);
 }
 
+function clearMessage() {
+  writeMessage("", "info")
+}
+
 function writeMessage(string, fontClass, whichMessageSpan) {
   var span = whichMessageSpan;
   if (! whichMessageSpan) {
@@ -77,6 +81,7 @@ function writeInfo(string, whichMessageSpan) {
 }
 
 function onSuccess(jsonString) {
+  writeInfo("Response received")
   console.log("onSuccess: "+jsonString)
   var json = $.parseJSON(jsonString)
   console.log("json: "+json)
