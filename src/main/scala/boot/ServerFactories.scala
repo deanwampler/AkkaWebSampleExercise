@@ -14,7 +14,7 @@ class BootAWSESupervisor {
     SupervisorConfig(
       RestartStrategy(OneForOne, 5, 5000, List(classOf[Throwable])),
     Supervise(
-      actorOf(new InstrumentAnalysisServerSupervisor),
+      actorOf(new InstrumentAnalysisServerSupervisor).start,
       LifeCycle(Permanent)) :: 
     Nil))
       

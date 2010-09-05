@@ -32,16 +32,6 @@ function setupDefaultDates() {
   $('.end').val(formatDate(today))
 }
 
-$(document).ready(function () {
-  $('.icon').click(function(){
-    $('.banner').fadeIn('slow');
-    $('.banner').fadeOut('slow');
-  })
-  setupDatePicker()
-  setupDefaultDates()
-  submitOnCarriageReturn($('.date-pick'), $('#master-toolbar'))
-});
-
 function submitOnCarriageReturn(elements, controlsParent) {
   $(elements).keydown(function (e) {
     var keyCode = e.keyCode || e.which;
@@ -87,38 +77,64 @@ function writeInfo(string, whichMessageSpan) {
 }
 
 function onSuccess(jsonString) {
-  var json = $.parseJSON(jsonString); 
-  if (json === null) {
-    writeError("Invalid data returned by AJAX query: " + jsonString);
+  console.log("onSuccess: "+jsonString)
+  var json = $.parseJSON(jsonString)
+  console.log("json: "+json)
+  if (json === null || json === undefined) {
+    writeError("Invalid data returned by AJAX query: " + jsonString)
   } else if (json["message"]) {
-    writeInfo(json["message"]);
-  } else if (json["ping replies"]) {
-    var replies ="["
-    for (var i=0; i<json["ping replies"].length; i++) {
-      replies += json["ping replies"][i]["pong"] + ", "
-    }
-    replies += "]"
-    writeInfo("Ping replies received from: " + replies);
+    writeInfo(json["message"])
+  } else if (json["pong"]) {
+    var pongList = $('#pong-list')
+    pongList.html('')
+    // TODO: Fix, the returned json is a doubly-nested array [[...]]
+    $.each($(json["pong"]), function(i, array) {
+      $.each(array, function(j, item) {
+        pongList.append("<li>" + item + "</li>")
+      })
+    })
+    $('#finance-display').hide()
+    $('#pong-display').show()
   } else if (json["info"]) {
     writeInfo(json["info"]);
   } else if (json["warn"]) {
-    writeWarning(json["warn"]);
+    writeWarning(json["warn"])
   } else if (json["warning"]) {
-    writeWarning(json["warning"]);
+    writeWarning(json["warning"])
   } else if (json["error"]) {
-    writeInfo(json["error"]);
-  } else {
-    // Plot the results data. 
-    // TODO: Note that we currently retrieve all data calculated, including data already retrieved.
-    $(".results-table").css("display", "table");
-    for (var i = 0; i < json.length; i++) {
-      var array = json[i];
-      for (var j = 0; j < array.length; j++) {
-        var row = array[j];
-        $(".results-table").append(
-          "<tr class='results-row'><tr><td>"+row["from"]+"</td><td>"+row["to"]+"</td><td>"+row["number-of-results"]+"</td></tr>");
+    writeInfo(json["error"])
+  } else if (json["financial-data"]) {
+    console.log("Financial data returned.")
+    // Plot the financial data. 
+    // TODO: we more or less assume that there is really one instrument and
+    // one statistic in each "row", because that's how the data is currently
+    // returned, with one-element arrays for the instruments and statistics.
+    $('#pong-display').hide()
+    $("#finance-table tbody").html('')
+    $.each(json["financial-data"], function(i, row) {
+      var criteria = row.criteria
+      var instruments = row.criteria.instruments
+      var statistics  = row.criteria.statistics
+      var results     = row.results
+      if (instruments.length > 1)
+        appendDebug("More than one instrument in the row! Assuming all data is for the first instrument...")
+      if (statistics.length > 1)
+        appendDebug("More than one statistic in the row! Assuming all data is for the first statistic...")
+      if (results.length === 0) {
+        $("#finance-table tbody").append(
+          "<tr class='results-row'><tr><td>"+instruments+"</td><td>"+statistics+"</td><td><b>No Data!</b></td></tr>")        
+      } else {
+        $.each(results, function(j, result) {
+          $("#finance-table tbody").append(
+            "<tr class='results-row'><tr><td>"+instruments+"</td><td>"+statistics+"</td><td>"+result+"</td></tr>")        
+        })
       }
-    }
+    })
+    $('#finance-display').show()
+  } else {
+    writeError("Unexpected JSON returned. Listed below and also written to the JavaScript console")
+    writeDebug("Unexpected JSON returned: "+json)
+    console.log(json)
   }
   // Use for continuous polling. Adjust the anon. function as appropriate.
   //  setTimeout(function() {
@@ -127,6 +143,7 @@ function onSuccess(jsonString) {
 }
 
 function onError(request, textStatus, errorThrown) {
+  console.log("onError: "+request.responseText)
   writeError("Ajax request failed: XMLHttpRequest="+request.responseText+", textStatus: "+textStatus+", errorThrown: "+errorThrown);
 }
 
@@ -136,6 +153,10 @@ function sendRequest(action) {
   var stats   = $(toolbar).find('.stats-option:selected').val()
   var start   = $(toolbar).find('#start').val()
   var end     = $(toolbar).find('#end').val()
+  $('#pong-display').hide()
+  $('#finance-display').hide()
+  
+  console.log("sending request for '"+action+"'.")
   $.ajax({
     url: "ajax/" + action + 
          "/?symbols=" + encodeURI(symbols) +
@@ -188,3 +209,15 @@ function fixMax(minId, maxId) {
     alert("Resetting max value to "+(min+1));
   }
 }
+
+$(document).ready(function () {
+  $('.icon').click(function(){
+    $('.banner').fadeIn('slow');
+    $('.banner').fadeOut(2000);
+  })
+  setupDatePicker()
+  setupDefaultDates()
+  submitOnCarriageReturn($('.date-pick'), $('#master-toolbar'))
+  $('.banner').fadeOut(2000);
+});
+

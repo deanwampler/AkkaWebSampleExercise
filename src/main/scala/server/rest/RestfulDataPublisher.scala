@@ -4,9 +4,12 @@ import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.server.finance._
 import org.chicagoscala.awse.domain.finance._
 import org.chicagoscala.awse.util._
+import org.chicagoscala.awse.util.json._
 import se.scalablesolutions.akka.actor._
 import se.scalablesolutions.akka.dispatch.{Future, Futures, FutureTimeoutException}
 import se.scalablesolutions.akka.util.Logging
+import net.liftweb.json.JsonAST._
+import net.liftweb.json.JsonDSL._
 import javax.ws.rs._
 import org.joda.time._
 
@@ -43,18 +46,15 @@ class RestfulDataPublisher extends Logging {
       @DefaultValue("")   @QueryParam("stats")   stats: String): String = 
     action match {
       case "ping" => 
-        try {
-          log.info("Pinging!!")
-          val futures = instrumentAnalysisServerSupervisors map { _ !!! Pair("ping", "You there??") }
-          Futures.awaitAll(futures)
-          val replyMessage = """{"ping replies": """ + handlePingReplies(futures) + "}"
-          log.info("Ping replies: " + replyMessage)
-          replyMessage
-        } catch {
-          case fte: FutureTimeoutException =>
-            """{"error": "Actors timed out (""" + fte.getMessage + ").\"}"
-        }
-        
+        log.info("Pinging actors...")
+        val results = for {
+          supervisor <- instrumentAnalysisServerSupervisors
+          result <- supervisor !! Ping("you there??")
+        } yield result
+        val result = compact(render(JSONMap.toJValue(Map("pong" -> results))))
+        log.info("ping result: "+result)
+        result
+
       case "stats" =>
         log.debug("Requesting statistics for instruments, stats, start, end = "+instruments+", "+stats+", "+start+", "+end)
         getAllDataFor(instruments, stats, start, end)
@@ -66,13 +66,15 @@ class RestfulDataPublisher extends Logging {
   protected[rest] def getAllDataFor(instruments: String, stats: String, start: String, end: String): String = 
     try {
       val allCriteria = CriteriaMap().withInstruments(instruments).withStatistics(stats).withStart(start).withEnd(end)
-      val futures = sendAndReturnFutures(allCriteria) 
-      Futures.awaitAll(futures)    // wait for all of them to reply.
-      val messageForNone = "No data available!"
-      val jsons = for {
-        future <- futures
-      } yield futureToJSON(future, messageForNone)
-      toJSON(jsons)
+      val results = instrumentAnalysisServerSupervisors map { supervisor =>
+        (supervisor !! CalculateStatistics(allCriteria)) match {
+          case Some(x) => JSONMap.toJValue(x)
+          case None => JNothing
+        }
+      } reduceLeft (_ ++ _)
+      val result = compact(render(JSONMap.toJValue(Map("financial-data" -> results))))
+      log.info("financial data result = "+result)
+      result
     } catch {
       case iae: CriteriaMap.InvalidTimeString => 
         makeErrorString("", iae, instruments, stats, start, end)
@@ -85,31 +87,12 @@ class RestfulDataPublisher extends Logging {
           th, instruments, stats, start, end)
     }
   
-  protected def futureToJSON(future: Future[_], messageForNone: String) = future.result match {
-    case Some(result) => result.toString
-    case None => "{\"error\": \"" + messageForNone + "\"}"
-  }
-
-  protected def toJSON(jsons: Iterable[String]) = jsons.size match {
-    case 0 => "{\"error\": \"No data servers appear to be available.\"}"
-    case _ => jsons.reduceLeft(_ + ", " + _)
-  }
-  
   protected def instrumentAnalysisServerSupervisors =
     ActorRegistry.actorsFor(classOf[InstrumentAnalysisServerSupervisor]).toList
   
-  protected def handlePingReplies(futures: Iterable[Future[_]]) = {
-    val messageForNone = "failed!"
-    val replies = for { future <- futures } yield futureToJSON(future, messageForNone)
-    replies.size match {
-      case 0 => "[]"
-      case _ => "[" + (replies reduceLeft (_ + ", " + _)) + "]"
-    }
-  }  
-  
   // Extracted this logic into a method so it can be overridden in a "test double".
   protected def sendAndReturnFutures(criteria: CriteriaMap) = 
-    instrumentAnalysisServerSupervisors map { _ !!! CalculateStatistics(criteria) }
+    instrumentAnalysisServerSupervisors map { _ !!! CalculateStatistics(criteria) } toList
     
   protected def makeErrorString(message: String, th: Throwable, 
       instruments: String, stats: String, start: String, end: String) =

@@ -34,12 +34,11 @@ class RestfulDataPublisherTest extends FunSuite
     JSONRecord(json)
   }
   
-  def makeJSONString(list: List[JSONRecord]) = {
-    val s = list reduceLeft (_ ++ _)
-    "[" + s.toJSONString + "]"
-  }
+  def makeJSON(list: List[JSONRecord]): JValue = list reduceLeft (_ ++ _) json
   
-  var expected: String = _
+  def makeJSONString(json: JValue): String = compact(render(json))
+  
+  var expected: JValue = _
   var ias: ActorRef = _
   var restfulPublisher: RestfulDataPublisher = _
 
@@ -58,19 +57,21 @@ class RestfulDataPublisherTest extends FunSuite
   }
   
   test ("getAllDataFor returns a JSON string containing all data when all data matches the query criteria") {
-    expected = makeJSONString (List(js(0), js(3), js(2), js(4), js(1)))
-    restfulPublisher.getAllDataFor("A,B,C","price", "0", nowms.toString) should equal (expected)
+    expected = makeJSON (List(js(0), js(3), js(2), js(4), js(1)))
+    restfulPublisher.getAllDataFor("A,B,C","price", "0", nowms.toString) should equal (makeJSONString(expected))
   }
   
   test ("getAllDataFor returns a JSON string containing all data that matches the time criteria") {
     // Return all data for the specified time range, low (inclusive) to high (exclusive)
-    expected = makeJSONString (List(js(3), js(2), js(4)))
-    restfulPublisher.getAllDataFor("A,B,C" , "price" , (thenms + 1000).toString, (thenms + 3001).toString) should equal (expected)
+    expected = makeJSON (List(js(3), js(2), js(4)))
+    restfulPublisher.getAllDataFor("A,B,C" , "price" , (thenms + 1000).toString, (thenms + 3001).toString) should equal (
+      makeJSONString(expected))
   }
   
   test ("The time criteria are inclusive for the earliest time and exclusive for the latest time") {
-    expected = makeJSONString (List(js(3), js(2)))
-    restfulPublisher.getAllDataFor("A,B,C" , "price" , (thenms + 1000).toString, (thenms + 3000).toString) should equal (expected)
+    expected = makeJSON (List(js(3), js(2)))
+    restfulPublisher.getAllDataFor("A,B,C" , "price" , (thenms + 1000).toString, (thenms + 3000).toString) should equal (
+      makeJSONString(expected))
   }
   
   // TODO

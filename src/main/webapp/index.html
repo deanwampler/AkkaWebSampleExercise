@@ -49,18 +49,26 @@
         Start: <input type="text" name="start" id="start" class="date-pick popup" />
         End: <input type="text" name="end" id="end" class="date-pick popup" />
         <input class="control" id="go" type="button" onclick="serverControl('stats');" value="Go!" />
-      </div>
-      <div class="toolbar-control with-right-border">
-        <input class="control" id="ping" type="button" onclick="serverControl('ping');" value="Ping!" />
+        &nbsp;
+        <input class="control" id="ping" type="button" onclick="serverControl('ping');" value="Ping!"/>
       </div>
       <div class="toolbar-control message-box" id="message"></div>
     </div>
     <div class='banner'></div>
-    <div id="results-div">
-      <table class="results-table" style="display:none;">
-        <tr class="results-head"><th>Date</th><th>Symbol</th><th>$</th></tr>
-      </table>
-    </div>
+    <div id='results-display'>
+      <div id='finance-display' class='hidden'>
+        <table id='finance-table'>
+          <thead>
+            <tr class="finance-head"><th>Symbol</th><th>Stat</th><th>Value</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div id='pong-display' class='hidden'>
+        <h2>Pong Received:</h2>
+        <ul id='pong-list'>
+        </ul>
+      </div>
     <div id="debug"></div>
   </body>
 </html>

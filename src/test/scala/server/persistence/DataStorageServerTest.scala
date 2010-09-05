@@ -22,7 +22,7 @@ class DataStorageServerTest extends FunSuite
   def makeJSONRecord(time: Long, value: String) = 
     JSONRecord(("timestamp" -> time) ~ ("value" -> value))
   
-  def makeJSONString(list: JSONRecord*) = (list reduceLeft (_ ++ _)) toJSONString
+  def makeJSON(list: JSONRecord*) = (list reduceLeft (_ ++ _)) json
 
   def makeGet(start: Long, end: Long) = Get(("start" -> start) ~ ("end" -> end))
   
@@ -68,32 +68,32 @@ class DataStorageServerTest extends FunSuite
   
   test("Get message should return an empty JSON string if there is no data") {
 
-    val response1: Option[String] = sendAndWait(makeGet(epochStart, now))
-    response1.get should equal ("{}")
+    val response1: Option[_] = sendAndWait(makeGet(epochStart, now))
+    response1.get should equal (JNothing)
   }
   
   test("Get message should return an empty JSON string if there is data, but none matches the Get time-range criteria") {
 
     populateDataStore(3)
-    val response3: Option[String] = sendAndWait(makeGet(thenms + 3000, thenms + 4000))
-    response3.get.toString should equal ("{}")
+    val response3: Option[_] = sendAndWait(makeGet(thenms + 3000, thenms + 4000))
+    response3.get should equal (JNothing)
   }
 
   test("Get message should return the one datum as a JSON string if there is one datum and it matches the Get time-range criteria") {
 
     populateDataStore(1)
-    val response2: Option[String] = sendAndWait(makeGet(epochStart, now))
-    response2.get.toString should equal (makeJSONString(makeJSONRecord(thenms, "value: 0")))
+    val response2: Option[_] = sendAndWait(makeGet(epochStart, now))
+    response2.get should equal (makeJSONRecord(thenms, "value: 0").json)
   }
       
   test("Get message should return all data as a single JSON string if there is more than one datum and all match the Get time-range criteria") {
 
     populateDataStore(3)
-    val response3: Option[String] = sendAndWait(makeGet(epochStart, now))
+    val response3: Option[_] = sendAndWait(makeGet(epochStart, now))
     response3 match {
       case None => fail()
       case Some(s) => 
-        s should equal (makeJSONString(
+        s should equal (makeJSON(
           makeJSONRecord(thenms,        "value: 0"),
           makeJSONRecord(thenms + 1000, "value: 1"),
           makeJSONRecord(thenms + 2000, "value: 2")))

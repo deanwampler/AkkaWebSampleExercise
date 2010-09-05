@@ -4,6 +4,7 @@ import org.chicagoscala.awse.persistence._
 import org.chicagoscala.awse.persistence.inmemory._
 import org.chicagoscala.awse.persistence.mongodb._
 import org.chicagoscala.awse.util._
+import org.chicagoscala.awse.util.json.JSONMap._
 import se.scalablesolutions.akka.actor._
 import se.scalablesolutions.akka.actor.Actor._
 import se.scalablesolutions.akka.stm.Transaction._
@@ -16,7 +17,7 @@ import org.joda.time._
  * DataStorageServer manages storage of time-oriented data, stored as JSON.
  * TODO: Currently, the query capabilities are limited to date-time range queries.
  */
-class DataStorageServer(val service: String) extends Actor with PingHandler with Logging {
+class DataStorageServer(val service: String) extends Transactor with PingHandler with Logging {
 
   val actorName = "DataStoreServer("+service+")"
 
@@ -24,7 +25,11 @@ class DataStorageServer(val service: String) extends Actor with PingHandler with
 
   log.info("Creating: "+actorName)
   
-  def receive = defaultHandler orElse pingHandler
+  /**
+   * The message handler calls its own "defaultHandler" first. If it doesn't match on the
+   * message (because it is a PartialFunction), then the "pingHandler" is tried.
+   */
+  def receive = pingHandler orElse defaultHandler 
   
   def defaultHandler: PartialFunction[Any, Unit] = {
 
@@ -39,20 +44,21 @@ class DataStorageServer(val service: String) extends Actor with PingHandler with
     case x => 
       val message = actorName + ": unknown message received: " + x
       log.info (message)
-      self.reply (("error", message))
+      self.reply (toJValue(Pair("error", message)))
   }
   
   // TODO: Support other query criteria besides time ranges.
-  protected[persistence] def getData(criteria: JValue) = {
+  protected[persistence] def getData(criteria: JValue): JValue = {
+    log.debug(actorName + ": GET starting...")
     val start = extractTime(criteria, "start", 0)
     val end   = extractTime(criteria, "end",   (new DateTime).getMillis)
     try {
       val data = for {
         json <- dataStore.range(start, end)
       } yield json
-      val result = toJSONString(data toList)
-      log.debug(actorName + ": GET returning response for start, end, size = " + 
-        start + ", " + end + ", " + result.size)
+      val result = toJSON(data toList)
+      log.debug(actorName + ": GET returning response for start, end = " + 
+        start + ", " + end)
       result
     } catch {
       case th => 
@@ -63,11 +69,10 @@ class DataStorageServer(val service: String) extends Actor with PingHandler with
   }
 
   protected[persistence] def putData(jsonRecord: JSONRecord) = {
-    log.info(actorName + " PUT: storing JSON: " + jsonShortStr(jsonRecord.toString))
-      
+    log.debug(actorName + " PUT: storing JSON: " + jsonShortStr(jsonRecord.toString))
     try {
       dataStore.add(jsonRecord)
-      Pair("message", "Put received and data storage started.")
+      toJValue(Pair("message", "Put received and data storage started."))
     } catch {
       case ex => 
         log.error(actorName + ": PUT: exception thrown while attempting to add JSON to the data store: "+jsonRecord)
@@ -84,9 +89,10 @@ class DataStorageServer(val service: String) extends Actor with PingHandler with
     case _ => default
   } 
 
-  protected def toJSONString(data: List[JSONRecord]): String = data.size match {
-    case 0 => "{}"
-    case _ => compact(render(data reduceLeft { _ ++ _ } json))
+  // TODO: Use JSONMap.toJValue instead.
+  protected def toJSON(data: List[JSONRecord]): JValue = data.size match {
+    case 0 => JNothing
+    case _ => data reduceLeft { _ ++ _ } json
   }
   
   private def jsonShortStr(jstr: String) = 
