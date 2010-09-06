@@ -85,10 +85,6 @@ The `Ping` button is a diagnostic tool. It checks whether or not the Akka "actor
 
 # TODO
 
-## Substitute a Different Problem Domain
-
-Instead of calculating primes, do something else. I considered building a distributed version of the recent Akka version of Clojure's "ants" demo. There are two Scala variants, [here](http://github.com/azzoti/ScalaAkkaAnts) and [here](http://github.com/pvlugter/ants). Try building a larger version of ants using distributed/clustered actors.
-
 ## Mine More of the Data
 
 Currently the app just returns price data. There are other items in the data files that can be exploited, and various analytics can be applied to the data.

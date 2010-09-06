@@ -32,11 +32,11 @@ object MongoDBJSONRecord {
 
   def iterToDBObject(iter: Iterable[Any]): DBObject = {
   	val dbl = new BasicDBList
-  	iter map { _ match {
+  	iter map {
   	  case map: Map[_,_] => dbl.add(mapToDBObject(map.asInstanceOf[Map[String,Any]]))
   		case iter2:Iterable[_] => dbl.add(iterToDBObject(iter2))
   		case x => dbl.add(otherToDBValue(x))
-  	}}
+  	}
   	dbl
   }
   

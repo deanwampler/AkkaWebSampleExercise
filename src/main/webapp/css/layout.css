@@ -82,6 +82,7 @@ div.banner {
   background-image: url("../images/scala-staircase.jpg");  
   background-repeat: no-repeat;
   background-position: center center;
+  vertical-align: top;
   width: 100%;
   height: 100%;
 }
