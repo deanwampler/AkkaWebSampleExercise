@@ -106,7 +106,7 @@ class InstrumentAnalysisServerTest extends FunSuite
 
   // TODO
   test ("calculateStatistics returns a JSON string containing all data that matches the instrument criteria") {
-    pending
+    // pending
     val criteria = makeCriteria("A","price", 0, nowms)
     val expected = makeExpected(makeJSON((List(js(0), js(1), js(2)))), criteria)
     analysisServer.calculateStatistics(criteria) should equal (expected)
