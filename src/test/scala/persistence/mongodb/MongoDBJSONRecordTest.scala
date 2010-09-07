@@ -47,7 +47,7 @@ class MongoDBJSONRecordTest extends FunSuite with ShouldMatchers with BeforeAndA
     val resultsData = (results(0).json \ "data").values
     val expectedData = Pair("data", data)
     resultsData should equal(expectedData)
-    // TODO: Should not return flosts for 1 elements in pairs in the data array!
+    // TODO: Should not return floats for the 1st elements in the pairs in the data array!
     (results(0).json \ "data").toJSONString should equal("\"data\":[[1.0,1.1],[2.0,2.2]]")
   }
   

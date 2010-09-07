@@ -19,10 +19,7 @@ import net.lag.logging.Level
 sealed trait InstrumentCalculationMessages
 
 case class CalculateStatistics(criteria: CriteriaMap) extends InstrumentCalculationMessages
-    
-class DataStorageNotAvailable(service: String) extends RuntimeException(
-  "Could not get a DataStorageServer for "+service)
-  
+      
 /**
  * InstrumentAnalysisServer is a worker that calculates (or simply fetches...) statistics for financial instruments.
  * It reads data from and writes results to a DataStorageServer, which it supervises.
