@@ -71,13 +71,11 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
   protected def fetchPrices(
         instruments: List[Instrument], statistics: List[InstrumentStatistic], 
         start: DateTime, end: DateTime): JValue = {
-    val startMillis = start.getMillis
-    val endMillis   = end.getMillis
-    (dataStorageServer !! Get(("start" -> startMillis) ~ ("end" -> endMillis))) match {
+    (dataStorageServer !! Get(("start" -> start) ~ ("end" -> end))) match {
       case None => 
         Pair("warning", "Nothing returned for query (start, end) = (" + start + ", " + end + ")")
       case Some(result) => 
-        formatPriceResults(filter(result), instruments, statistics, startMillis, endMillis)
+        formatPriceResults(filter(result), instruments, statistics, start, end)
     }
   }
   
@@ -89,7 +87,7 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
   
   // Public visibility, for testing purposes.
   def formatPriceResults(
-      json: JValue, instruments: List[Instrument], statistics: List[InstrumentStatistic], start: Long, end: Long): JValue = {
+      json: JValue, instruments: List[Instrument], statistics: List[InstrumentStatistic], start: DateTime, end: DateTime): JValue = {
     val results = json match {
       case JNothing => toJValue(Nil)  // Use an empty array as the result
       case x => x
@@ -99,7 +97,7 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
   }
   
   /** Extract and format the data so it's more convenient when returned to the UI. */
-  protected def toNiceFormat(instruments: List[Instrument], statistics: List[InstrumentStatistic], start: Long, end: Long): Map[String, Any] = 
+  protected def toNiceFormat(instruments: List[Instrument], statistics: List[InstrumentStatistic], start: DateTime, end: DateTime): Map[String, Any] = 
     Map(
       "instruments" -> Instrument.toSymbolNames(instruments),
       "statistics"  -> statistics,

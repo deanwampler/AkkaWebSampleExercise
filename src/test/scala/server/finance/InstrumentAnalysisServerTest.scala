@@ -47,7 +47,7 @@ class InstrumentAnalysisServerTest extends FunSuite
 
   def makeExpected(json: JValue, criteria: CriteriaMap) = 
     analysisServer.formatPriceResults(
-      json, criteria.instruments, criteria.statistics, criteria.start.getMillis, criteria.end.getMillis)
+      json, criteria.instruments, criteria.statistics, criteria.start, criteria.end)
   
   def sendAndWait(msg: Message): Option[String] = {
     answer = (driverActor !!! msg).await.result
@@ -57,13 +57,13 @@ class InstrumentAnalysisServerTest extends FunSuite
   def loadData = js.reverse foreach ((jsr: JSONRecord) => sendAndWait(Put(jsr)))
 
   var analysisServer: InstrumentAnalysisServerHelper = _
-  var testDataStore: InMemoryDataStore[JSONRecord] = _
+  var testDataStore: InMemoryDataStore = _
   var dss: ActorRef = _
   var driverActor: ActorRef = _
   var answer: Option[String] = None
 
   override def beforeEach = {
-    testDataStore = new InMemoryDataStore[JSONRecord]("testDataStore")
+    testDataStore = new InMemoryDataStore("testDataStore")
     dss = actorOf(new DataStorageServer("testService") {
       override lazy val dataStore = testDataStore 
     })

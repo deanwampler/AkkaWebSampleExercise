@@ -61,7 +61,7 @@ class InstrumentAnalysisServerSupervisor extends Actor
    *   1) The instrument resides in a DataStore whose name is given by the first letter of its trading symbol 
    *      (e.g., "A" for "APPL") and the "class" of statistic being calculated. For example, "A_prices".
    *   2) The actual format of timestamps in the JSON: i) The timestamp key is actually "date" and 2) the
-   *      format is actually a date string. (This is actually done in the companion object)
+   *      format is actually a date string. (This is handled in the companion object)
    */   
   def getOrMakeInstrumentAnalysisServerFor(instrument: Instrument, statistic: InstrumentStatistic): Some[ActorRef] = {
     val newActorName  = instrument.toString+":"+statistic.toString
@@ -79,22 +79,11 @@ object InstrumentAnalysisServerSupervisor {
   /**
    * Some global initializations:
    *   1) The key in the Mongo records for the timestamp is "date".
-   *   2) The timestamp values are actually date strings, not longs.
+   *   2) The timestamp values are date strings. (Handled by JSONRecord automatically)
    * @see InstrumentAnalysisServerSupervisor.getOrMakeInstrumentAnalysisServerFor
    */
   def init = {
     JSONRecord.timestampKey = "date"
-
-    // JSONRecord.timestampConverter = new JSONRecord.TimestampConverter[String] {
-    //   // The date (timestamp) values are actually strings, e.g., "2010-08-30".
-    //   val persistenceDateTimeFormat = DateTimeFormat.forPattern("yyyy-MM-dd")
-    //   def millisecondsToTimestamp(millis: Long): String = persistenceDateTimeFormat.print(new DateTime(millis))
-    //   def timestampToMilliseconds(ts: String): Long = new DateTime(ts).getMillis
-    //   def jValueTimestampToMilliseconds(jvts: JValue): Long = jvts match {
-    //     case JString(s) => timestampToMilliseconds(s)
-    //     case _ => throw new JSONRecord.InvalidJSONException(jvts)
-    //   }
-    // }
   }
 }
 

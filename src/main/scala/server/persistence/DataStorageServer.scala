@@ -50,8 +50,8 @@ class DataStorageServer(val service: String) extends Transactor with PingHandler
   // TODO: Support other query criteria besides time ranges.
   protected[persistence] def getData(criteria: JValue): JValue = {
     log.debug(actorName + ": GET starting...")
-    val start = extractTime(criteria, "start", 0)
-    val end   = extractTime(criteria, "end",   (new DateTime).getMillis)
+    val start = extractTime(criteria, "start", new DateTime(0))
+    val end   = extractTime(criteria, "end",   new DateTime)
     try {
       val data = for {
         json <- dataStore.range(start, end)
@@ -81,9 +81,10 @@ class DataStorageServer(val service: String) extends Transactor with PingHandler
     }
   }
 
-  protected def extractTime(json: JValue, key: String, default: => Long): Long = (json \ key) match {
+  protected def extractTime(json: JValue, key: String, default: => DateTime): DateTime = (json \ key) match {
     case JField(key, value) => value match {
-      case JInt(millis) => millis.longValue
+      case JInt(millis) => new DateTime(millis.toLong)
+      case JString(s) => new DateTime(s)
       case _ => default
     }
     case _ => default
@@ -110,14 +111,14 @@ object DataStorageServer extends Logging {
    * Instantiate the default type of datastore, based on the configuration setting in "akk.conf"
    * or a system property. Defaults to MongoDB.
    */
-  def makeDefaultDataStore(storeName: String): DataStore[JSONRecord] = {
+  def makeDefaultDataStore(storeName: String): DataStore = {
     val db = System.getProperty("app.datastore.type", config.getString("app.datastore.type", "mongodb"))
     if (db.toLowerCase.trim == "mongodb") {
       log.info("Using MongoDB-backed data storage.")
       new MongoDBDataStore(storeName)
     } else {
       log.info("Using in-memory data storage.")
-      new InMemoryDataStore[JSONRecord](storeName)
+      new InMemoryDataStore(storeName)
     }
   }
 }

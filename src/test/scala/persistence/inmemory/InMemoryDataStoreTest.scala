@@ -6,10 +6,10 @@ import org.joda.time._
 
 class InMemoryDataStoreTest extends DataStoreTestBase with BeforeAndAfterEach {
 
-  type DS = InMemoryDataStore[JSONRecord]
+  type DS = InMemoryDataStore
   var dataStore: DS = _
   
   override def beforeEach {
-    dataStore = new InMemoryDataStore[JSONRecord]("testStore")
+    dataStore = new InMemoryDataStore("testStore")
   }
 }

@@ -7,11 +7,11 @@ import net.liftweb.json.JsonDSL._
 
 abstract class DataStoreTestBase extends FunSuite with ShouldMatchers {
 
-  type DS <: DataStore[JSONRecord]
+  type DS <: DataStore
 
   var dataStore: DS
   
-  def makeTR(timestamp: Long, value: Long) = new JSONRecord(("timestamp" -> timestamp) ~ ("value" -> value))
+  def makeTR(timestamp: Long, value: Long) = JSONRecord(("timestamp" -> timestamp) ~ ("value" -> value))
     
   val start = (new DateTime).getMillis
 
@@ -91,10 +91,16 @@ abstract class DataStoreTestBase extends FunSuite with ShouldMatchers {
     populateDataStore(100, 0)
     val range = dataStore.range(-1L, 101L).toList
     range.size should equal (100)
-    range.foreach { rec => rec equalsIgnoringId makeTR(rec.timestamp, (rec.timestamp*10L)) should be (true) }
+    range.foreach { rec => 
+      val ts = rec.timestamp.getMillis
+      rec equalsIgnoringId makeTR(ts, (ts*10L)) should be (true) 
+    }
     val range2 = dataStore.range(-100L, 200L).toList
     range2.size should equal (100)
-    range2.foreach { rec => rec equalsIgnoringId makeTR(rec.timestamp, (rec.timestamp*10L)) should be (true) }
+    range2.foreach { rec => 
+      val ts = rec.timestamp.getMillis
+      rec equalsIgnoringId makeTR(ts, (ts*10L)) should be (true) 
+    }
   }
   
   test("range returns an empty equence if the start is >= the end") {

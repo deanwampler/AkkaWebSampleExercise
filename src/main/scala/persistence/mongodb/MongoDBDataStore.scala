@@ -18,7 +18,7 @@ class MongoDBDataStore(
     val dataBaseName: String      = MongoDBDataStore.MONGODB_SERVER_DBNAME,
     val hostName: String          = MongoDBDataStore.MONGODB_SERVER_HOSTNAME,
     val port: Int                 = MongoDBDataStore.MONGODB_SERVER_PORT)
-      extends DataStore[JSONRecord] with Logging {
+      extends DataStore with Logging {
 
   lazy val name = collectionName
   
@@ -29,7 +29,8 @@ class MongoDBDataStore(
   // already exists. So, we catch it and call getCollection.
   lazy val collection = try {
     val coll = dataBase.createCollection(collectionName, Map.empty[String,Any])  // options
-    coll ensureIndex Map(JSONRecord.timestampKey -> 1)
+    // We setup indices when we create the collections; otherwise, do this:
+    // coll ensureIndex Map(JSONRecord.timestampKey -> 1)
     coll asScala
   } catch {
     case ex: MongoException => 

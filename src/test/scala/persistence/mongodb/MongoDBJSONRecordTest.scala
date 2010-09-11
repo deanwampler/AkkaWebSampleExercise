@@ -18,10 +18,10 @@ class MongoDBJSONRecordTest extends FunSuite with ShouldMatchers with BeforeAndA
       ("data" -> JArray(List(JArray(List(JInt(1L),JDouble(1.1))), JArray(List(JInt(2L),JDouble(2.2)))))))
   val recordMap = JSONRecord(map)
   
-  var dataStore: InMemoryDataStore[JSONRecord] = _
+  var dataStore: InMemoryDataStore = _
 
   override def beforeEach = {
-    dataStore = new InMemoryDataStore[JSONRecord]("testColl_testDb")
+    dataStore = new InMemoryDataStore("testColl_testDb")
   }
   
   test ("JSONRecords written to a data store and retrieved have valid timestamps") {

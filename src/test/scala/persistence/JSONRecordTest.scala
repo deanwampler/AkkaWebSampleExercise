@@ -9,7 +9,8 @@ import net.liftweb.json.JsonAST._
 
 class JSONRecordTest extends FunSuite with ShouldMatchers with BeforeAndAfterEach {
   
-  val now     = (new DateTime).getMillis
+  val nowDT   = new DateTime
+  val now     = nowDT.getMillis
   val data    = List(List(1L, 1.1), List(2L, 2.2))
   val jdata   = new java.util.ArrayList[java.util.ArrayList[AnyVal]]
   val jdata0  = new java.util.ArrayList[AnyVal]
@@ -31,10 +32,13 @@ class JSONRecordTest extends FunSuite with ShouldMatchers with BeforeAndAfterEac
   val recordJSON = JSONRecord(("timestamp" -> BigInt(now)) ~ recordJSONData)
   val recordMap = JSONRecord(map)  
   val jRecordJSON = JSONRecord(jmap)
-  var dataStore: InMemoryDataStore[JSONRecord] = _
+  var dataStore: InMemoryDataStore = _
 
   override def beforeEach = {
-    dataStore = new InMemoryDataStore[JSONRecord]("testColl_testDb")
+    dataStore = new InMemoryDataStore("testColl_testDb")
+  }
+  override def afterEach = {
+    JSONRecord.timestampKey = JSONRecord.defaultTimestampKey  // reset
   }
   
   
@@ -44,7 +48,13 @@ class JSONRecordTest extends FunSuite with ShouldMatchers with BeforeAndAfterEac
     }
   }
   
-  test ("Attempting to create a JSONRecord with an invalid timestamp field throws an exception") {
+  test ("Attempting to create a JSONRecord with a timestamp field that isn't a Long or String throws an exception") {
+    intercept[JSONRecord.UnsupportedTimestampTypeException] {
+      JSONRecord (("timestamp" -> false) ~ recordJSONData )
+    }
+  }
+  
+  test ("Attempting to create a JSONRecord with an invalid timestamp string throws an exception") {
     intercept[JSONRecord.InvalidJSONException] {
       JSONRecord (("timestamp" -> "invalid") ~ recordJSONData )
     }
@@ -53,27 +63,12 @@ class JSONRecordTest extends FunSuite with ShouldMatchers with BeforeAndAfterEac
   test ("The name of the timestamp key can be changed globally by setting JSONRecord.timestampKey") {
     JSONRecord.timestampKey = "foobar"
     val jr = JSONRecord (("foobar" -> BigInt(now)) ~ recordJSONData ) // no exception thrown and...
-    jr.timestamp should equal (now)
-    JSONRecord.timestampKey = JSONRecord.defaultTimestampKey  // reset
+    jr.timestamp should equal (nowDT)
   }
-  
-  // test ("The format of the timestamp value can be changed globally by setting JSONRecord.timestampConverter") {
-  //   JSONRecord.timestampConverter = new TimestampConverter[String] {
-  //     def millisecondsToTimestamp(millis: Long): String = millis.toString
-  //     def timestampToMilliseconds(ts: String): Long = java.lang.Long.parseValue(ts)
-  //     def jValueTimestampToMilliseconds(jvts: JValue): Long = jvts match {
-  //       case JString(s) => timestampToMilliseconds(s)
-  //       case _ => throw new JSONRecord.InvalidJSONException(jvts)
-  //     }
-  //   }
-  //   val jr = JSONRecord(("timestamp" -> now.toString) ~ recordJSONData)
-  //   jr.timestamp should equal (now)
-  //   JSONRecord.timestampConverter = JSONRecord.defaultTimestampConverter  // reset
-  // }
   
   test ("The name of the timestamp key defaults to 'timestamp'") {
     val jr = JSONRecord (("timestamp" -> BigInt(now)) ~ recordJSONData )
-    jr.timestamp should equal (now)
+    jr.timestamp should equal (nowDT)
   }
   
   test ("JSONRecords written to a data store and retrieved have valid timestamps") {
