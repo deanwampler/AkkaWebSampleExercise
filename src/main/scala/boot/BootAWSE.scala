@@ -9,7 +9,11 @@ import se.scalablesolutions.akka.config.ScalaConfig._
 import se.scalablesolutions.akka.config.OneForOneStrategy
 import se.scalablesolutions.akka.util.Logging
 
-class BootAWSESupervisor {
+class BootAWSE {
+
+  // Some global initialization:
+  InstrumentAnalysisServerSupervisor.init
+  
   val factory = SupervisorFactory(
     SupervisorConfig(
       RestartStrategy(OneForOne, 5, 5000, List(classOf[Throwable])),

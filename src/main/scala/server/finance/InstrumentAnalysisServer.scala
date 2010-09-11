@@ -24,7 +24,7 @@ case class CalculateStatistics(criteria: CriteriaMap) extends InstrumentCalculat
  * InstrumentAnalysisServer is a worker that calculates (or simply fetches...) statistics for financial instruments.
  * It reads data from and writes results to a DataStorageServer, which it supervises.
  */
-class InstrumentAnalysisServer(val service: String) extends Transactor 
+class InstrumentAnalysisServer(val service: String, val dataStoreName: String) extends Transactor 
     with ActorSupervision with ActorUtil with PingHandler with Logging {
   
   val actorName = "InstrumentAnalysisServer("+service+")"
@@ -41,7 +41,7 @@ class InstrumentAnalysisServer(val service: String) extends Transactor
   }
   
   lazy val dataStorageServer = getOrMakeActorFor(service+"_data_storage_server") {
-    name => new DataStorageServer(name)
+    name => new DataStorageServer(dataStoreName)
   }
   
   override protected def subordinatesToPing: List[ActorRef] = List(dataStorageServer)

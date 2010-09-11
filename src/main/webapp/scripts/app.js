@@ -9,15 +9,16 @@ function padLeft(s, l, c) {
 }
 
 function formatDate(date) {
-  return padLeft((date.getMonth() + 1), 2, '0') + "/" +
-    padLeft(date.getDate(), 2, '0') + "/" +
-    date.getFullYear()
+  return date.getFullYear() + "-" +
+    padLeft((date.getMonth() + 1), 2, '0') + "-" +
+    padLeft(date.getDate(), 2, '0')
 }
 
 function setupDefaultDates() {
   var today = new Date()
-  $('.start').val(formatDate(today))
-  $('.end').val(formatDate(today))
+  $('#start').val(formatDate(today))
+  $('#end').val(formatDate(today))
+  console.log($('#start').val())
 }
 
 function submitOnCarriageReturn(elements, controlsParent) {
@@ -198,11 +199,11 @@ function setUpTableSorting() {
 }
 
 function setupDatePicker(){
-  Date.format = 'mm/dd/yyyy'
+  Date.format = 'yyyy-mm-dd'
   var today = (new Date()).asString()
   $('.date-pick').datePicker({
     clickInput:  true,
-    startDate:   '01/01/1970',
+    startDate:   '1970-01-01',
     endDate:     today,
     defaultDate: today
   });

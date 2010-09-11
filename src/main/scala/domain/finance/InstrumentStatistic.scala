@@ -60,6 +60,16 @@ object Price {
   val NAME_RE = """^\s*([pP]rice(?:\[([^\]]+)\])?)\s*$""".r
 }
 
+case class Dividend(currency: Currency = Dollars) extends InstrumentStatistic {
+  
+  override def toString = "dividend[" + currency + "]"
+}
+object Dividend {
+  // The 2nd (optional) capture group is the name or symbol of the currency.
+  // (Note there is a noncapturing group outside the 2nd group.)
+  val NAME_RE = """^\s*([dD]ividend(?:\[([^\]]+)\])?)\s*$""".r
+}
+
 case class MovingAverage(length: Int) extends InstrumentStatistic {
   
   override def toString = length + "-day moving average"

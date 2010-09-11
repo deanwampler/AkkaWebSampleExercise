@@ -29,7 +29,7 @@ class MongoDBDataStore(
   // already exists. So, we catch it and call getCollection.
   lazy val collection = try {
     val coll = dataBase.createCollection(collectionName, Map.empty[String,Any])  // options
-    coll ensureIndex Map("timestamp" -> 1)
+    coll ensureIndex Map(JSONRecord.timestampKey -> 1)
     coll asScala
   } catch {
     case ex: MongoException => 
@@ -38,9 +38,6 @@ class MongoDBDataStore(
   }
   
   def add(record: JSONRecord): Unit = collection << record
-  
-  // def map[T](f: JSONRecord => T) = 
-  //   collection map { dbo => f(JSONRecord(dbo.toMap)) } toIterable
   
   def getAll() = cursorToRecords(collection.find())
 
@@ -53,9 +50,9 @@ class MongoDBDataStore(
   
   def range(from: Long, until: Long, maxNum: Int): Iterable[JSONRecord] = try {
     val query = new BasicDBObject()
-    query.put("timestamp", new BasicDBObject("$gte", from).append("$lt", until))
+    query.put(JSONRecord.timestampKey, new BasicDBObject("$gte", from).append("$lt", until))
 
-    val cursor = collection.find(query).sort(new BasicDBObject("timestamp", 1))
+    val cursor = collection.find(query).sort(new BasicDBObject(JSONRecord.timestampKey, 1))
     if (cursor.count > maxNum)
       cursorToRecords(cursor.skip(cursor.count - maxNum).limit(maxNum))
     else

@@ -24,6 +24,8 @@ object FinanceJSONConverter {
   implicit def statisticToJSON(statistic: InstrumentStatistic): JValue = statistic match {
     case Price(currency) => 
       Map("price" -> Map("currency" -> currency.toString))
+    case Dividend(currency) => 
+      Map("dividend" -> Map("currency" -> currency.toString))
     case MovingAverage(length) => 
       Map("moving average" -> Map("length" -> length))
   }

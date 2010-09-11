@@ -94,6 +94,10 @@ It's a bit messy and in your face. Lot's of room for code cleanup here!
 
 # Notes
 
+## Global Configuration
+
+Many global configuration properties are set in `src/main/resources/akka.conf`. Some more complex global configuration items are setup in `src/main/scala/boo/ServerFactories.scala`.
+
 ## Persistence Options
 
 There are two data persistence options, MongoDB and an in-memory hash map. Currently, MongoDB is really the only supported option, because of the need to import the data into some form of persistent storage first.

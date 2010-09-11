@@ -9,13 +9,8 @@ import net.liftweb.json.JsonParser.parse
  */
 case class JSONRecord(json: JValue) extends RecordWithTimestamp {
   
-  val timestamp = (for { 
-    JField("timestamp", JInt(timestamp)) <- json
-  } yield timestamp.toLong) toList match {
-    case Nil => throw JSONRecord.InvalidJSONException(json)
-    case head :: tail => head
-  }
-  
+  val timestamp = determineTimestamp(json)
+
   /**
    * Convert the JSON object to a Map. To avoid problems where longs get converted to
    * doubles by Mongo, we convert any BigInts to longs.
@@ -50,13 +45,47 @@ case class JSONRecord(json: JValue) extends RecordWithTimestamp {
     case bi: BigInt => bi.longValue
     case _ => x
   }
+
+  protected def determineTimestamp(json: JValue) = try {
+    (for { 
+      JField(key, JInt(timestamp)) <- json
+      if key == JSONRecord.timestampKey
+    } yield timestamp.toLong) toList match {
+      case Nil => throw JSONRecord.InvalidJSONException(json)
+      case head :: tail => head
+    }
+  } catch {
+    case th => println("th: "+th); throw th
+  }
 }
 
 object JSONRecord {
 
   case class InvalidJSONException(json: JValue) extends RuntimeException(
-    "JSON must have a timestamp key-value: "+compact(render(json)))
+    "JSON must have a valid " + timestampKey + " key-value: " + compact(render(json)))
 
+  // Should this key and the following functions really be public? In a widely used 
+  // public API, probably not, but in our restricted usage, the overhead of tighter
+  // encapsulation isn't really that valuable.
+  val defaultTimestampKey = "timestamp"
+  var timestampKey = defaultTimestampKey
+  
+  // trait TimestampConverter[TS] {
+  //   def millisecondsToTimestamp(millis: Long): TS
+  //   def timestampToMilliseconds(ts: TS): Long
+  //   def jValueTimestampToMilliseconds(jvts: JValue): Long
+  // }
+  // // Essentially an identity operator
+  // val defaultTimestampConverter:TimestampConverter[Any] = new TimestampConverter[Long] {
+  //   def millisecondsToTimestamp(millis: Long) = millis
+  //   def timestampToMilliseconds(ts: Long) = ts 
+  //   def jValueTimestampToMilliseconds(jvts: JValue): Long = jvts match {
+  //     case JInt(value) => value.toLong
+  //     case _ => throw new InvalidJSONException(jvts)
+  //   }
+  // }  
+  // var timestampConverter:TimestampConverter[Any] = defaultTimestampConverter
+  
   // This apply is added automatically by the case class declaration:
   // def apply(json: JValue): JSONRecord = new JSONRecord(json)
   def apply[K,V](map: Map[K,V]): JSONRecord = new JSONRecord(map)
