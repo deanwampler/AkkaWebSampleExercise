@@ -65,7 +65,7 @@ class DataStoreTest extends FunSuite with ShouldMatchers with BeforeAndAfterEach
     checkEach(0, range)
   }
     
-  test("range returns an empty equence if the start is >= the end") {
+  test("range returns an empty sequence if the start is >= the end") {
     populateDataStore(100)
     for (n <- List(0L, 10L, 99L)) {
       val range1 = dataStore.range(new DateTime(n), new DateTime(n))

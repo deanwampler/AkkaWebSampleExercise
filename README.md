@@ -96,7 +96,7 @@ It's a bit messy and in your face. Lot's of room for code cleanup here!
 
 ## Global Configuration
 
-Many global configuration properties are set in `src/main/resources/akka.conf`. Some more complex global configuration items are setup in `src/main/scala/boo/ServerFactories.scala`.
+Many global configuration properties are set in `src/main/resources/akka.conf`. Some more complex global configuration items are setup in `src/main/scala/boot/BootAWSE.scala` and  `src/main/scala/server/finance/InstrumentAnalysisServerSupervisor.scala`.
 
 ## Persistence Options
 

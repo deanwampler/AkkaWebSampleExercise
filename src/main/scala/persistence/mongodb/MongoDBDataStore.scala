@@ -49,9 +49,10 @@ class MongoDBDataStore(
     case Some(dbo) => Some(JSONRecord(dbo.toMap))
   }
   
-  def range(from: Long, until: Long, maxNum: Int): Iterable[JSONRecord] = try {
+  def range(from: DateTime, until: DateTime, maxNum: Int): Iterable[JSONRecord] = try {
     val query = new BasicDBObject()
-    query.put(JSONRecord.timestampKey, new BasicDBObject("$gte", from).append("$lt", until))
+    query.put(JSONRecord.timestampKey, 
+              new BasicDBObject("$gte", dateTimeToAnyValue(from)).append("$lt", dateTimeToAnyValue(until)))
 
     val cursor = collection.find(query).sort(new BasicDBObject(JSONRecord.timestampKey, 1))
     if (cursor.count > maxNum)
@@ -71,6 +72,13 @@ class MongoDBDataStore(
     }
     buff
   }
+  
+  /**
+   * Convert a DateTime to whatever type is actually used in the data records.
+   * This implementation converts the input DateTime to milliseconds. 
+   * Subclasses can transform the input DateTime as appropriate.
+   */
+  protected def dateTimeToAnyValue(dateTime: DateTime): Any = dateTime.getMillis
 }
 
 object MongoDBDataStore extends Logging {

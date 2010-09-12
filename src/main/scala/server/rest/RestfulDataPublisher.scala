@@ -25,8 +25,8 @@ class RestfulDataPublisher extends Logging {
    *   stats:   Calculate and return statistics for financial instruments, subject to the URL options: 
    *              ?start=long&end=long&symbols=i1,i1,...&stats=s1,s2,...
    *            where
-   *              "start"   is the starting date time, inclusive (default: earliest available).
-   *              "end"     is the ending date time, inclusive (default: latest available).
+   *              "start"   is the starting date, inclusive (default: earliest available).
+   *              "end"     is the ending date, inclusive (default: latest available).
    *              "symbols" is the comma-separated list of instruments by "symbol" to analyze (default: all available).
    *              "stats"   is the comma-separated list of statistics to calculate (default: all available).
    *            The allowed date time formats include milliseconds (Long) and any date time string that can be parsed

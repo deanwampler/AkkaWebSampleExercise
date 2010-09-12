@@ -1,6 +1,8 @@
 package org.chicagoscala.awse.server.finance
 import org.chicagoscala.awse.util.json._
 import org.chicagoscala.awse.persistence._
+import org.chicagoscala.awse.persistence.inmemory._
+import org.chicagoscala.awse.persistence.mongodb._
 import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.domain.finance._
@@ -18,11 +20,11 @@ import net.liftweb.json.JsonDSL._
 /**
  * Supervisor for InstrumentAnalysisServers. It also has methods that are called directly to
  * invoke InstrumentAnalysisServers to do calculations, return data, etc.
- * Also, this class is where we embed knowledge about how the data on instruments and statistics is 
- * structured and how processing of that data is distributed among InstrumentAnalysisServer.
+ * Also, this class and its companion are where we embed knowledge about how the data 
+ * on instruments and statistics is structured and how processing of that data is 
+ * distributed among InstrumentAnalysisServer, etc.
  */
-class InstrumentAnalysisServerSupervisor extends Actor 
-    with ActorSupervision with ActorUtil with PingHandler with Logging {
+class InstrumentAnalysisServerSupervisor extends Actor with ActorFactory with ActorUtil with PingHandler with Logging {
   
   val actorName = "InstrumentAnalysisServerSupervisor"
 
@@ -57,11 +59,10 @@ class InstrumentAnalysisServerSupervisor extends Actor
   }
   
   /**
-   * Where we embed the knowledge described in the class comments above:
-   *   1) The instrument resides in a DataStore whose name is given by the first letter of its trading symbol 
-   *      (e.g., "A" for "APPL") and the "class" of statistic being calculated. For example, "A_prices".
-   *   2) The actual format of timestamps in the JSON: i) The timestamp key is actually "date" and 2) the
-   *      format is actually a date string. (This is handled in the companion object)
+   * Where we embed some of the knowledge described in the class comments above. Specifically, the
+   * instrument resides in a DataStore whose name is given by the first letter of its trading symbol 
+   * (e.g., "A" for "APPL") and the "class" of statistic being calculated. For example, "A_prices".
+   * Also, the timestamp values are date strings. (Handled by JSONRecord automatically)
    */   
   def getOrMakeInstrumentAnalysisServerFor(instrument: Instrument, statistic: InstrumentStatistic): Some[ActorRef] = {
     val newActorName  = instrument.toString+":"+statistic.toString
@@ -70,20 +71,42 @@ class InstrumentAnalysisServerSupervisor extends Actor
       case _ => "prices"
     })
     Some(getOrMakeActorFor(newActorName) {
-      name => new InstrumentAnalysisServer(name, dataStoreName)
+      name => new InstrumentAnalysisServer(
+        name, InstrumentAnalysisServerSupervisor.dataStorageServerFactory(dataStoreName))
     })
   }  
 }
 
+/**
+ * Encodes some global features:
+ *   1) The key in the Mongo records for the timestamp is "date".
+ *   2) The values for the timestamp are strings of form "yyyy-MM-dd".
+ * @see InstrumentAnalysisServerSupervisor.getOrMakeInstrumentAnalysisServerFor
+ */
 object InstrumentAnalysisServerSupervisor {
-  /**
-   * Some global initializations:
-   *   1) The key in the Mongo records for the timestamp is "date".
-   *   2) The timestamp values are date strings. (Handled by JSONRecord automatically)
-   * @see InstrumentAnalysisServerSupervisor.getOrMakeInstrumentAnalysisServerFor
-   */
+
   def init = {
     JSONRecord.timestampKey = "date"
   }
-}
+  
+  def dataStorageServerFactory(storeName: String): ActorRef = {
+    import se.scalablesolutions.akka.config.Config.config
 
+    val dataStoreKind = System.getProperty("app.datastore.type", config.getString("app.datastore.type", "mongodb"))
+    val dataStore = if (dataStoreKind.toLowerCase.trim == "mongodb") {
+      log.info("Using MongoDB-backed data storage.")
+      new MongoDBDataStore(storeName) {
+        // We actually store DateTimes as Date strings.
+        val format = DateTimeFormat.forPattern("yyyy-MM-dd")
+        
+        override protected def dateTimeToAnyValue(dateTime: DateTime): Any = format.print(dateTime)
+      }
+    } else {
+      log.info("Using in-memory data storage.")
+      new InMemoryDataStore(storeName) // always uses DateTime for queries
+    }
+    val ref = actorOf(new DataStorageServer(storeName+"_server", dataStore))
+    ref.id = storeName+"_server"
+    ref
+  }
+}

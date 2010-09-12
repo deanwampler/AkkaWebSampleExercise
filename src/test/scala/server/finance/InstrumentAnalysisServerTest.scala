@@ -64,9 +64,7 @@ class InstrumentAnalysisServerTest extends FunSuite
 
   override def beforeEach = {
     testDataStore = new InMemoryDataStore("testDataStore")
-    dss = actorOf(new DataStorageServer("testService") {
-      override lazy val dataStore = testDataStore 
-    })
+    dss = actorOf(new DataStorageServer("testService", testDataStore))
     analysisServer = new InstrumentAnalysisServerHelper(dss) 
     driverActor = actorOf(new Actor {
       def receive = {

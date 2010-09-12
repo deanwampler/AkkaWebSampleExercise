@@ -23,11 +23,16 @@ case class CalculateStatistics(criteria: CriteriaMap) extends InstrumentCalculat
 /**
  * InstrumentAnalysisServer is a worker that calculates (or simply fetches...) statistics for financial instruments.
  * It reads data from and writes results to a DataStorageServer, which it supervises.
+ * It is parameterized by the type of the date time values used as timestamps.
+ * TODO: The relationship and management of these servers, DataStorageServers and DataStores is
+ * convoluted and messy. Refactor...
  */
-class InstrumentAnalysisServer(val service: String, val dataStoreName: String) extends Transactor 
-    with ActorSupervision with ActorUtil with PingHandler with Logging {
+class InstrumentAnalysisServer(val service: String, dataStorageServer: => ActorRef) extends Transactor 
+    with ActorUtil with ActorFactory with PingHandler with Logging {
   
   val actorName = "InstrumentAnalysisServer("+service+")"
+  
+  manageNewActor(dataStorageServer)
   
   /**
    * The message handler calls the "pingHandler" first. If it doesn't match on the
@@ -38,10 +43,6 @@ class InstrumentAnalysisServer(val service: String, val dataStoreName: String) e
 
   def defaultHandler: PartialFunction[Any, Unit] = {
     case CalculateStatistics(criteria) => self.reply(helper.calculateStatistics(criteria))
-  }
-  
-  lazy val dataStorageServer = getOrMakeActorFor(service+"_data_storage_server") {
-    name => new DataStorageServer(dataStoreName)
   }
   
   override protected def subordinatesToPing: List[ActorRef] = List(dataStorageServer)

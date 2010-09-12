@@ -47,9 +47,7 @@ class DataStorageServerTest extends FunSuite
   
   override def beforeEach = {
     testDataStore = new InMemoryDataStore("testDataStore")
-    dss = actorOf(new DataStorageServer("testService") {
-      override lazy val dataStore = testDataStore 
-    })
+    dss = actorOf(new DataStorageServer("testService", testDataStore))
     driverActor = actorOf(new Actor {
       def receive = {
         case msg => (dss !!! msg).await.result match {

@@ -12,15 +12,17 @@ import org.joda.time._
  */
 class InMemoryDataStore(val name: String) extends DataStore with Logging {
 
-  var store = SortedMap[Long, JSONRecord]()
+  implicit val dateTimeOrdering = new scala.math.Ordering[DateTime] {
+    def compare(dt1: DateTime, dt2: DateTime) = dt1 compareTo dt2
+  }
   
-  def add(item: JSONRecord): Unit = store += item.timestamp.getMillis -> item
+  var store = SortedMap[DateTime, JSONRecord]()
+  
+  def add(item: JSONRecord): Unit = store += Pair(item.timestamp, item)
     
-  // def map[T](f: Record => T) = store map f
-  
   def getAll() = store map {p => p._2}
   
-  def range(from: Long, until: Long, maxNum: Int): Iterable[JSONRecord] = 
+  def range(from: DateTime, until: DateTime, maxNum: Int): Iterable[JSONRecord] = 
     store.range(from, until).map(p => p._2).take(maxNum).toIterable
   
   def size: Long = store.size
