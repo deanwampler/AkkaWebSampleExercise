@@ -112,9 +112,13 @@ Currently the app just returns closing price data. There are other items in the 
 
 How does the performance scale up, especially any analytics, if you use Akka's support for clustering?
 
-## Clean up the JSON Handling
+## Clean Up the JSON Handling
 
 It's a bit messy and in your face in the server code. Lot's of room for code cleanup and encapsulation here!
+
+## Clean Up the MongoDB-related Code
+
+In `MongoDBDataStore.scala`, which interacts with MongoDB, there is a mixture of `mongo-scala-driver` code and the standard Mongo Java driver. This could be cleaned up substantially. For example, the newer [Casbah](http://github.com/novus/casbah) API looks promising.
 
 # Notes
 
