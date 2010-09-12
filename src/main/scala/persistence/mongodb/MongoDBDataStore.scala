@@ -53,7 +53,7 @@ class MongoDBDataStore(
     val query = new BasicDBObject()
     query.put(JSONRecord.timestampKey, 
               new BasicDBObject("$gte", dateTimeToAnyValue(from)).append("$lt", dateTimeToAnyValue(until)))
-
+    log.error("MongoDB query: "+query)
     val cursor = collection.find(query).sort(new BasicDBObject(JSONRecord.timestampKey, 1))
     if (cursor.count > maxNum)
       cursorToRecords(cursor.skip(cursor.count - maxNum).limit(maxNum))

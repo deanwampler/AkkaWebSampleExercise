@@ -23,9 +23,8 @@ trait ActorFactory { this: Actor with Logging =>
 
   def manageNewActor(actorRef: ActorRef): ActorRef = {
     actorRef.start
-    log.info("Registering actor.")
+    log.info("Registering actor: "+actorRef.id)
     self link actorRef
-    log.info("Returning new actor.")
     actorRef
   }
 }

@@ -27,7 +27,7 @@ case class CalculateStatistics(criteria: CriteriaMap) extends InstrumentCalculat
  * TODO: The relationship and management of these servers, DataStorageServers and DataStores is
  * convoluted and messy. Refactor...
  */
-class InstrumentAnalysisServer(val service: String, dataStorageServer: => ActorRef) extends Transactor 
+class InstrumentAnalysisServer(val service: String, dataStorageServer: ActorRef) extends Transactor 
     with ActorUtil with ActorFactory with PingHandler with Logging {
   
   val actorName = "InstrumentAnalysisServer("+service+")"

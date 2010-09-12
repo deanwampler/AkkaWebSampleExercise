@@ -105,8 +105,9 @@ object InstrumentAnalysisServerSupervisor {
       log.info("Using in-memory data storage.")
       new InMemoryDataStore(storeName) // always uses DateTime for queries
     }
-    val ref = actorOf(new DataStorageServer(storeName+"_server", dataStore))
-    ref.id = storeName+"_server"
+    val id = storeName+"_data_storage_server"
+    val ref = actorOf(new DataStorageServer(id, dataStore))
+    ref.id = id
     ref
   }
 }
