@@ -53,8 +53,8 @@ class MongoDBDataStore(
     val query = new BasicDBObject()
     query.put(JSONRecord.timestampKey, 
               new BasicDBObject("$gte", dateTimeToAnyValue(from)).append("$lt", dateTimeToAnyValue(until)))
-    log.error("MongoDB query: "+query)
     val cursor = collection.find(query).sort(new BasicDBObject(JSONRecord.timestampKey, 1))
+    log.info("db name: query, cursor.count, maxNum: "+collection.getFullName+", "+query+", "+cursor.count+", "+maxNum)
     if (cursor.count > maxNum)
       cursorToRecords(cursor.skip(cursor.count - maxNum).limit(maxNum))
     else
@@ -82,9 +82,10 @@ class MongoDBDataStore(
 }
 
 object MongoDBDataStore extends Logging {
-  val MONGODB_SERVER_HOSTNAME = config.getString("akka.storage.mongodb.hostname", "127.0.0.1")
-  val MONGODB_SERVER_DBNAME = config.getString("akka.storage.mongodb.dbname", "statistics")
-  val MONGODB_SERVER_PORT = config.getInt("akka.storage.mongodb.port", 27017)
+  val mongodbConfigPrefix = "akka.remote.server.server.client.storage.mongodb"
+  val MONGODB_SERVER_HOSTNAME = config.getString(mongodbConfigPrefix+".hostname", "127.0.0.1")
+  val MONGODB_SERVER_DBNAME = config.getString(mongodbConfigPrefix+".dbname", "statistics")
+  val MONGODB_SERVER_PORT = config.getInt(mongodbConfigPrefix+".port", 27017)
   
   def getDb(
       dbName: String   = MONGODB_SERVER_DBNAME,

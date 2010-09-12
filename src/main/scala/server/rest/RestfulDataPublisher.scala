@@ -71,7 +71,7 @@ class RestfulDataPublisher extends Logging {
       val allCriteria = CriteriaMap().withInstruments(instruments).withStatistics(stats).withStart(start).withEnd(end)
       val results = getStatsFromInstrumentAnalysisServerSupervisors(allCriteria)
       val result = compact(render(JSONMap.toJValue(Map("financial-data" -> results))))
-      log.info("financial data result = "+result)
+      log.info("financial data result = "+result.substring(0,100)+"...")
       result
     } catch {
       case NoWorkersAvailable =>

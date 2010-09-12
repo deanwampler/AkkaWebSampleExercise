@@ -17,11 +17,14 @@
     <link rel="stylesheet" type="text/css" href="css/layout.css"> 
     
     <script language="javascript" type="text/javascript" src="scripts/jquery/jquery-1.4.2.min.js"></script>
+    <script language="javascript" type="text/javascript" src="scripts/jquery/ui.core.js"></script>
+    <script language="javascript" type="text/javascript" src="scripts/jquery/jquery.metadata.js"></script>
     <script language="javascript" type="text/javascript" src="scripts/jquery/jquery-ui-1.7.2.custom.min.js"></script>
     <script language="javascript" type="text/javascript" src="scripts/jquery/jquery.cookie.js"></script>
     <script language="javascript" type="text/javascript" src="scripts/jquery/jquery.layout-latest.js"></script>
     <script language="javascript" type="text/javascript" src="scripts/jquery/jquery.md5.js"></script>
     <script language="javascript" type="text/javascript" src="scripts/jquery/jquery.notice.js"></script>
+    
     <script language="javascript" type="text/javascript" src="scripts/jquery/jquery.dump.js"></script>
 <!-- Flot is a graphing library for real-time data. Might use it... 
     <script language="javascript" type="text/javascript" src="scripts/flot/jquery.flot.js"></script>
@@ -43,13 +46,13 @@
     <div class="toolbar rounded-corners" id="master-toolbar">
       <div class="toolbar-control icon with-right-border" id="master-toolbar-img"></div>
       <div class="toolbar-control">
-        Symbols:&nbsp;<input class="control popup" id="symbols" type="text" alt="comma or space separated list of symbols" value="APPL, MSOFT" />
+        Symbols:&nbsp;<input class="control popup symbols submit-on-CR" id="symbols" type="text" alt="comma or space separated list of symbols" value="AA, BA" />
         Statistics:
         <select name="stats" id="stats" class="stats">
           <option class='stats-option' value='price'>Closing Price</option> 
         </select>
-        Start: <input type="text" name="start" id="start" class="date-pick popup" />
-        End: <input type="text" name="end" id="end" class="date-pick popup" />
+        Start: <input type="text" name="start" id="start" class="date-pick popup submit-on-CR" />
+        End: <input type="text" name="end" id="end" class="date-pick popup submit-on-CR" />
         <input class="control" id="go" type="button" onclick="serverControl('stats');" value="Go!" />
         <input class="control" id="ping" type="button" onclick="serverControl('ping');" value="Ping!"/>
         <input class="control" id="unknown" type="button" onclick="serverControl('bogus');" value="Bogus"/>
@@ -62,7 +65,7 @@
         <table id='finance-table' class='tablesorter rounded-corners'>
           <thead>
             <tr class="finance-head">
-              <th class='top-left-rounded-corners'>Symbol</th><th>Stat</th><th class='top-right-rounded-corners'>Value</th>
+              <th class='top-left-rounded-corners'>Symbol</th><th>Date</th><th class='top-right-rounded-corners'>Value</th>
             </tr>
           </thead>
           <tbody></tbody>

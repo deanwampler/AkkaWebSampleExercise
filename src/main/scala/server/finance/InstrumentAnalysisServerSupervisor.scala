@@ -65,8 +65,8 @@ class InstrumentAnalysisServerSupervisor extends Actor with ActorFactory with Ac
    * Also, the timestamp values are date strings. (Handled by JSONRecord automatically)
    */   
   def getOrMakeInstrumentAnalysisServerFor(instrument: Instrument, statistic: InstrumentStatistic): Some[ActorRef] = {
-    val newActorName  = instrument.toString+":"+statistic.toString
-    val dataStoreName = instrument.toString.charAt(0).toUpper + "_" + (statistic match {
+    val newActorName  = instrument.symbol+":"+statistic.toString
+    val dataStoreName = instrument.symbol.charAt(0).toUpper + "_" + (statistic match {
       case d: Dividend => "dividends"
       case _ => "prices"
     })
@@ -94,7 +94,7 @@ object InstrumentAnalysisServerSupervisor {
 
     val dataStoreKind = System.getProperty("app.datastore.type", config.getString("app.datastore.type", "mongodb"))
     val dataStore = if (dataStoreKind.toLowerCase.trim == "mongodb") {
-      log.info("Using MongoDB-backed data storage.")
+      log.info("Using MongoDB-backed data storage. name = "+storeName)
       new MongoDBDataStore(storeName) {
         // We actually store DateTimes as Date strings.
         val format = DateTimeFormat.forPattern("yyyy-MM-dd")
@@ -102,7 +102,7 @@ object InstrumentAnalysisServerSupervisor {
         override protected def dateTimeToAnyValue(dateTime: DateTime): Any = format.print(dateTime)
       }
     } else {
-      log.info("Using in-memory data storage.")
+      log.info("Using in-memory data storage. name = "+storeName)
       new InMemoryDataStore(storeName) // always uses DateTime for queries
     }
     val id = storeName+"_data_storage_server"

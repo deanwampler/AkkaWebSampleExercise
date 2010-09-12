@@ -18,7 +18,6 @@ function setupDefaultDates() {
   var today = new Date()
   $('#start').val(formatDate(today))
   $('#end').val(formatDate(today))
-  console.log($('#start').val())
 }
 
 function submitOnCarriageReturn(elements, controlsParent) {
@@ -71,7 +70,7 @@ function writeInfo(string, whichMessageSpan) {
 
 function onSuccess(jsonString) {
   $('.banner').fadeOut(2000);
-  writeInfo("Response received")
+  writeInfo("Response received...")
   var json = $.parseJSON(jsonString)
   if (json === null || json === undefined) {
     writeError("Invalid data returned by AJAX query: " + jsonString)
@@ -105,26 +104,31 @@ function onSuccess(jsonString) {
     $("#finance-table tbody").html('')
     $.each(json["financial-data"], function(i, row) {
       var criteria = row.criteria
-      var instruments = row.criteria.instruments
-      var statistics  = row.criteria.statistics
-      var results     = row.results
-      if (instruments.length > 1)
-        appendDebug("More than one instrument in the row! Assuming all data is for the first instrument...")
-      if (statistics.length > 1)
-        appendDebug("More than one statistic in the row! Assuming all data is for the first statistic...")
+      var instruments = "unknown criteria"
+      var statistics  = "unknown statistics"
+      if (criteria) {
+        instruments = criteria.instruments
+        statistics  = criteria.statistics
+      }
+      var results  = row.results
+      // if (instruments.length > 1)
+      //   appendDebug("More than one instrument in the row! Assuming all data is for the first instrument...")
+      // if (statistics.length > 1)
+      //   appendDebug("More than one statistic in the row! Assuming all data is for the first statistic...")
       if (results.length === 0) {
+        var start = $('#master-toolbar').find('#start').val()
+        var end   = $('#master-toolbar').find('#end').val()
         $("#finance-table tbody").append(
-          "<tr class='results-row'><tr><td>"+instruments+"</td><td>"+statistics+"</td><td><b>No Data!</b></td></tr>")        
+          "<tr class='results-row'><tr><td colspan='3'><b>No "+statistics+" data for "+instruments+" in range "+start+" to "+end+".</b></td></tr>")        
       } else {
         $.each(results, function(j, result) {
           $("#finance-table tbody").append(
-            "<tr class='results-row'><td class='instruments'>" + instruments +
-            "</td><td class='statistics'>" + statistics + 
-            "</td><td class='results'>" + result + "</td></tr>")        
+            "<tr class='results-row'><td class='instruments'>" + result.stock_symbol +
+            "</td><td class='date'>" + result.date + "</td><td class='results'>" + result.close + "</td></tr>")        
         })
+        setUpTableSorting()
       }
     })
-    setUpTableSorting()
     $('#finance-display').show()
   } else {
     writeError("Unexpected JSON returned. Listed below and also written to the JavaScript console")
@@ -170,18 +174,20 @@ function sendRequest(action) {
 }
 
 function serverControl(action) {
+  writeInfo("Sending request...")
   var action2 = action;
   sendRequest(action);
 }
 
 function setUpTableSorting() {
-  return // disabled until I can figure out a JS error that occurs.
+  console.log('in setUpTableSorting:')
+  console.log($('table.tablesorter'))
   $('table.tablesorter').tablesorter({
-    sortList:[[0,0], [1,0], [2,0]],
-    headers: { 
+    sortList: [[0,0], [1,0], [2,0]],
+    // headers: { 
        // disable some columns,
        // 0: { sorter: false },
-    },
+    // },
     widgets:['zebra']
   });  
   
@@ -202,7 +208,7 @@ function setupDatePicker(){
   Date.format = 'yyyy-mm-dd'
   var today = (new Date()).asString()
   $('.date-pick').datePicker({
-    clickInput:  true,
+    // clickInput:  true,
     startDate:   '1970-01-01',
     endDate:     today,
     defaultDate: today
@@ -215,10 +221,8 @@ $(document).ready(function () {
     $('.banner').fadeIn('slow');
     $('.banner').fadeOut(2000);
   })
-  // Call the following each time the finance table is set up!
-  // setUpTableSorting()
   setupDatePicker()
   setupDefaultDates()
-  submitOnCarriageReturn($('.date-pick'), $('#master-toolbar'))
+  submitOnCarriageReturn($('.submit-on-CR'), $('#master-toolbar'))
 });
 
