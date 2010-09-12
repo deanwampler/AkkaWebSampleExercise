@@ -4,9 +4,10 @@
 # Designed to be run in the root directory of the project.
 
 dir=$(dirname $0)
-mongo < $dir/data-import-prep.js 
-scala $dir/data-import-transform.scala
+mongo < $dir/data-import-prep.js    # Create the collections in mongo
+scala $dir/data-import-transform.scala  # Munge the YAML files into JSON files we'll import
 
+# Import the munged data. Note that it is in files in the datatmp directory.
 for n in {A..Z}
 do
   prefix=$dir/../datatmp/stocks_yahoo_NYSE
@@ -20,8 +21,9 @@ do
     exit 1
   fi
 done
-mongo < $dir/data-import-finish.js
+mongo < $dir/data-import-finish.js  # Final steps, e.g., indexing the collections
 
+# A sanity check; Does the following produce "sensible" results?
 echo "Test queries:"
 mongo <<EOF
 use stocks_yahoo_NYSE

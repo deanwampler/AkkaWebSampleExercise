@@ -94,7 +94,7 @@ function onSuccess(jsonString) {
   } else if (json["warning"]) {
     writeWarning(json["warning"])
   } else if (json["error"]) {
-    writeInfo(json["error"])
+    writeError(json["error"])
   } else if (json["financial-data"]) {
     // Plot the financial data. 
     // TODO: we more or less assume that there is really one instrument and
