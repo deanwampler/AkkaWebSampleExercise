@@ -5,6 +5,13 @@ body {
   background-color: #FFF2E3;
 }
 
+font.tiny {
+  font-size: 50%;
+}
+font.small {
+  font-size: 75%;
+}
+
 font.error {
   color: #FF0210;
   font-family: bold;

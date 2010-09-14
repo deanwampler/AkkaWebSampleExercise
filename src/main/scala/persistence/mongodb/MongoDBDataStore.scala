@@ -52,7 +52,7 @@ class MongoDBDataStore(
   def range(from: DateTime, until: DateTime, maxNum: Int): Iterable[JSONRecord] = try {
     val query = new BasicDBObject()
     query.put(JSONRecord.timestampKey, 
-              new BasicDBObject("$gte", dateTimeToAnyValue(from)).append("$lt", dateTimeToAnyValue(until)))
+              new BasicDBObject("$gte", dateTimeToAnyValue(from)).append("$lte", dateTimeToAnyValue(until)))
     val cursor = collection.find(query).sort(new BasicDBObject(JSONRecord.timestampKey, 1))
     log.info("db name: query, cursor.count, maxNum: "+collection.getFullName+", "+query+", "+cursor.count+", "+maxNum)
     if (cursor.count > maxNum)

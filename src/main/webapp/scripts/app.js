@@ -79,7 +79,7 @@ function onSuccess(jsonString) {
   } else if (json["pong"]) {
     var pongList = $('#pong-list')
     pongList.html('')
-    // TODO: Fix, the returned json is a doubly-nested array [[...]]
+    // TODO: Fix, the returned json is a EITHER a singly- or doubly-nested array [[...]]
     $.each($(json["pong"]), function(i, array) {
       $.each(array, function(j, item) {
         pongList.append("<li>" + item + "</li>")
@@ -96,40 +96,14 @@ function onSuccess(jsonString) {
   } else if (json["error"]) {
     writeError(json["error"])
   } else if (json["financial-data"]) {
-    // Plot the financial data. 
-    // TODO: we more or less assume that there is really one instrument and
-    // one statistic in each "row", because that's how the data is currently
-    // returned, with one-element arrays for the instruments and statistics.
-    $('#pong-display').hide()
-    $("#finance-table tbody").html('')
-    $.each(json["financial-data"], function(i, row) {
-      var criteria = row.criteria
-      var instruments = "unknown criteria"
-      var statistics  = "unknown statistics"
-      if (criteria) {
-        instruments = criteria.instruments
-        statistics  = criteria.statistics
-      }
-      var results  = row.results
-      // if (instruments.length > 1)
-      //   appendDebug("More than one instrument in the row! Assuming all data is for the first instrument...")
-      // if (statistics.length > 1)
-      //   appendDebug("More than one statistic in the row! Assuming all data is for the first statistic...")
-      if (results.length === 0) {
-        var start = $('#master-toolbar').find('#start').val()
-        var end   = $('#master-toolbar').find('#end').val()
-        $("#finance-table tbody").append(
-          "<tr class='results-row'><tr><td colspan='3'><b>No "+statistics+" data for "+instruments+" in range "+start+" to "+end+".</b></td></tr>")        
-      } else {
-        $.each(results, function(j, result) {
-          $("#finance-table tbody").append(
-            "<tr class='results-row'><td class='instruments'>" + result.stock_symbol +
-            "</td><td class='date'>" + result.date + "</td><td class='results'>" + result.close + "</td></tr>")        
-        })
-        setUpTableSorting()
-      }
-    })
-    $('#finance-display').show()
+    displayFinancialData(json["financial-data"], 
+      [["Symbol", function(row) { return row.stock_symbol; }],
+       ["Date",   function(row) { return row.date; }],
+       ["Price",  function(row) { return row.close; }]])
+  } else if (json["stock-list"]) {
+    displayFinancialData(json["stock-list"], 
+      [["Letter",  function(row) { return row.letter; }],
+       ["Symbols", function(row) { return row.symbols; }]])
   } else {
     writeError("Unexpected JSON returned. Listed below and also written to the JavaScript console")
     writeDebug("Unexpected JSON returned: "+json)
@@ -139,6 +113,63 @@ function onSuccess(jsonString) {
   //  setTimeout(function() {
   //   sendRequest("???");
   // }, 3000);
+}
+
+function displayFinancialData(json, fields) {
+  console.log(json)
+  console.log(fields)
+  // Plot the financial data. 
+  // TODO: we more or less assume that there is really one instrument and
+  // one statistic in each "row", because that's how the data is currently
+  // returned, with one-element arrays for the instruments and statistics.
+  $('#pong-display').hide()
+  // Create the header row:
+  $("#finance-table thead").html('<tr class="finance-head"></tr>') // start with a clean row.
+  $.each(fields, function(i, field) {
+    if (i == 0)
+      $(".finance-head").append("<th class='top-left-rounded-corners'>" + field[0] + "</th>")
+    else if (i == fields.length - 1)
+      $(".finance-head").append("<th class='top-right-rounded-corners'>" + field[0] + "</th>")
+    else
+      $(".finance-head").append("<th>" + field[0] + "</th>")    
+  })
+  // Create the body rows:
+  $("#finance-table tbody").html('') // clear the body first.
+  $.each(json, function(i, row) {
+    var criteria = row.criteria
+    var instruments = "unknown criteria"
+    var statistics  = "unknown statistics"
+    if (criteria) {
+      instruments = criteria.instruments
+      statistics  = criteria.statistics
+    }
+    var results  = row.results
+    // TODO: The following logic assumes that we always care about the time range. We don't for some queries.
+    if (results.length === 0) {
+      var start = $('#master-toolbar').find('#start').val()
+      var end   = $('#master-toolbar').find('#end').val()
+      $("#finance-table tbody").append(
+        "<tr class='results-row'><tr><td colspan='"+fields.length+"'><b>No "+statistics+" data for "+instruments+". Time range: "+start+" to "+end+
+          "</b></br><font class='tiny'>(Note: time range may not be relevant for all queries...).</font></td></tr>")        
+    } else {
+      $.each(results, function(j, result) {
+        var idij = "results-row-" + i+"_"+j
+        $("#finance-table tbody").append("<tr class='results-row' id='results-row-" + idij + "'></tr>")
+        $.each(fields, function(k, field) {
+        if (j == 0) {
+          console.log(result)
+          console.log(field[1](result))
+          console.log($('#results-row-' + idij))
+        }
+          var idijk = "results-row-" + i+"_"+j+"_"+k
+          var value = field[1](result)
+          $('#results-row-' + idij).append("<td class='statistic' id='statistic-'" + idijk + "'>" + value + "</td>")
+        })
+      })
+    }
+  })
+  $('#finance-display').show()
+  setUpTableSorting()
 }
 
 function onError(request, textStatus, errorThrown) {
