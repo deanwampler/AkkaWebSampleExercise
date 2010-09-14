@@ -58,10 +58,12 @@ When `bin/data-import.sh` is finished, you should have 52 collections in `stocks
 
     show dbs
     use stocks_yahoo_NYSE
+    db.A_prices.count()
     db.A_prices.findOne()
+    db.A_dividends.count()
     db.A_dividends.findOne()
     
-Repeat the last two commands for any of the collections that interest you. Here's a command that is also very useful; it shows all the stock symbols in a given table.
+Repeat the last `count()` and `findOne()` commands for any of the collections that interest you. Here's a command that is also very useful; it shows all the stock symbols in a given table. It's useful because each stock has one entry for every day that it was traded.
 
     db.A_prices.distinct("stock_symbol")  
 
@@ -90,11 +92,13 @@ While we're at it, you can stop or restart jetty thusly:
     jetty-stop         # stop the Jetty web server
     jetty-restart      # restart the Jetty web server
 
-In the web UI, enter a comma-separate list of NYSE stock symbols, start and end dates, then click the `Go!` button (or hit `return` in one of the text fields). The results are presented below in a table. If no data is returned, the table will indicate that fact. Otherwise, you'll see a potentially long table of data. You can click on the column headers to sort the data by that column. Click again to reverse the sort.
+In the web UI, enter a comma-separate list of NYSE stock symbols, start and end dates, then click the `Go!` button (or hit `return` in one of the text fields). The results are presented below in a table. If no data is returned, the table will indicate that fact. Usually that indicates you specified a time range for which there is no data. (The data range in the data set is not that big). Try date ranges in February, 2008. Also, if you use a wide range, you will get a **lot** of data back and the query will take a while. 
 
 **Note:** Currently, data for *all* stocks in the corresponding A-Z table is returned, not just for the symbols you entered! 
 
-We plan to add charting of this data in a few weeks.
+When you get a table of data. You can click on the column headers to sort the data by that column. Click again to reverse the sort.
+
+We will add better filtering of stock symbols and graphing the data over the next several weeks.
 
 The `Ping` button is a diagnostic tool. It checks whether or not the Akka "actors" are still responsive in the application. It will return a list of actors running. If you click it before asking for stock data (with the `Go!` button), only one actor will be listed (There is a bug in the display currently...). Afterwards, 5 or more actors will be listed.
 
