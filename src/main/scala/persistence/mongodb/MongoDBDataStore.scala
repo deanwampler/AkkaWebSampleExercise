@@ -5,6 +5,8 @@ import se.scalablesolutions.akka.config.Config.config
 import se.scalablesolutions.akka.util.Logging
 import scala.collection.immutable.SortedSet
 import org.joda.time._
+import net.liftweb.json.JsonAST._
+import net.liftweb.json.JsonDSL._
 import com.osinka.mongodb._
 import com.mongodb.{BasicDBObject, DBCursor, Mongo, MongoException}
 
@@ -59,6 +61,21 @@ class MongoDBDataStore(
       cursorToRecords(cursor.skip(cursor.count - maxNum).limit(maxNum))
     else
       cursorToRecords(cursor)
+  } catch {
+    case th => 
+      log.error("MongoDB Exception: ", th)
+      throw th
+  }
+  
+  // Hack!
+  def getInstrumentList(prefix: String): Iterable[JSONRecord] = try {
+    val list = collection.distinct(prefix)
+    val buff = new scala.collection.mutable.ArrayBuffer[String]()
+    var iter = list.iterator
+    while (iter.hasNext) {
+      buff += iter.next.toString
+    }
+    List(JSONRecord(("letter" -> prefix) ~ ("symbols" -> buff)))
   } catch {
     case th => 
       log.error("MongoDB Exception: ", th)

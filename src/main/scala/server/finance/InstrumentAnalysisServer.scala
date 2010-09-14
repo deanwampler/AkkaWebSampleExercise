@@ -19,6 +19,7 @@ import net.lag.logging.Level
 sealed trait InstrumentCalculationMessages
 
 case class CalculateStatistics(criteria: CriteriaMap) extends InstrumentCalculationMessages
+case class GetInstrumentList(range: scala.collection.immutable.NumericRange[Char]) extends InstrumentCalculationMessages
       
 /**
  * InstrumentAnalysisServer is a worker that calculates (or simply fetches...) statistics for financial instruments.
@@ -43,6 +44,7 @@ class InstrumentAnalysisServer(val service: String, dataStorageServer: ActorRef)
 
   def defaultHandler: PartialFunction[Any, Unit] = {
     case CalculateStatistics(criteria) => self.reply(helper.calculateStatistics(criteria))
+    case GetInstrumentList(range) => self.reply(helper.getInstrumentList(range))
   }
   
   override protected def subordinatesToPing: List[ActorRef] = List(dataStorageServer)
@@ -58,10 +60,8 @@ class InstrumentAnalysisServer(val service: String, dataStorageServer: ActorRef)
 class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
   
   def calculateStatistics(criteria: CriteriaMap): JValue = criteria match {
-    case CriteriaMap(instruments, statistics, start, end) => 
-       fetchPrices(instruments, statistics, start, end)
-    case _ =>
-      Pair("error", "Invalid criteria: " + criteria)
+    case CriteriaMap(instruments, statistics, start, end) => fetchPrices(instruments, statistics, start, end)
+    case _ => Pair("error", "Invalid criteria: " + criteria)
   }
 
   /**
@@ -80,6 +80,14 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
     }
   }
   
+  def getInstrumentList(range: scala.collection.immutable.NumericRange[Char]) = {
+    (dataStorageServer !! Get(Pair("instrument_list", range.toList.head.toString))) match {
+      case None => 
+        Pair("warning", "Nothing returned for instrument list in range "+range)
+      case Some(result) => result
+    }
+  }
+
   /**
    * A "hook" method that could be used to filter by instrument (and maybe statistics) criteria. 
    * However, in general, it would be better to filter in the DB query itself!

@@ -58,6 +58,10 @@ class RestfulDataPublisher extends Logging {
         log.info("ping result: "+result)
         result
 
+      case "list_instruments" =>
+        log.debug("Requesting a list of all instruments")
+        getAllInstruments()
+
       case "stats" =>
         log.debug("Requesting statistics for instruments, stats, start, end = "+instruments+", "+stats+", "+start+", "+end)
         getAllDataFor(instruments, stats, start, end)
@@ -69,7 +73,7 @@ class RestfulDataPublisher extends Logging {
   protected[rest] def getAllDataFor(instruments: String, stats: String, start: String, end: String): String = 
     try {
       val allCriteria = CriteriaMap().withInstruments(instruments).withStatistics(stats).withStart(start).withEnd(end)
-      val results = getStatsFromInstrumentAnalysisServerSupervisors(allCriteria)
+      val results = getStatsFromInstrumentAnalysisServerSupervisors(CalculateStatistics(allCriteria))
       val result = compact(render(JSONMap.toJValue(Map("financial-data" -> results))))
       log.info("financial data result = "+result.substring(0,100)+"...")
       result
@@ -86,12 +90,32 @@ class RestfulDataPublisher extends Logging {
         makeErrorString("An unexpected problem occurred during processing the request", 
           th, instruments, stats, start, end)
     }
+    
+  protected[rest] def getAllInstruments() = 
+    try {
+      val results = getStatsFromInstrumentAnalysisServerSupervisors(GetInstrumentList('A' to 'Z'))
+      val result = compact(render(JSONMap.toJValue(Map("instrument-list" -> results))))
+      log.info("instrument list result = "+result.substring(0,100)+"...")
+      result
+    } catch {
+      case NoWorkersAvailable =>
+        makeAllInstrumentsErrorString("", NoWorkersAvailable)
+      case iae: CriteriaMap.InvalidTimeString => 
+        makeAllInstrumentsErrorString("", iae)
+      case fte: FutureTimeoutException =>
+        makeAllInstrumentsErrorString("Actors timed out", fte)
+      case awsee: AkkaWebSampleExerciseException =>
+        makeAllInstrumentsErrorString("Invalid input", awsee)
+      case th: Throwable => 
+        makeAllInstrumentsErrorString("An unexpected problem occurred during processing the request", th)
+    }
+    
   
-  protected def getStatsFromInstrumentAnalysisServerSupervisors(allCriteria: CriteriaMap): JValue =
+  protected def getStatsFromInstrumentAnalysisServerSupervisors(message: InstrumentCalculationMessages): JValue =
     instrumentAnalysisServerSupervisors match {
       case Nil => error(NoWorkersAvailable)
       case supervisors => supervisors map { supervisor =>
-        (supervisor !! CalculateStatistics(allCriteria)) match {
+        (supervisor !! message) match {
           case Some(x) => JSONMap.toJValue(x)
           case None => JNothing
         }
@@ -106,4 +130,6 @@ class RestfulDataPublisher extends Logging {
     "{\"error\": \"" + (if (message.length > 0) (message + ". ") else "") + th.getMessage + ". Investment instruments = '" + 
       instruments + "', statistics = '" + stats + "', start = '" + start + "', end = '" + end + "'.\"}"
 
+  protected def makeAllInstrumentsErrorString(message: String, th: Throwable) =
+    "{\"error\": \"Getting all instruments failed. " + (if (message.length > 0) (message + ". ") else "") + th.getMessage + "\"}"
 }
