@@ -100,7 +100,7 @@ function onSuccess(jsonString) {
       [["Symbol", function(row) { return row.stock_symbol; }],
        ["Date",   function(row) { return row.date; }],
        ["Price",  function(row) { return row.close; }]])
-  } else if (json["stock-list"]) {
+  } else if (json["instrument-list"]) {
     displayFinancialData(json["stock-list"], 
       [["Letter",  function(row) { return row.letter; }],
        ["Symbols", function(row) { return row.symbols; }]])

@@ -16,7 +16,7 @@ trait DataStore {
   
   def getAll(): Iterable[JSONRecord]
   
-  def range(from: DateTime, until: DateTime, maxNum: Int = java.lang.Integer.MAX_VALUE): Iterable[JSONRecord]
+  def range(from: DateTime, to: DateTime, maxNum: Int = java.lang.Integer.MAX_VALUE): Iterable[JSONRecord]
 
   def size: Long
 }  

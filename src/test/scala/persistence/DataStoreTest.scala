@@ -46,16 +46,16 @@ class DataStoreTest extends FunSuite with ShouldMatchers with BeforeAndAfterEach
   }
   
   def populateDataStore(size: Long) = {
-    for (i <- start      until (start + size ) by 2L) 
+    for (i <- start      to (start + size ) by 2L) 
       { dataStore add makeJSONRecord(i, "" + (i*10L)) }
-    for (i <- start + 1L until (start + size ) by 2L)
+    for (i <- start + 1L to (start + size ) by 2L)
       { dataStore add makeJSONRecord(i, "" + (i*10L)) }
   }
   
-  test("range returns a subset of a DataStore from a starting bounds upto but not including an upper bound should return a Traversable with the correct subset") {
+  test("range returns a subset of a DataStore from a starting bounds upto AND including an upper bound should return a Traversable with the correct subset") {
     populateDataStore(100)
     val range = dataStore.range(new DateTime(start+20), new DateTime(start+25)).toList
-    range.size should equal(5)
+    range.size should equal(6)
     def checkEach(i: Int, range2: List[JSONRecord]):Unit = range2 match {
       case Nil =>
       case head :: tail => 

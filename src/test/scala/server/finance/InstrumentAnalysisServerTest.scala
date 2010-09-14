@@ -90,15 +90,15 @@ class InstrumentAnalysisServerTest extends FunSuite
   }
 
   test ("calculateStatistics returns a JSON string containing all data that matches the time criteria") {
-    // Return all data for the specified time range, low (inclusive) to high (exclusive)
-    val criteria = makeCriteria("A,B,C","price", thenms + 1000, thenms + 3001)
+    // Return all data for the specified time range, low to high (inclusive)
+    val criteria = makeCriteria("A,B,C","price", thenms + 1000, thenms + 3000)
     val expected = makeExpected(makeJSON((List(js(3), js(2), js(4)))), criteria)
     analysisServer.calculateStatistics(criteria) should equal (expected)
   }
 
-  test ("The time criteria are inclusive for the earliest time and exclusive for the latest time") {
+  test ("The time criteria are inclusive for the earliest time and the latest time") {
     val criteria = makeCriteria("A,B,C","price", thenms + 1000, thenms + 3000)
-    val expected = makeExpected(makeJSON((List(js(3), js(2)))), criteria)
+    val expected = makeExpected(makeJSON((List(js(3), js(2), js(4)))), criteria)
     analysisServer.calculateStatistics(criteria) should equal (expected)
   }
 
