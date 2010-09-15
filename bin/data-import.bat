@@ -2,7 +2,7 @@ rem Run this script from the project root directory.
 rem Assumes that mongo and mongoimport are in your path.
 rem Note: this script hasn't been tested!! Caveat Emptor!
 mongo < bin/data-import-prep.js
-scala bin/data-import-transform.scala
+scala -classpath lib/joda-time-1.6.jar bin/data-import-transform.scala
 mongoimport --db stocks_yahoo_NYSE --collection A_prices --file datatmp/stocks_yahoo_NYSE_A_prices.json
 mongoimport --db stocks_yahoo_NYSE --collection B_prices --file datatmp/stocks_yahoo_NYSE_B_prices.json
 mongoimport --db stocks_yahoo_NYSE --collection C_prices --file datatmp/stocks_yahoo_NYSE_C_prices.json
