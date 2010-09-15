@@ -5,7 +5,7 @@
 
 dir=$(dirname $0)
 mongo < $dir/data-import-prep.js    # Create the collections in mongo
-scala $dir/data-import-transform.scala  # Munge the YAML files into JSON files we'll import
+scala -classpath $PWD/lib/joda-time-1.6.jar $dir/data-import-transform.scala  # Munge the YAML files into JSON files we'll import
 
 # Import the munged data. Note that it is in files in the datatmp directory.
 for n in {A..Z}
