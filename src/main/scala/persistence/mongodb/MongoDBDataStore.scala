@@ -70,7 +70,8 @@ class MongoDBDataStore(
   
   // Hack!
   def getInstrumentList(prefix: String): Iterable[JSONRecord] = try {
-    val list = collection.distinct(prefix)
+	  // TODO: We hard-code the name of the thing we want, the "stock_symbol". Should be abstracted...
+    val list = collection.distinct("stock_symbol")
     val buff = new scala.collection.mutable.ArrayBuffer[String]()
     var iter = list.iterator
     while (iter.hasNext) {
@@ -78,7 +79,7 @@ class MongoDBDataStore(
     }
     // Must put in a timestamp to make JSONRecord happy:
     val format = DateTimeFormat.forPattern("yyyy-MM-dd")
-    List(JSONRecord(("date" -> format.print(new DateTime)) ~ ("letter" -> prefix) ~ ("symbols" -> buff)))
+    List(JSONRecord(("date" -> format.print(new DateTime)) ~ ("letter" -> prefix) ~ ("symbols" -> buff.toList)))
   } catch {
     case th => 
       log.error("MongoDB Exception: ", th)

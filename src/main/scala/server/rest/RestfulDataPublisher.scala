@@ -61,7 +61,7 @@ class RestfulDataPublisher extends Logging {
 
       case "list_instruments" =>
         log.debug("Requesting a list of all instruments")
-        getAllInstruments()
+        getAllInstruments(instruments)
 
       case "stats" =>
         log.debug("Requesting statistics for instruments, stats, start, end = "+instruments+", "+stats+", "+start+", "+end)
@@ -93,9 +93,17 @@ class RestfulDataPublisher extends Logging {
           th, instruments, stats, start, end)
     }
     
-  protected[rest] def getAllInstruments() = 
+  protected[rest] def getAllInstruments(instruments: String) = 
     try {
-      val results = getStatsFromInstrumentAnalysisServerSupervisors(GetInstrumentList('A' to 'B'))
+      // Hack! Just grab the first and last letter.
+			val symbolRange = instruments.trim match {
+        case "" => 'A' to 'Z'
+        case s  => s.length match {
+          case 1 => s.charAt(0).toUpper to 'Z'
+          case n => s.charAt(0).toUpper to s.charAt(n-1).toUpper
+        }
+      }
+      val results = getStatsFromInstrumentAnalysisServerSupervisors(GetInstrumentList(symbolRange))
       log.info("Rest: instruments results: "+results)
       val result = compact(render(JSONMap.toJValue(Map("instrument-list" -> results))))
       val length = if (result.length > 200) 200 else result.length

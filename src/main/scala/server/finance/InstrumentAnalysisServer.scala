@@ -84,7 +84,9 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
     (dataStorageServer !! Get(Pair("instrument_list", range.toList.head.toString))) match {
       case None => 
         Pair("warning", "Nothing returned for instrument list in range "+range)
-      case Some(result) => result
+      case Some(result) => 
+					 log.info("IS: result = "+result)
+					 result
     }
   }
 

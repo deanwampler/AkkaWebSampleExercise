@@ -82,7 +82,10 @@ class DataStorageServer(val serviceName: String, val dataStore: DataStore)
     log.debug(actorName + ": Starting getInstrumentList for prefix: "+prefix)
     dataStore match {
       case mongo: MongoDBDataStore => 
-        val result = mongo.getInstrumentList(prefix)
+        val data = for {
+					json <- mongo.getInstrumentList(prefix)
+        } yield json
+        val result = toJSON(data toList)
         log.info("DataStorageServer.getInstrumentList returning: "+result)
         result
       case _ => throw new RuntimeException("Can't get the instrument list from datastore "+dataStore)
