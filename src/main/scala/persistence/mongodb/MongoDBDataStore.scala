@@ -5,6 +5,7 @@ import se.scalablesolutions.akka.config.Config.config
 import se.scalablesolutions.akka.util.Logging
 import scala.collection.immutable.SortedSet
 import org.joda.time._
+import org.joda.time.format._
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 import com.osinka.mongodb._
@@ -75,7 +76,9 @@ class MongoDBDataStore(
     while (iter.hasNext) {
       buff += iter.next.toString
     }
-    List(JSONRecord(("letter" -> prefix) ~ ("symbols" -> buff)))
+    // Must put in a timestamp to make JSONRecord happy:
+    val format = DateTimeFormat.forPattern("yyyy-MM-dd")
+    List(JSONRecord(("date" -> format.print(new DateTime)) ~ ("letter" -> prefix) ~ ("symbols" -> buff)))
   } catch {
     case th => 
       log.error("MongoDB Exception: ", th)

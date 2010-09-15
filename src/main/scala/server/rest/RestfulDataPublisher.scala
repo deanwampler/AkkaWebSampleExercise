@@ -31,6 +31,7 @@ class RestfulDataPublisher extends Logging {
    *              "stats"   is the comma-separated list of statistics to calculate (default: all available).
    *            The allowed date time formats include milliseconds (Long) and any date time string that can be parsed
    *            by JodaTime.
+   *   list_instruments: Return a list of the symbols of all the financial instruments. 
    *   ping:    Send a "ping" message to each actor and return the responses.
    *   <other>  If any other message is received, an error response is returned.
    * @todo: It would be nice to use an HTML websocket to stream results to the browser more dynamically.
@@ -75,7 +76,8 @@ class RestfulDataPublisher extends Logging {
       val allCriteria = CriteriaMap().withInstruments(instruments).withStatistics(stats).withStart(start).withEnd(end)
       val results = getStatsFromInstrumentAnalysisServerSupervisors(CalculateStatistics(allCriteria))
       val result = compact(render(JSONMap.toJValue(Map("financial-data" -> results))))
-      log.info("financial data result = "+result.substring(0,100)+"...")
+      val length = if (result.length > 100) 100 else result.length
+      log.info("financial data result = "+result.substring(0, length)+"...")
       result
     } catch {
       case NoWorkersAvailable =>
@@ -93,9 +95,11 @@ class RestfulDataPublisher extends Logging {
     
   protected[rest] def getAllInstruments() = 
     try {
-      val results = getStatsFromInstrumentAnalysisServerSupervisors(GetInstrumentList('A' to 'Z'))
+      val results = getStatsFromInstrumentAnalysisServerSupervisors(GetInstrumentList('A' to 'B'))
+      log.info("Rest: instruments results: "+results)
       val result = compact(render(JSONMap.toJValue(Map("instrument-list" -> results))))
-      log.info("instrument list result = "+result.substring(0,100)+"...")
+      val length = if (result.length > 200) 200 else result.length
+      log.info("instrument list result = "+result.substring(0,length)+"...")
       result
     } catch {
       case NoWorkersAvailable =>
