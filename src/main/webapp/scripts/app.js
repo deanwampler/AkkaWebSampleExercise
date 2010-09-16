@@ -80,8 +80,11 @@ function onSuccess(jsonString) {
     var pongList = $('#pong-list')
     pongList.html('')
     // TODO: Fix, the returned json is a EITHER a singly- or doubly-nested array [[...]]
-    $.each($(json["pong"]), function(i, array) {
-      $.each(array, function(j, item) {
+    $.each($(json["pong"]), function(i, arrayOrObject) {
+  	  if (is_array(arrayOrObject) === false) {
+        arrayOrObject = [arrayOrObject]
+			}
+      $.each(arrayOrObject, function(j, item) {
         pongList.append("<li>" + item + "</li>")
       })
     })
@@ -173,6 +176,10 @@ function displayInstrumentsLists(json) {
 
   // Create the body rows:
   $("#finance-table tbody").html('') // clear the body first.
+	// Hack: Handle case where there was only one object, so json is that object, not an array.
+	if (is_array(json) === false) {
+    json = [json]
+	} 
   $.each(json, function(i, row) {
     var symbols  = row.symbols
     if (symbols.length === 0) {
