@@ -51,6 +51,14 @@ td {
   padding: 5px;
   background-color: #F5F4E2;
 }
+td.symbol-letter {
+  font-weight: bold;
+}
+td.no-symbols {
+  font-style: italic;
+}
+td.symbols {
+}
 
 .hidden {
   display: none;

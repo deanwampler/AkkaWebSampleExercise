@@ -80,8 +80,11 @@ function onSuccess(jsonString) {
     var pongList = $('#pong-list')
     pongList.html('')
     // TODO: Fix, the returned json is a EITHER a singly- or doubly-nested array [[...]]
-    $.each($(json["pong"]), function(i, array) {
-      $.each(array, function(j, item) {
+    $.each($(json["pong"]), function(i, arrayOrObject) {
+  	  if (is_array(arrayOrObject) === false) {
+        arrayOrObject = [arrayOrObject]
+			}
+      $.each(arrayOrObject, function(j, item) {
         pongList.append("<li>" + item + "</li>")
       })
     })
@@ -96,14 +99,12 @@ function onSuccess(jsonString) {
   } else if (json["error"]) {
     writeError(json["error"])
   } else if (json["financial-data"]) {
-    displayFinancialData(json["financial-data"], 
+		displayFinancialData(json["financial-data"],
       [["Symbol", function(row) { return row.stock_symbol; }],
        ["Date",   function(row) { return row.date; }],
        ["Price",  function(row) { return row.close; }]])
   } else if (json["instrument-list"]) {
-    displayFinancialData(json["stock-list"], 
-      [["Letter",  function(row) { return row.letter; }],
-       ["Symbols", function(row) { return row.symbols; }]])
+		displayInstrumentsLists(json["instrument-list"])
   } else {
     writeError("Unexpected JSON returned. Listed below and also written to the JavaScript console")
     writeDebug("Unexpected JSON returned: "+json)
@@ -116,8 +117,6 @@ function onSuccess(jsonString) {
 }
 
 function displayFinancialData(json, fields) {
-  console.log(json)
-  console.log(fields)
   // Plot the financial data. 
   // TODO: we more or less assume that there is really one instrument and
   // one statistic in each "row", because that's how the data is currently
@@ -144,7 +143,6 @@ function displayFinancialData(json, fields) {
       statistics  = criteria.statistics
     }
     var results  = row.results
-    // TODO: The following logic assumes that we always care about the time range. We don't for some queries.
     if (results.length === 0) {
       var start = $('#master-toolbar').find('#start').val()
       var end   = $('#master-toolbar').find('#end').val()
@@ -156,17 +154,41 @@ function displayFinancialData(json, fields) {
         var idij = "results-row-" + i+"_"+j
         $("#finance-table tbody").append("<tr class='results-row' id='results-row-" + idij + "'></tr>")
         $.each(fields, function(k, field) {
-        if (j == 0) {
-          console.log(result)
-          console.log(field[1](result))
-          console.log($('#results-row-' + idij))
-        }
           var idijk = "results-row-" + i+"_"+j+"_"+k
           var value = field[1](result)
           $('#results-row-' + idij).append("<td class='statistic' id='statistic-'" + idijk + "'>" + value + "</td>")
         })
       })
     }
+  })
+  $('#finance-display').show()
+  setUpTableSorting()
+}
+
+function displayInstrumentsLists(json) {
+  $('#pong-display').hide()
+  // Create the header row:
+  $("#finance-table thead").html(     // start with a clean row.
+    "<tr class='finance-head'>" + 
+    "<th class='top-left-rounded-corners'>Letter</th>" +
+    "<th class='top-right-rounded-corners'>Symbols</th>" +
+    "</tr>")
+
+  // Create the body rows:
+  $("#finance-table tbody").html('') // clear the body first.
+	// Hack: Handle case where there was only one object, so json is that object, not an array.
+	if (is_array(json) === false) {
+    json = [json]
+	} 
+  $.each(json, function(i, row) {
+    var symbols  = row.symbols
+    if (symbols.length === 0) {
+      $("#finance-table tbody").append(
+        "<tr class='results-row'><td class='symbol-letter'>" + row.letter + "</td><td class='no-symbols'>No instruments!</td></tr>")        
+    } else {
+      $("#finance-table tbody").append(
+			  "<tr class='results-row'><td class='symbol-letter'>" + row.letter + "</td><td class='symbols'>" + symbols.join(', ') + "</td></tr>")
+		}
   })
   $('#finance-display').show()
   setUpTableSorting()
@@ -211,10 +233,8 @@ function serverControl(action) {
 }
 
 function setUpTableSorting() {
-  console.log('in setUpTableSorting:')
-  console.log($('table.tablesorter'))
   $('table.tablesorter').tablesorter({
-    sortList: [[0,0], [1,0], [2,0]],
+					//sortList: [[0,0], [1,0]],
     // headers: { 
        // disable some columns,
        // 0: { sorter: false },
