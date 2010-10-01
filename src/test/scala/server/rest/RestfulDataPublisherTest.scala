@@ -40,6 +40,7 @@ class RestfulDataPublisherTest extends FunSuite
   def makeJSON(list: List[JSONRecord]): JValue = list reduceLeft (_ ++ _) json
 
   def makeExpected(result: JValue): JValue = JSONMap toJValue Map("financial-data" -> result)
+  def makeInstrumentsExpected(result: JValue): JValue = JSONMap toJValue Map("instrument-list" -> result)
   
   var returnedJSON: JValue = _
   var ias: ActorRef = _
@@ -51,6 +52,7 @@ class RestfulDataPublisherTest extends FunSuite
         val fake = actorOf(new Actor {
           def receive = {
             case CalculateStatistics(x) => self.reply(returnedJSON)
+            case GetInstrumentList(range) => self.reply(returnedJSON)
           }
         }) 
         fake.start
@@ -64,6 +66,11 @@ class RestfulDataPublisherTest extends FunSuite
     restfulPublisher.getAllDataFor("A,B,C","price", "0", nowms.toString) should equal (makeJSONString(makeExpected(returnedJSON)))
   }
   
+  test ("getAllInstruments returns a JSON string containing all data when all data matches the query criteria") {
+    returnedJSON = List("A","B")
+    restfulPublisher.getAllInstruments("AB") should equal (makeJSONString(makeInstrumentsExpected(returnedJSON)))
+  }
+
   test ("getAllDataFor returns a JSON string containing all data that matches the time criteria") {
     // Return all data for the specified time range, low (inclusive) to high (exclusive)
     returnedJSON = makeJSON (List(js(3), js(2), js(4)))
