@@ -37,7 +37,7 @@ class InstrumentAnalysisServerSupervisor extends Actor with ActorFactory with Ac
 
   def defaultHandler: PartialFunction[Any,Unit] = {
     case CalculateStatistics(criteria) => self.reply(calculate(criteria))
-    case GetInstrumentList(range) => self.reply(getInstrumentList(range))
+    case GetInstrumentList(range, keyForInstrumentSymbols) => self.reply(getInstrumentList(range, keyForInstrumentSymbols))
   }
   
   /**
@@ -59,13 +59,13 @@ class InstrumentAnalysisServerSupervisor extends Actor with ActorFactory with Ac
     futuresToJSON(futures, "None!")
   }
   
-  def getInstrumentList(range: scala.collection.immutable.NumericRange[Char]) = {
+  def getInstrumentList(range: scala.collection.immutable.NumericRange[Char], keyForInstrumentSymbols: String) = {
     val futures = for {
       letter <- range
       oneLetterRange = letter to letter
       instrument = Instrument(letter.toString)
       calculator <- getOrMakeInstrumentAnalysisServerFor(instrument, Price(Dollars))
-    } yield (calculator !!! GetInstrumentList(oneLetterRange))
+    } yield (calculator !!! GetInstrumentList(oneLetterRange, keyForInstrumentSymbols))
     Futures.awaitAll(futures.toList)
     futuresToJSON(futures.toList, "None!")
   }

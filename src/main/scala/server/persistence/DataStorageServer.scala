@@ -16,6 +16,9 @@ import org.joda.time._
 case class CouldNotFindDateTime(key: String, json: JValue) extends RuntimeException(
   "Could not find expected date time field for key "+key+" in JSON "+compact(render(json)))
   
+case class InvalidCriteria(message: String, criteria: JValue) extends RuntimeException(
+  "The specified criteria was not valid. "+message+". criteria: "+compact(render(criteria)))
+
 /**
  * DataStorageServer manages access to time-oriented data, stored as JSON.
  * TODO: Currently, the query capabilities are limited to date-time range queries.
@@ -51,7 +54,12 @@ class DataStorageServer(val serviceName: String, val dataStore: DataStore)
 
   protected[persistence] def getData(criteria: JValue): JValue = {
     (criteria \ "instrument_list") match {
-      case JField(key, JString(value)) => getInstrumentList(value)
+      case JField(key, JString(value)) => 
+        (criteria \ "instrument_symbols_key") match {
+          case JField(key, JString(keyForInstruments)) => getInstrumentList(value, keyForInstruments)
+          case _ => throw new InvalidCriteria(
+            "JSON contained a key-value pair for key 'instrument_list', but not for key 'instrument_symbols_key'.", criteria)
+        }
       case _ => getDataForRange(criteria)
     } 
   }
@@ -78,12 +86,12 @@ class DataStorageServer(val serviceName: String, val dataStore: DataStore)
   }
 
   // Hack!
-  protected[persistence] def getInstrumentList(prefix: String): JValue = {
-    log.debug(actorName + ": Starting getInstrumentList for prefix: "+prefix)
+  protected[persistence] def getInstrumentList(prefix: String, keyForInstrumentSymbols: String): JValue = {
+    log.debug(actorName + ": Starting getInstrumentList for prefix = "+prefix+" and symbol key = "+keyForInstrumentSymbols)
     dataStore match {
       case mongo: MongoDBDataStore => 
         val data = for {
-					json <- mongo.getInstrumentList(prefix)
+					json <- mongo.getInstrumentList(prefix, keyForInstrumentSymbols)
         } yield json
         val result = toJSON(data toList)
         log.info("DataStorageServer.getInstrumentList returning: "+result)

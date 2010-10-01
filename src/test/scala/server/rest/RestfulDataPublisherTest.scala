@@ -40,7 +40,7 @@ class RestfulDataPublisherTest extends FunSuite
   def makeJSON(list: List[JSONRecord]): JValue = list reduceLeft (_ ++ _) json
 
   def makeExpected(result: JValue): JValue = JSONMap toJValue Map("financial-data" -> result)
-  def makeInstrumentsExpected(result: JValue): JValue = JSONMap toJValue Map("instrument-list" -> result)
+  def makeInstrumentsExpected(result: JValue): JValue = JSONMap toJValue Map("instrument-list" -> result, "instrument_symbols_key" ->"stock_symbol")
   
   var returnedJSON: JValue = _
   var ias: ActorRef = _
@@ -52,7 +52,7 @@ class RestfulDataPublisherTest extends FunSuite
         val fake = actorOf(new Actor {
           def receive = {
             case CalculateStatistics(x) => self.reply(returnedJSON)
-            case GetInstrumentList(range) => self.reply(returnedJSON)
+            case GetInstrumentList(range, x) => self.reply(returnedJSON)
           }
         }) 
         fake.start

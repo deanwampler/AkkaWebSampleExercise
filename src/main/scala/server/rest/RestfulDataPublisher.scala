@@ -103,9 +103,10 @@ class RestfulDataPublisher extends Logging {
           case n => s.charAt(0).toUpper to s.charAt(n-1).toUpper
         }
       }
-      val results = getStatsFromInstrumentAnalysisServerSupervisors(GetInstrumentList(symbolRange))
+      val results = getStatsFromInstrumentAnalysisServerSupervisors(GetInstrumentList(symbolRange, "stock_symbol"))
       log.info("Rest: instruments results: "+results)
-      val result = compact(render(JSONMap.toJValue(Map("instrument-list" -> results))))
+      val result = compact(render(JSONMap.toJValue(
+          Map("instrument-list" -> results, "instrument_symbols_key" -> "stock_symbol"))))
       val length = if (result.length > 200) 200 else result.length
       log.info("instrument list result = "+result.substring(0,length)+"...")
       result

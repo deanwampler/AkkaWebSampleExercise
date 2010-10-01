@@ -8,6 +8,7 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info)  
 	object Repositories {
     lazy val AkkaRepo             = MavenRepository("Akka Repository", "http://scalablesolutions.se/akka/repository")
     lazy val CodehausRepo         = MavenRepository("Codehaus Repo", "http://repository.codehaus.org")
+    lazy val CasbahRepo           = MavenRepository("Casbah Repo", "http://repo.bumnetworks.com/releases/")    
     lazy val EmbeddedRepo         = MavenRepository("Embedded Repo", (info.projectPath / "embedded-repo").asURL.toString)
     lazy val FusesourceSnapshotRepo = MavenRepository("Fusesource Snapshots", "http://repo.fusesource.com/nexus/content/repositories/snapshots")
     lazy val GuiceyFruitRepo      = MavenRepository("GuiceyFruit Repo", "http://guiceyfruit.googlecode.com/svn/repo/releases/")
@@ -42,6 +43,7 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info)  
 
   import Repositories._
   lazy val atmosphereModuleConfig  = ModuleConfiguration("org.atmosphere",  SonatypeSnapshotRepo)
+  lazy val casbahModuleConfig      = ModuleConfiguration("com.novus",  CasbahRepo)
   lazy val grizzlyModuleConfig     = ModuleConfiguration("com.sun.grizzly", JavaNetRepo)
   lazy val guiceyFruitModuleConfig = ModuleConfiguration("org.guiceyfruit", GuiceyFruitRepo)
   lazy val liftModuleConfig        = ModuleConfiguration("net.liftweb",     ScalaToolsReleases)
@@ -50,7 +52,7 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info)  
   lazy val scalaTestModuleConfig   = ModuleConfiguration("org.scalatest",   ScalaToolsSnapshots)
 
   override def repositories = Set(
-    AkkaRepo, CodehausRepo, EmbeddedRepo, FusesourceSnapshotRepo, GuiceyFruitRepo, 
+    AkkaRepo, CasbahRepo, CodehausRepo, EmbeddedRepo, FusesourceSnapshotRepo, GuiceyFruitRepo, 
     JBossRepo, JavaNetRepo, SonatypeSnapshotRepo, SunJDMKRepo)
     
   // -------------------------------------------------------------------------------------------------------------------
@@ -60,13 +62,14 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info)  
   lazy val AKKA_VERSION          = "0.10"
   lazy val ATMO_VERSION          = "0.6.1"
   lazy val CAMEL_VERSION         = "2.4.0"
+  lazy val CASBAH_VERSION        = "1.0.8.5"
   lazy val JERSEY_VERSION        = "1.2"
   lazy val LIFT_VERSION          = "2.1-M1"
   lazy val MULTIVERSE_VERSION    = "0.6"
   lazy val SCALATEST_VERSION     = "1.2-for-scala-2.8.0.final-SNAPSHOT"
 
   lazy val ECLIPSE_JETTY_VERSION = "7.1.6.v20100715" //  "7.0.2.v20100331"
-  lazy val MORTBAY_JETTY_VERSION = "6.1.22"
+  lazy val MORTBAY_JETTY_VERSION = "6.1.22"  
 
 
   object Dependencies {
@@ -81,6 +84,8 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info)  
 
     lazy val atmo         = "org.atmosphere" % "atmosphere-annotations"     % ATMO_VERSION % "compile"
     lazy val atmoRuntime  = "org.atmosphere" % "atmosphere-runtime"         % ATMO_VERSION % "compile"
+
+    lazy val casbah   = "com.novus" % "casbah_2.8.0" % CASBAH_VERSION % "compile"
 
     lazy val configgy = "net.lag" % "configgy" % "2.8.0-1.5.5" % "compile"
 
@@ -111,6 +116,7 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info)  
   override def libraryDependencies = Set(
     akkaCore, akkaCamel, akkaHttp, akkaKernel, 
     atmo, atmoRuntime, 
+    // casbah, 
     configgy, 
     liftJSON, 
     mongo, mongoScalaDriver,
@@ -127,7 +133,7 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info)  
   // For continuous redeployment: http://code.google.com/p/simple-build-tool/wiki/WebApplications
   // Use sbt "~prepare-webapp" command for automatic redeployments.
   override def scanDirectories = ( ( temporaryWarPath / "WEB-INF" / "classes" ) +++
-                                    ( temporaryWarPath / "WEB-INF" / "lib") ).get.toSeq
+                                   ( temporaryWarPath / "WEB-INF" / "lib") ).get.toSeq
 
   override def compileOptions = super.compileOptions ++
     Seq("-deprecation",
