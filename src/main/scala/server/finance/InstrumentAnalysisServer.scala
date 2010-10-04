@@ -82,15 +82,20 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
   }
   
   def getInstrumentList(
-      range: scala.collection.immutable.NumericRange[Char], keyForInstrumentSymbols: String): JValue = {
-    (dataStorageServer !! Get(Pair("instrument_list", range.toList.head.toString) ~ Pair("instrument_symbols_key", keyForInstrumentSymbols))) match {
+      range: scala.collection.immutable.NumericRange[Char], keyForInstrumentSymbols: String): JValue =
+    (dataStorageServer !! Get(Pair("distinct_values_for_key", keyForInstrumentSymbols))) match {
       case None => 
         Pair("warning", "Nothing returned for instrument list in range "+range)
-      case Some(result) => 
-					 log.info("IS: result = "+result)
-					 result
+      case Some(result) => result
+        // val filteredResult = for {
+        //   prefixChar <- range
+        //   name <- result
+        //   if (name.charAt(0) == prefixChar)
+        // } yield name
+        // log.info("IS: result = "+filteredResult)
+        // filteredResult
     }
-  }
+  
 
   /**
    * A "hook" method that could be used to filter by instrument (and maybe statistics) criteria. 

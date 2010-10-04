@@ -18,5 +18,7 @@ trait DataStore {
   
   def range(from: DateTime, to: DateTime, maxNum: Int = java.lang.Integer.MAX_VALUE): Iterable[JSONRecord]
 
+  def getDistinctValuesFor(key: String): Iterable[JSONRecord]
+  
   def size: Long
 }  

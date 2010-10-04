@@ -120,4 +120,11 @@ class InstrumentAnalysisServerTest extends FunSuite
     analysisServer.calculateStatistics(criteria1) should equal (expected1)
     analysisServer.calculateStatistics(criteria2) should equal (expected2)
   }
+  
+  test ("getInstrumentList returns a list of instruments that start with the specified range of letters") {
+    analysisServer.getInstrumentList('A' to 'D', "symbol") \ "symbol" match {
+      case JField("symbol", array) => array.values should equal (List("A", "B", "C"))
+      case _ => fail
+    }
+  }
 }

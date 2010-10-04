@@ -8,9 +8,9 @@ import org.joda.time._
 /**
  * A wrapper around a Lift JSON object.
  */
-case class JSONRecord(json: JValue) {
+case class JSONRecord(inputJSON: JValue) {
   
-  val timestamp: DateTime = determineTimestamp(json)
+  val (json, timestamp) = fixTimestamp(inputJSON)
 
   /**
    * Convert the JSON object to a Map. To avoid problems where longs get converted to
@@ -47,13 +47,15 @@ case class JSONRecord(json: JValue) {
     case _ => x
   }
 
-  protected def determineTimestamp(json: JValue): DateTime = 
+  protected def fixTimestamp(json: JValue): Pair[JValue, DateTime] = 
     (for { 
       JField(key, timestamp) <- json
       if key == JSONRecord.timestampKey
     } yield jValueToTimestamp(timestamp)) toList match {
-      case Nil => throw new JSONRecord.InvalidJSONException(json)
-      case head :: _ => head
+      case Nil =>
+        val now = new DateTime
+        (json + (JSONRecord.timestampKey -> now.getMillis), now)
+      case head :: _ => (json, head)
     }
   
   def jValueToTimestamp(jv: JValue): DateTime = try {

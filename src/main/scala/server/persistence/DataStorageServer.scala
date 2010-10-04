@@ -53,13 +53,8 @@ class DataStorageServer(val serviceName: String, val dataStore: DataStore)
   }
 
   protected[persistence] def getData(criteria: JValue): JValue = {
-    (criteria \ "instrument_list") match {
-      case JField(key, JString(value)) => 
-        (criteria \ "instrument_symbols_key") match {
-          case JField(key, JString(keyForInstruments)) => getInstrumentList(value, keyForInstruments)
-          case _ => throw new InvalidCriteria(
-            "JSON contained a key-value pair for key 'instrument_list', but not for key 'instrument_symbols_key'.", criteria)
-        }
+    (criteria \ "distinct_values_for_key") match {
+      case JField(_, JString(key)) => getDistinctValuesFor(key)
       case _ => getDataForRange(criteria)
     } 
   }
@@ -85,19 +80,14 @@ class DataStorageServer(val serviceName: String, val dataStore: DataStore)
     }
   }
 
-  // Hack!
-  protected[persistence] def getInstrumentList(prefix: String, keyForInstrumentSymbols: String): JValue = {
-    log.debug(actorName + ": Starting getInstrumentList for prefix = "+prefix+" and symbol key = "+keyForInstrumentSymbols)
-    dataStore match {
-      case mongo: MongoDBDataStore => 
-        val data = for {
-					json <- mongo.getInstrumentList(prefix, keyForInstrumentSymbols)
-        } yield json
-        val result = toJSON(data toList)
-        log.info("DataStorageServer.getInstrumentList returning: "+result)
-        result
-      case _ => throw new RuntimeException("Can't get the instrument list from datastore "+dataStore)
-    }
+  protected[persistence] def getDistinctValuesFor(key: String): JValue = {
+    log.debug(actorName + ": Starting getDistinctValuesFor for key = "+key)
+    val data = for {
+			json <- dataStore.getDistinctValuesFor(key)
+    } yield json
+    val result = toJSON(data toList)
+    log.info("DataStorageServer.getDistinctValuesFor returning: "+result)
+    result
   }
   
   protected[persistence] def putData(jsonRecord: JSONRecord) = {

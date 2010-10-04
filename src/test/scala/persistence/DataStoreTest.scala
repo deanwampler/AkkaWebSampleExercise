@@ -30,6 +30,9 @@ class DataStoreTest extends FunSuite with ShouldMatchers with BeforeAndAfterEach
   
   // out of order in time
   def add3Elements = List(js3, js1, js2) foreach (dataStore add _)
+
+  // out of order in time
+  def add5Elements = List(js3, js1, js2, js1, js2) foreach (dataStore add _)
   
   test("After adding N elements, a DataStore should have N elements") {
     add3Elements
@@ -73,5 +76,13 @@ class DataStoreTest extends FunSuite with ShouldMatchers with BeforeAndAfterEach
       val range2 = dataStore.range(new DateTime(n+1), new DateTime(n))
       range2.size should equal (0)
     }
+  }
+  
+  test("getDistinctValuesFor returns the distinct values for the specified key.") {
+    add5Elements
+    dataStore.getDistinctValuesFor("string").foreach { _.json \ "string" match {
+      case JField("string", array) => array.values should equal (List("one", "three", "two"))
+      case _ => fail
+    }}
   }
 }

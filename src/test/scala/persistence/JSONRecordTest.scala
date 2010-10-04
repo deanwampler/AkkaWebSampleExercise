@@ -42,10 +42,9 @@ class JSONRecordTest extends FunSuite with ShouldMatchers with BeforeAndAfterEac
   }
   
   
-  test ("Attempting to create a JSONRecord with a timestamp field throws an exception") {
-    intercept[JSONRecord.InvalidJSONException] {
-      JSONRecord (recordJSONData)
-    }
+  test ("When creating a JSONRecord without a timestamp field, the current time is used") {
+    val jr = JSONRecord (recordJSONData)
+    ((jr.timestamp.getMillis - now) > 0) should equal (true)
   }
   
   test ("Attempting to create a JSONRecord with a timestamp field that isn't a Long or String throws an exception") {
