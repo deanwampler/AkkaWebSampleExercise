@@ -7,10 +7,11 @@ import net.liftweb.json.JsonDSL._
 sealed trait Message
 
 /** 
- * Get data corresponding to criteria encoded in the given JSON. Note that we don't
- * use a JSONRecord because it is specifically for a single data point at a particular time.
+ * Get data corresponding to criteria encoded in the given Map. The interpretation
+ * of the map contents is specified by the DataStorageServer and the underlying DataStores.
+ * The structure of the map is intended to be easily serializable to JSON.
  */
-case class Get(json: JValue) extends Message
+case class Get(criteria: Map[String, Any]) extends Message
 
 /**
  * Put a "JSONRecord", a JSON object with a single timestamp, in the persistent storage.

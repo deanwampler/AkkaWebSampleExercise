@@ -73,7 +73,7 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
   protected def fetchPrices(
         instruments: List[Instrument], statistics: List[InstrumentStatistic], 
         start: DateTime, end: DateTime): JValue = {
-    (dataStorageServer !! Get(("start" -> start) ~ ("end" -> end))) match {
+    (dataStorageServer !! Get(Map("start" -> start, "end" -> end))) match {
       case None => 
         Pair("warning", "Nothing returned for query (start, end) = (" + start + ", " + end + ")")
       case Some(result) => 
@@ -83,7 +83,7 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
   
   def getInstrumentList(
       range: scala.collection.immutable.NumericRange[Char], keyForInstrumentSymbols: String): JValue = {
-    (dataStorageServer !! Get(Pair("instrument_list", range.toList.head.toString) ~ Pair("instrument_symbols_key", keyForInstrumentSymbols))) match {
+    (dataStorageServer !! Get(Map("instrument_list" -> range.toList.head.toString, "instrument_symbols_key" -> keyForInstrumentSymbols))) match {
       case None => 
         Pair("warning", "Nothing returned for instrument list in range "+range)
       case Some(result) => 

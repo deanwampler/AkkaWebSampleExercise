@@ -24,7 +24,7 @@ class DataStorageServerTest extends FunSuite
   
   def makeJSON(list: JSONRecord*) = (list reduceLeft (_ ++ _)) json
 
-  def makeGet(start: Long, end: Long) = Get(("start" -> start) ~ ("end" -> end))
+  def makeGet(start: Long, end: Long) = Get(Map("start" -> start, "end" -> end))
   
   def sendAndWait(msg: Message): Option[String] = {
     answer = (driverActor !!! msg).await.result
