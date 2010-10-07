@@ -24,7 +24,7 @@ class InMemoryDataStore(val name: String) extends DataStore with Logging {
     
   def getAll() = store map {p => p._2}
   
-  def range(from: DateTime, to: DateTime, otherCriteria: JValue, maxNum: Int): Iterable[JSONRecord] = 
+  def range(from: DateTime, to: DateTime, otherCriteria: Map[String,Any] = Map.empty, maxNum: Int): Iterable[JSONRecord] = 
     store.range(from, dateTimePlus1(to)).map(p => p._2).take(maxNum).toIterable
 
   /**

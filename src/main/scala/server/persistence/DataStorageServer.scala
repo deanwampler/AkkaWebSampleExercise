@@ -57,7 +57,7 @@ class DataStorageServer(val serviceName: String, val dataStore: DataStore)
     case Some(x) => x match {
       case prefix: String => criteria.get("instrument_symbols_key") match {
         case Some(y) => y match {
-          case keyForInstruments: String => getInstrumentList(prefix, keyForInstruments)
+          case keyForInstruments: String => getDistinctValuesFor(keyForInstruments)
           case _ => throw new InvalidCriteria(
             "Map contained key-value pairs for keys 'instrument_list' and 'instrument_symbols_key', but the value for 'instrument_symbols_key' was not a string: value = ", y)
         }          
@@ -75,9 +75,10 @@ class DataStorageServer(val serviceName: String, val dataStore: DataStore)
     log.debug(actorName + ": Starting getDataForRange:")
     val start: DateTime = extractTime(criteria, "start", new DateTime(0))
     val end:   DateTime = extractTime(criteria, "end",   new DateTime)
+    val criteria2 = criteria - "start" - "end"
     try {
       val data = for {
-        json <- dataStore.range(start, end, criteria)
+        json <- dataStore.range(start, end, criteria2)
       } yield json
       val result = toJSON(data toList)
       log.debug(actorName + ": GET returning response for start, end = " + 

@@ -3,8 +3,6 @@ import org.chicagoscala.awse.util.json.JSONMap._
 import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.persistence._
-import org.chicagoscala.awse.persistence.inmemory._
-import org.chicagoscala.awse.persistence.mongodb._
 import org.chicagoscala.awse.domain.finance._
 import org.chicagoscala.awse.domain.finance.FinanceJSONConverter._
 import se.scalablesolutions.akka.actor._
@@ -88,7 +86,8 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
         Pair("warning", "Nothing returned for instrument list in range "+range)
       case Some(result) => result
     }
-
+  }
+  
   /**
    * A "hook" method that could be used to filter by instrument (and maybe statistics) criteria. 
    * However, in general, it would be better to filter in the DB query itself!

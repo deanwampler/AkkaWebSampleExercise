@@ -17,7 +17,7 @@ trait DataStore {
   
   def getAll(): Iterable[JSONRecord]
   
-  def range(from: DateTime, to: DateTime, otherCriteria: JValue = JNothing, maxNum: Int = java.lang.Integer.MAX_VALUE): Iterable[JSONRecord]
+  def range(from: DateTime, to: DateTime, otherCriteria: Map[String,Any] = Map.empty, maxNum: Int = java.lang.Integer.MAX_VALUE): Iterable[JSONRecord]
 
   def getDistinctValuesFor(key: String): Iterable[JSONRecord]
 

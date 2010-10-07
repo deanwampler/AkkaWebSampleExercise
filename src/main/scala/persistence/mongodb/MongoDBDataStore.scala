@@ -52,10 +52,16 @@ class MongoDBDataStore(
     case Some(dbo) => Some(JSONRecord(dbo.toMap))
   }
   
-  def range(from: DateTime, to: DateTime, otherCriteria: JValue, maxNum: Int): Iterable[JSONRecord] = try {
+  def range(from: DateTime, to: DateTime, otherCriteria: Map[String,Any] = Map.empty, maxNum: Int): Iterable[JSONRecord] = try {
     val query = new BasicDBObject()
     query.put(JSONRecord.timestampKey, 
               new BasicDBObject("$gte", dateTimeToAnyValue(from)).append("$lte", dateTimeToAnyValue(to)))
+    // Add the additional query criteria, if any.
+    // otherCriteria.foldLeft(query) { (q: BasicDBObject, keyValue: Pair[String,Any]) =>
+    //   keyValue._2 match {
+    //     case list: List => q.put(keyValue._1, new BasicDBObject("$in", ))
+    //   }
+    // }
     val cursor = collection.find(query).sort(new BasicDBObject(JSONRecord.timestampKey, 1))
     log.info("db name: query, cursor.count, maxNum: "+collection.getFullName+", "+query+", "+cursor.count+", "+maxNum)
     if (cursor.count > maxNum)

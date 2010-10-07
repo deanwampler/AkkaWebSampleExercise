@@ -64,13 +64,13 @@ abstract class DataStoreTestBase extends FunSuite with ShouldMatchers {
   
   test("range returns a subset of a DataStore from a starting bounds upto AND including an upper bound, with a maximum number of values to return") {
     populateDataStore(100)
-    val range = dataStore.range(new DateTime(20L), new DateTime(50L), JNothing, 7).toList
+    val range = dataStore.range(new DateTime(20L), new DateTime(50L), Map.empty, 7).toList
     range.size should equal (7)
     range zip (List(makeTR(23L, 230), makeTR(27L, 270), makeTR(31L, 310), makeTR(35L, 350), makeTR(39L, 390), makeTR(43L, 430), makeTR(47L, 470))) map {
       pair => pair._1 equalsIgnoringId pair._2
     }
     
-    val range2 = dataStore.range(new DateTime(20L), new DateTime(49L), JNothing, 7).toList
+    val range2 = dataStore.range(new DateTime(20L), new DateTime(49L), Map.empty, 7).toList
     range2.size should equal (7)
     range2 zip (List(makeTR(23L, 230), makeTR(27L, 270), makeTR(31L, 310), makeTR(35L, 350), makeTR(39L, 390), makeTR(43L, 430), makeTR(47L, 470))) map {
       pair => pair._1 equalsIgnoringId pair._2
@@ -79,7 +79,7 @@ abstract class DataStoreTestBase extends FunSuite with ShouldMatchers {
   
   test("range returns all of the data in the range if the maximum number is greater than the size of the data set") {
     populateDataStore(100)
-    val range = dataStore.range(new DateTime(20L), new DateTime(50L), JNothing, 1000).toList
+    val range = dataStore.range(new DateTime(20L), new DateTime(50L), Map.empty, 1000).toList
     range.size should equal (31)
     def testList(l:List[_], expectedN:Int):Unit = l match {
       case Nil =>
@@ -131,7 +131,7 @@ abstract class DataStoreTestBase extends FunSuite with ShouldMatchers {
     range1.size should equal (10001)
     range1.head equalsIgnoringId makeTR(0,0) should be (true)
     range1.last equalsIgnoringId makeTR(10000,100000) should be (true)
-    val range2 = dataStore.range(new DateTime(-10), new DateTime(100000), java.lang.Integer.MAX_VALUE)
+    val range2 = dataStore.range(new DateTime(-10), new DateTime(100000), Map.empty, java.lang.Integer.MAX_VALUE)
     range2.size should equal (20001)
     range2.head equalsIgnoringId makeTR(0,0) should be (true)
     range2.last equalsIgnoringId makeTR(20000,200000) should be (true)
