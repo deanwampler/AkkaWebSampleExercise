@@ -53,9 +53,11 @@ class MongoDBDataStore(
   }
   
   def range(from: DateTime, to: DateTime, otherCriteria: Map[String,Any] = Map.empty, maxNum: Int): Iterable[JSONRecord] = try {
-    val query = new BasicDBObject()
-    query.put(JSONRecord.timestampKey, 
-              new BasicDBObject("$gte", dateTimeToAnyValue(from)).append("$lte", dateTimeToAnyValue(to)))
+    val qb = new com.mongodb.QueryBuilder
+    qb.and(JSONRecord.timestampKey).
+      greaterThanEquals(dateTimeToAnyValue(from)).
+      lessThanEquals(dateTimeToAnyValue(to))
+    val query = qb.get
     // Add the additional query criteria, if any.
     // otherCriteria.foldLeft(query) { (q: BasicDBObject, keyValue: Pair[String,Any]) =>
     //   keyValue._2 match {
