@@ -52,15 +52,26 @@ class DataStorageServer(val serviceName: String, val dataStore: DataStore)
       self.reply (toJValue(Pair("error", message)))
   }
 
-  protected[persistence] def getData(criteria: JValue): JValue = {
-    (criteria \ "distinct_values_for_key") match {
-      case JField(_, JString(key)) => getDistinctValuesFor(key)
-      case _ => getDataForRange(criteria)
-    } 
+  // TODO: a little messy...
+  protected[persistence] def getData(criteria: Map[String, Any]): JValue = criteria.get("instrument_list") match {
+    case Some(x) => x match {
+      case prefix: String => criteria.get("instrument_symbols_key") match {
+        case Some(y) => y match {
+          case keyForInstruments: String => getInstrumentList(prefix, keyForInstruments)
+          case _ => throw new InvalidCriteria(
+            "Map contained key-value pairs for keys 'instrument_list' and 'instrument_symbols_key', but the value for 'instrument_symbols_key' was not a string: value = ", y)
+        }          
+        case _ => throw new InvalidCriteria(
+          "Map contained a key-value pair for key 'instrument_list', but not for key 'instrument_symbols_key': criteria = ", criteria)
+      }
+      case _ => throw new InvalidCriteria(
+        "Map contained a key-value pair for key 'instrument_list', but the value was not a string: value = ", x)
+    }
+    case _ => getDataForRange(criteria)    
   }
   
   // TODO: Support other query criteria besides time ranges.
-  protected[persistence] def getDataForRange(criteria: JValue): JValue = {
+  protected[persistence] def getDataForRange(criteria: Map[String, Any]): JValue = {
     log.debug(actorName + ": Starting getDataForRange:")
     val start: DateTime = extractTime(criteria, "start", new DateTime(0))
     val end:   DateTime = extractTime(criteria, "end",   new DateTime)
@@ -103,11 +114,12 @@ class DataStorageServer(val serviceName: String, val dataStore: DataStore)
     }
   }
 
-  protected def extractTime(json: JValue, key: String, default: => DateTime): DateTime = (json \ key) match {
-    case JField(key, value) => value match {
-      case JInt(millis) => new DateTime(millis.toLong)
-      case JString(s) => new DateTime(s)
-      case _ => default
+  protected def extractTime(criteria: Map[String, Any], key: String, default: => DateTime): DateTime = criteria.get(key) match {
+    case Some(value) => value match {
+      case dt:     DateTime => dt
+      case millis: Long     => new DateTime(millis)
+      case s:      String   => new DateTime(s)
+      case _                => default
     }
     case _ => default
   } 

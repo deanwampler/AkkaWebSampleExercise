@@ -73,7 +73,7 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
   protected def fetchPrices(
         instruments: List[Instrument], statistics: List[InstrumentStatistic], 
         start: DateTime, end: DateTime): JValue = {
-    (dataStorageServer !! Get(("start" -> start) ~ ("end" -> end) ~ ("stock_symbol" -> instruments))) match {
+    (dataStorageServer !! Get(Map("start" -> start, "end" -> end, "stock_symbol" -> instruments))) match {
       case None => 
         Pair("warning", "Nothing returned for query (start, end, instruments) = (" + start + ", " + end + ", " + instruments + ")")
       case Some(result) => 
@@ -82,13 +82,12 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
   }
   
   def getInstrumentList(
-      range: scala.collection.immutable.NumericRange[Char], keyForInstrumentSymbols: String): JValue =
-    (dataStorageServer !! Get(Pair("distinct_values_for_key", keyForInstrumentSymbols))) match {
+        range: scala.collection.immutable.NumericRange[Char], keyForInstrumentSymbols: String): JValue = {
+    (dataStorageServer !! Get(Map("instrument_list" -> range.toList.head.toString, "instrument_symbols_key" -> keyForInstrumentSymbols))) match {
       case None => 
         Pair("warning", "Nothing returned for instrument list in range "+range)
       case Some(result) => result
     }
-  
 
   /**
    * A "hook" method that could be used to filter by instrument (and maybe statistics) criteria. 

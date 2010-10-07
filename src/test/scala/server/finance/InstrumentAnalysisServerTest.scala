@@ -84,20 +84,20 @@ class InstrumentAnalysisServerTest extends FunSuite
   }
 
   test ("calculateStatistics returns a JSON string containing all data when all data matches the query criteria") {
-    val criteria = makeCriteria("A,B,C","price", 0, nowms)
+    val criteria = makeCriteria("A,B,C", "price", 0, nowms)
     val expected = makeExpected(makeJSON((List(js(0), js(3), js(2), js(4), js(1)))), criteria)
     analysisServer.calculateStatistics(criteria) should equal (expected)
   }
 
   test ("calculateStatistics returns a JSON string containing all data that matches the time criteria") {
     // Return all data for the specified time range, low to high (inclusive)
-    val criteria = makeCriteria("A,B,C","price", thenms + 1000, thenms + 3000)
+    val criteria = makeCriteria("A,B,C", "price", thenms + 1000, thenms + 3000)
     val expected = makeExpected(makeJSON((List(js(3), js(2), js(4)))), criteria)
     analysisServer.calculateStatistics(criteria) should equal (expected)
   }
 
   test ("The time criteria are inclusive for the earliest time and the latest time") {
-    val criteria = makeCriteria("A,B,C","price", thenms + 1000, thenms + 3000)
+    val criteria = makeCriteria("A,B,C", "price", thenms + 1000, thenms + 3000)
     val expected = makeExpected(makeJSON((List(js(3), js(2), js(4)))), criteria)
     analysisServer.calculateStatistics(criteria) should equal (expected)
   }
@@ -105,7 +105,7 @@ class InstrumentAnalysisServerTest extends FunSuite
   // TODO
   test ("calculateStatistics returns a JSON string containing all data that matches the instrument criteria") {
     pending
-    val criteria = makeCriteria("A","price", 0, nowms)
+    val criteria = makeCriteria("A", "price", 0, nowms)
     val expected = makeExpected(makeJSON((List(js(0), js(1), js(2)))), criteria)
     analysisServer.calculateStatistics(criteria) should equal (expected)
   }
