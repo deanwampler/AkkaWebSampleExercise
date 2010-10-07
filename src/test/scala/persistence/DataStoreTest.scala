@@ -54,10 +54,8 @@ class DataStoreTest extends FunSuite with ShouldMatchers with BeforeAndAfterEach
     for (i <- start + 1L to (start + size ) by 2L)
       { dataStore add makeJSONRecord(i, "" + (i*10L)) }
   }
-  
-  test("range returns a subset of a DataStore from a starting bounds upto AND including an upper bound should return a Traversable with the correct subset") {
-    populateDataStore(100)
-    val range = dataStore.range(new DateTime(start+20), new DateTime(start+25)).toList
+
+  def verifyRangeQuery(range: List[JSONRecord]) = {
     range.size should equal(6)
     def checkEach(i: Int, range2: List[JSONRecord]):Unit = range2 match {
       case Nil =>
@@ -66,6 +64,12 @@ class DataStoreTest extends FunSuite with ShouldMatchers with BeforeAndAfterEach
         checkEach(i+1, tail)
     }
     checkEach(0, range)
+  }
+  
+  test("range returns a subset of a DataStore from a starting bounds upto AND including an upper bound should return a Traversable with the correct subset") {
+    populateDataStore(100)
+    val range = dataStore.range(new DateTime(start+20), new DateTime(start+25)).toList
+    verifyRangeQuery(range)
   }
     
   test("range returns an empty sequence if the start is >= the end") {
@@ -77,6 +81,12 @@ class DataStoreTest extends FunSuite with ShouldMatchers with BeforeAndAfterEach
       range2.size should equal (0)
     }
   }
+
+  // test("query returns a sequence matching the specified query, as interpreted by the underlying storage engine") {
+  //   populateDataStore(100)
+  //   val range = dataStore.query(Map(">=" -> new DateTime(start+20), "<=" -> new DateTime(start+25))).toList
+  //   verifyRangeQuery(range)
+  // }
   
   test("getDistinctValuesFor returns the distinct values for the specified key.") {
     add5Elements

@@ -1,4 +1,5 @@
 package org.chicagoscala.awse.persistence.mongodb
+import org.chicagoscala.awse.util.json._
 import org.chicagoscala.awse.persistence._
 import com.osinka.mongodb._
 import net.liftweb.json.JsonAST._
@@ -14,9 +15,14 @@ import com.mongodb._
 object MongoDBJSONRecord {
   
   /**
-   * Convert a Map to DBObject.
+   * Convert a JSONRecord to a DBObject.
    */ 
-  implicit def toDBObject(json: JSONRecord) = mapToDBObject(json.toMap)
+  implicit def toDBObject(json: JSONRecord): DBObject = mapToDBObject(json.toMap)
+  
+  /**
+   * Convert a Lift JSON JValue to a DBObject.
+   */ 
+  implicit def toDBObject(json: JValue): DBObject = mapToDBObject(JSONMap.jsonToMap(json))
   
   def apply(dbo: DBObject): JSONRecord = JSONRecord(dbo.toMap.asInstanceOf[java.util.Map[String,Any]])
       

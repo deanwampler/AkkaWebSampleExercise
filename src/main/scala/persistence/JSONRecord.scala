@@ -16,7 +16,7 @@ case class JSONRecord(inputJSON: JValue) {
    * Convert the JSON object to a Map. To avoid problems where longs get converted to
    * doubles by Mongo, we convert any BigInts to longs.
    */ 
-  def toMap = convertBigIntsToLongs(json.values.asInstanceOf[Map[String,Any]])
+  def toMap = JSONRecord.convertTypes(json.values.asInstanceOf[Map[String,Any]])
   
   def ++(other: JSONRecord): JSONRecord = JSONRecord(json ++ other.json)
   def ++(other: JValue): JSONRecord     = JSONRecord(json ++ other)
@@ -36,17 +36,6 @@ case class JSONRecord(inputJSON: JValue) {
   def equalsIgnoringId(that: JSONRecord) = 
     JSONRecord.jsonWithoutId(this) equals JSONRecord.jsonWithoutId(that)
     
-  protected def convertBigIntsToLongs(m: Map[String, Any]): Map[String, Any] = 
-    m map { kv => (kv._1, convertBigIntsToLongs(kv._2)) }
-    
-  protected def convertBigIntsToLongs(i: Iterable[Any]): Iterable[Any] = 
-    i map { convertBigIntsToLongs(_) }
-    
-  protected def convertBigIntsToLongs(x: Any): Any = x match {
-    case bi: BigInt => bi.longValue
-    case _ => x
-  }
-
   protected def fixTimestamp(json: JValue): Pair[JValue, DateTime] = 
     (for { 
       JField(key, timestamp) <- json
@@ -94,6 +83,12 @@ object JSONRecord {
   def apply[K,V](map: Map[K,V]): JSONRecord = new JSONRecord(map)
   def apply[K,V](jmap: java.util.Map[K,V]): JSONRecord = new JSONRecord(javaMapToMap(jmap))  
   
+  /**
+   * Convert the JSON object to a Map.
+   */ 
+  def toMap(jsonRecord: JSONRecord) = 
+    Some(convertTypes(jsonRecord.json.values.asInstanceOf[Map[String,Any]]))
+  
   def jsonWithoutId(record: JSONRecord) = record.json match {
     case jo: JObject => JObject(jo.obj filter { 
       case JField("_id", value) => false
@@ -106,6 +101,23 @@ object JSONRecord {
     case JField("_id", value) => JNothing
     case json => json 
   }
+
+  /**
+   * To avoid problems where longs get converted to doubles by Mongo, we convert any BigInts to longs.
+   * Also, we convert Joda Time DateTimes to millisecond longs.
+   */
+  def convertTypes(m: Map[String, Any]): Map[String, Any] = 
+    m map { kv => (kv._1, convertTypes(kv._2)) }
+    
+  def convertTypes(i: Iterable[Any]): Iterable[Any] = 
+    i map { convertTypes(_) }
+    
+  def convertTypes(x: Any): Any = x match {
+    case bi: BigInt => bi.longValue
+    case dt: DateTime => dt.getMillis
+    case _ => x
+  }
+
   
   // Since the underlying Java map is mutable, we make a copy, rather than use
   // Scala's JavaConversions.

@@ -52,7 +52,7 @@ class MongoDBDataStore(
     case Some(dbo) => Some(JSONRecord(dbo.toMap))
   }
   
-  def range(from: DateTime, to: DateTime, maxNum: Int): Iterable[JSONRecord] = try {
+  def range(from: DateTime, to: DateTime, otherCriteria: JValue, maxNum: Int): Iterable[JSONRecord] = try {
     val query = new BasicDBObject()
     query.put(JSONRecord.timestampKey, 
               new BasicDBObject("$gte", dateTimeToAnyValue(from)).append("$lte", dateTimeToAnyValue(to)))
@@ -68,6 +68,20 @@ class MongoDBDataStore(
       throw th
   }
   
+  /**
+   * This query capability should support any valid DBObject-based query specification, as long as it is expressed
+   * correctly in the input map. 
+   */
+  // def query(querySpecification: Map[String, Any]): Iterable[JSONRecord] = try {
+  //   val queryDBObject = MongoDBJSONRecord.mapToDBObject(querySpecification)
+  //   val cursor = collection.find(queryDBObject)
+  //   cursorToRecords(cursor)
+  // } catch {
+  //   case th => 
+  //     log.error("MongoDB Exception: ", th)
+  //     throw th
+  // } 
+
   def getDistinctValuesFor(keyForValues: String): Iterable[JSONRecord] = try {
     val list = collection.distinct(keyForValues)
     val buff = new scala.collection.mutable.ArrayBuffer[String]()

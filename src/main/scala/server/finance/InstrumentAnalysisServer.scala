@@ -73,9 +73,9 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
   protected def fetchPrices(
         instruments: List[Instrument], statistics: List[InstrumentStatistic], 
         start: DateTime, end: DateTime): JValue = {
-    (dataStorageServer !! Get(("start" -> start) ~ ("end" -> end))) match {
+    (dataStorageServer !! Get(("start" -> start) ~ ("end" -> end) ~ ("stock_symbol" -> instruments))) match {
       case None => 
-        Pair("warning", "Nothing returned for query (start, end) = (" + start + ", " + end + ")")
+        Pair("warning", "Nothing returned for query (start, end, instruments) = (" + start + ", " + end + ", " + instruments + ")")
       case Some(result) => 
         formatPriceResults(filter(result), instruments, statistics, start, end)
     }
@@ -87,13 +87,6 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
       case None => 
         Pair("warning", "Nothing returned for instrument list in range "+range)
       case Some(result) => result
-        // val filteredResult = for {
-        //   prefixChar <- range
-        //   name <- result
-        //   if (name.charAt(0) == prefixChar)
-        // } yield name
-        // log.info("IS: result = "+filteredResult)
-        // filteredResult
     }
   
 

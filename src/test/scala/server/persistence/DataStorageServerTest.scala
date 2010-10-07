@@ -65,27 +65,23 @@ class DataStorageServerTest extends FunSuite
   }
   
   test("Get message should return an empty JSON string if there is no data") {
-
     val response1: Option[_] = sendAndWait(makeGet(epochStart, now))
     response1.get should equal (JNothing)
   }
   
   test("Get message should return an empty JSON string if there is data, but none matches the Get time-range criteria") {
-
     populateDataStore(3)
     val response3: Option[_] = sendAndWait(makeGet(thenms + 3000, thenms + 4000))
     response3.get should equal (JNothing)
   }
 
   test("Get message should return the one datum as a JSON string if there is one datum and it matches the Get time-range criteria") {
-
     populateDataStore(1)
     val response2: Option[_] = sendAndWait(makeGet(epochStart, now))
     response2.get should equal (makeJSONRecord(thenms, "value: 0").json)
   }
       
   test("Get message should return all data as a single JSON string if there is more than one datum and all match the Get time-range criteria") {
-
     populateDataStore(3)
     val response3: Option[_] = sendAndWait(makeGet(epochStart, now))
     response3 match {

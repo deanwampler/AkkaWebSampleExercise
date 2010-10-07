@@ -48,23 +48,29 @@ abstract class DataStoreTestBase extends FunSuite with ShouldMatchers {
       { dataStore add makeTR(i, (i*10L)) }
   }
   
+  def verifyLowerUpper(range: List[JSONRecord]) {
+    val expected = List(makeTR(20L, 200), makeTR(21L, 210), makeTR(22L, 220), makeTR(23L, 230), makeTR(24L, 240), makeTR(25L, 250))
+    range.size should equal (expected.size)
+    range zip expected map {
+      pair => pair._1 equalsIgnoringId pair._2
+    }
+  }
+    
   test("range returns a subset of a DataStore from a starting bounds upto AND including an upper bound should return a Traversable with the correct subset") {
     populateDataStore(100)
     val range = dataStore.range(new DateTime(20L), new DateTime(25L)).toList
-    range zip (List(makeTR(20L, 200), makeTR(21L, 210), makeTR(22L, 220), makeTR(23L, 230), makeTR(24L, 240), makeTR(25L, 250))) map {
-      pair => pair._1 equalsIgnoringId pair._2
-    }
+    verifyLowerUpper(range)
   }
   
   test("range returns a subset of a DataStore from a starting bounds upto AND including an upper bound, with a maximum number of values to return") {
     populateDataStore(100)
-    val range = dataStore.range(new DateTime(20L), new DateTime(50L), 7).toList
+    val range = dataStore.range(new DateTime(20L), new DateTime(50L), JNothing, 7).toList
     range.size should equal (7)
     range zip (List(makeTR(23L, 230), makeTR(27L, 270), makeTR(31L, 310), makeTR(35L, 350), makeTR(39L, 390), makeTR(43L, 430), makeTR(47L, 470))) map {
       pair => pair._1 equalsIgnoringId pair._2
     }
     
-    val range2 = dataStore.range(new DateTime(20L), new DateTime(49L), 7).toList
+    val range2 = dataStore.range(new DateTime(20L), new DateTime(49L), JNothing, 7).toList
     range2.size should equal (7)
     range2 zip (List(makeTR(23L, 230), makeTR(27L, 270), makeTR(31L, 310), makeTR(35L, 350), makeTR(39L, 390), makeTR(43L, 430), makeTR(47L, 470))) map {
       pair => pair._1 equalsIgnoringId pair._2
@@ -73,7 +79,7 @@ abstract class DataStoreTestBase extends FunSuite with ShouldMatchers {
   
   test("range returns all of the data in the range if the maximum number is greater than the size of the data set") {
     populateDataStore(100)
-    val range = dataStore.range(new DateTime(20L), new DateTime(50L), 1000).toList
+    val range = dataStore.range(new DateTime(20L), new DateTime(50L), JNothing, 1000).toList
     range.size should equal (31)
     def testList(l:List[_], expectedN:Int):Unit = l match {
       case Nil =>
@@ -131,4 +137,9 @@ abstract class DataStoreTestBase extends FunSuite with ShouldMatchers {
     range2.last equalsIgnoringId makeTR(20000,200000) should be (true)
   }
   
+  // test("query returns a sequence matching the specified query, as interpreted by the underlying storage engine") {
+  //   populateDataStore(100)
+  //   val range = dataStore.query(Map(">=" -> new DateTime(20L), "<=" -> new DateTime(25L))).toList
+  //   verifyLowerUpper(range)
+  // }
 }
