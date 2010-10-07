@@ -8,7 +8,7 @@ import org.joda.time._
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 import com.osinka.mongodb._
-import com.mongodb.{BasicDBObject, DBCursor, Mongo, MongoException}
+import com.mongodb.{BasicDBObject, BasicDBList, DBCursor, Mongo, MongoException, QueryBuilder}
 // import com.novus.casbah.mongodb.Imports._
 
 /**
@@ -53,17 +53,25 @@ class MongoDBDataStore(
   }
   
   def range(from: DateTime, to: DateTime, otherCriteria: Map[String,Any] = Map.empty, maxNum: Int): Iterable[JSONRecord] = try {
-    val qb = new com.mongodb.QueryBuilder
+    val qb = new QueryBuilder
     qb.and(JSONRecord.timestampKey).
       greaterThanEquals(dateTimeToAnyValue(from)).
       lessThanEquals(dateTimeToAnyValue(to))
-    val query = qb.get
     // Add the additional query criteria, if any.
-    // otherCriteria.foldLeft(query) { (q: BasicDBObject, keyValue: Pair[String,Any]) =>
-    //   keyValue._2 match {
-    //     case list: List => q.put(keyValue._1, new BasicDBObject("$in", ))
-    //   }
-    // }
+    otherCriteria.foreach { (keyValue: Pair[String,Any]) =>
+      keyValue._2 match {
+        case list: List[_] => 
+          val dbList = list.foldLeft(new BasicDBList()) { (dbl: BasicDBList, x:Any) => 
+            dbl.add(x.asInstanceOf[AnyRef])
+            dbl
+          }
+          qb.and(keyValue._1).in(dbList)
+        case map: Map[_,_] => throw new RuntimeException("Construction of Query with a Map is TODO.")
+        case x: AnyRef => qb.is(x)
+        case x: Any => throw new RuntimeException("Construction of Query with an Any is TODO.")
+      }
+    }
+    val query = qb.get
     val cursor = collection.find(query).sort(new BasicDBObject(JSONRecord.timestampKey, 1))
     log.info("db name: query, cursor.count, maxNum: "+collection.getFullName+", "+query+", "+cursor.count+", "+maxNum)
     if (cursor.count > maxNum)

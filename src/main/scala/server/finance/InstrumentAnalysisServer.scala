@@ -71,7 +71,8 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
   protected def fetchPrices(
         instruments: List[Instrument], statistics: List[InstrumentStatistic], 
         start: DateTime, end: DateTime): JValue = {
-    (dataStorageServer !! Get(Map("start" -> start, "end" -> end, "stock_symbol" -> instruments))) match {
+    val symbols = instruments map {_.symbol}
+    (dataStorageServer !! Get(Map("start" -> start, "end" -> end, "stock_symbol" -> Instrument.toSymbolNames(instruments)))) match {
       case None => 
         Pair("warning", "Nothing returned for query (start, end, instruments) = (" + start + ", " + end + ", " + instruments + ")")
       case Some(result) => 
