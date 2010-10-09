@@ -93,9 +93,5 @@ class DataStorageServerTest extends FunSuite
           makeJSONRecord(thenms + 2000, "value: 2")))
     }
   }
-
-  test("Get message should return data as a single JSON string if there is data that matches the Get value criteria") {
-    pending  // TODO: implement this functionality!
-  }
 }
 

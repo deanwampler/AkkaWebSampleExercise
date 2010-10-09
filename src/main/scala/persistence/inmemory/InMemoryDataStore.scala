@@ -24,9 +24,36 @@ class InMemoryDataStore(val name: String) extends DataStore with Logging {
     
   def getAll() = store map {p => p._2}
   
-  def range(from: DateTime, to: DateTime, otherCriteria: Map[String,Any] = Map.empty, maxNum: Int): Iterable[JSONRecord] = 
-    store.range(from, dateTimePlus1(to)).map(p => p._2).take(maxNum).toIterable
-
+  def range(from: DateTime, to: DateTime, otherCriteria: Map[String,Any] = Map.empty, maxNum: Int): Iterable[JSONRecord] = {
+    // Get the data as as a map of times to JSONRecords in the time range and extract just the JSONRecords and convert them to Maps.
+    val rangeResult = store.range(from, dateTimePlus1(to)).toIterable map { p => p._2.toMap }
+    val rangeResult2: Iterable[Map[String,Any]] = otherCriteria.size match {
+      case 0 => rangeResult
+      case _ => rangeResult filter filters(otherCriteria)
+    } 
+    rangeResult2 map { (r: Map[String,Any]) => JSONRecord(r) } take maxNum
+  }
+  
+  // A function value that takes a criteria map and returns another function that takes a map of data. 
+  // It requires the data map to satisfy at least one of the criteria.
+  val filters = (criteria: Map[String,Any]) => (data: Map[String,Any]) => 
+    criteria exists { kv => 
+      data.get(kv._1) match {
+        case None => false
+        case Some(value) => kv._2 match {
+          // If the criterium is a list or array, require that the data value (in the key-value) is 
+          // present in the list. In other words, the criterium list elements are treated as "or'ed" 
+          // requirements.
+          // If the criterium is a map, we don't support it yet.
+          // For anything else, we require the data value to equal the criterium value.
+          case list: List[_]  => list contains value
+          // case ary:  Array[_] => ary.toList contains value
+          case map:  Map[_,_] => throw new RuntimeException("Construction of Query with a Map is TODO.")
+          case a:    Any      => a == value
+        }
+      }
+    }    
+  
   /**
    * A limited query capability. Currently only supports the same operations as range, specified thusly:
    * Map(">=" -> lowerDateTime, "<=" -> upperDateTime, "max" => maxNum). Other key-value pairs are ignored.

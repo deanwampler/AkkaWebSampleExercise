@@ -30,7 +30,7 @@ class InstrumentAnalysisServerTest extends FunSuite
 
 
   def makeJSONRecord(time: Long, symbol: String, price: Double) = {
-    val json = ("timestamp" -> time) ~ ("symbol" -> symbol) ~ ("price" -> price)
+    val json = ("timestamp" -> time) ~ ("stock_symbol" -> symbol) ~ ("price" -> price)
     JSONRecord(json)
   }
 
@@ -102,17 +102,13 @@ class InstrumentAnalysisServerTest extends FunSuite
     analysisServer.calculateStatistics(criteria) should equal (expected)
   }
 
-  // TODO
   test ("calculateStatistics returns a JSON string containing all data that matches the instrument criteria") {
-    pending
     val criteria = makeCriteria("A", "price", 0, nowms)
     val expected = makeExpected(makeJSON((List(js(0), js(1), js(2)))), criteria)
     analysisServer.calculateStatistics(criteria) should equal (expected)
   }
 
-  // TODO
   test ("calculateStatistics returns a JSON string containing all data that matches the statistics criteria") {
-    pending
     val criteria1 = makeCriteria("A,B,C", "price", 0, nowms)
     val criteria2 = makeCriteria("A,B,C", "50dma", 0, nowms)
     val expected1 = makeExpected(makeJSON((List(js(0), js(3), js(2), js(4), js(1)))), criteria1)
@@ -122,8 +118,8 @@ class InstrumentAnalysisServerTest extends FunSuite
   }
   
   test ("getInstrumentList returns a list of instruments that start with the specified range of letters") {
-    analysisServer.getInstrumentList('A' to 'D', "symbol") \ "symbol" match {
-      case JField("symbol", array) => array.values should equal (List("A", "B", "C"))
+    analysisServer.getInstrumentList('A' to 'D', "stock_symbol") \ "stock_symbol" match {
+      case JField("stock_symbol", array) => array.values should equal (List("A", "B", "C"))
       case _ => fail
     }
   }
