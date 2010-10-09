@@ -70,7 +70,6 @@ class DataStorageServer(val serviceName: String, val dataStore: DataStore)
     case _ => getDataForRange(criteria)    
   }
   
-  // TODO: Support other query criteria besides time ranges.
   protected[persistence] def getDataForRange(criteria: Map[String, Any]): JValue = {
     log.debug(actorName + ": Starting getDataForRange:")
     val start: DateTime = extractTime(criteria, "start", new DateTime(0))

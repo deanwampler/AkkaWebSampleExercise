@@ -21,12 +21,5 @@ trait DataStore {
 
   def getDistinctValuesFor(key: String): Iterable[JSONRecord]
 
-  /** 
-   * General interface to the query capabilities of the underlying persistent store. Requires that the
-   * store (or support classes) can interpret the input Map as necessary. The supported queries are
-   * store-dependent!
-   */
-  // def query(querySpecification: Map[String, Any]): Iterable[JSONRecord]
-
   def size: Long
 }  

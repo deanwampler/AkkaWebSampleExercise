@@ -84,20 +84,6 @@ class MongoDBDataStore(
       throw th
   }
   
-  /**
-   * This query capability should support any valid DBObject-based query specification, as long as it is expressed
-   * correctly in the input map. 
-   */
-  // def query(querySpecification: Map[String, Any]): Iterable[JSONRecord] = try {
-  //   val queryDBObject = MongoDBJSONRecord.mapToDBObject(querySpecification)
-  //   val cursor = collection.find(queryDBObject)
-  //   cursorToRecords(cursor)
-  // } catch {
-  //   case th => 
-  //     log.error("MongoDB Exception: ", th)
-  //     throw th
-  // } 
-
   def getDistinctValuesFor(keyForValues: String): Iterable[JSONRecord] = try {
     val list = collection.distinct(keyForValues)
     val buff = new scala.collection.mutable.ArrayBuffer[String]()

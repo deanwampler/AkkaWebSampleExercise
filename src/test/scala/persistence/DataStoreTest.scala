@@ -81,12 +81,6 @@ class DataStoreTest extends FunSuite with ShouldMatchers with BeforeAndAfterEach
       range2.size should equal (0)
     }
   }
-
-  // test("query returns a sequence matching the specified query, as interpreted by the underlying storage engine") {
-  //   populateDataStore(100)
-  //   val range = dataStore.query(Map(">=" -> new DateTime(start+20), "<=" -> new DateTime(start+25))).toList
-  //   verifyRangeQuery(range)
-  // }
   
   test("getDistinctValuesFor returns the distinct values for the specified key.") {
     add5Elements

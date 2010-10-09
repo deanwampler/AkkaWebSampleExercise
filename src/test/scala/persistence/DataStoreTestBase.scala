@@ -137,10 +137,4 @@ abstract class DataStoreTestBase extends FunSuite with ShouldMatchers {
     range2.head equalsIgnoringId makeTR(0,0) should be (true)
     range2.last equalsIgnoringId makeTR(20000,200000) should be (true)
   }
-  
-  // test("query returns a sequence matching the specified query, as interpreted by the underlying storage engine") {
-  //   populateDataStore(100)
-  //   val range = dataStore.query(Map(">=" -> new DateTime(20L), "<=" -> new DateTime(25L))).toList
-  //   verifyLowerUpper(range)
-  // }
 }

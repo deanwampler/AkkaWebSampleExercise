@@ -54,17 +54,6 @@ class InMemoryDataStore(val name: String) extends DataStore with Logging {
       }
     }    
   
-  /**
-   * A limited query capability. Currently only supports the same operations as range, specified thusly:
-   * Map(">=" -> lowerDateTime, "<=" -> upperDateTime, "max" => maxNum). Other key-value pairs are ignored.
-   */
-  // def query(querySpecification: Map[String, Any]): Iterable[JSONRecord] = {
-  //   val lower = querySpecification.getOrElse(">=",  new DateTime(0)).asInstanceOf[DateTime]
-  //   val upper = querySpecification.getOrElse("<=",  new DateTime).asInstanceOf[DateTime]
-  //   val max   = querySpecification.getOrElse("max", java.lang.Integer.MAX_VALUE).asInstanceOf[Int]
-  //   range(lower, upper, max)
-  // }
-
   def getDistinctValuesFor(keyForValues: String) = {
     val values = store.valuesIterator map { (jsonRecord: JSONRecord) =>
       (jsonRecord.json \ keyForValues) match {
