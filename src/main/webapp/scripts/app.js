@@ -145,7 +145,7 @@ function displayFinancialDataInAGraph(json, fields) {
     var graph_data = []
     var results  = row.results
     if (results.length === 0) {
-      writeWarning("No results!")
+      writeWarning("No " + statistics + " results for " + instruments + "!")
     } else {
       $.each(results, function(j, result) {
         var x = new Date(fields[1][1](result))
@@ -175,12 +175,13 @@ function displayFinancialDataInAGraph(json, fields) {
 
 
 function graphData(data, data_bounds) {
-  console.log(data_bounds)
-  console.log(data)
+  time_delta = data_bounds.max_x.getTime() - data_bounds.min_x.getTime()
+  padding_on_the_right = time_delta * .05
+  max_x = new Date(data_bounds.max_x.getTime() + padding_on_the_right)
   /* Sizing and scales. */
   var w = $(window).width() * .9,
       h = $(window).height() * .8,
-      x = pv.Scale.linear(data_bounds.min_x, data_bounds.max_x).range(0, w),
+      x = pv.Scale.linear(data_bounds.min_x, max_x).range(0, w),
       y = pv.Scale.linear(data_bounds.min_y, data_bounds.max_y).range(0, h);
 
   /* The root panel. */
@@ -216,17 +217,24 @@ function graphData(data, data_bounds) {
   
   /* The lines. */
   $.each(data, function(i, data_for_stock) {
-    var color = 'rgba(' + ((128 * i) % 256) + ',128,128,1.0)' //pv.Colors.category20().by(i)
-    var line = vis.add(pv.Line)
+    var color = 'rgba(' + ((32 * i) % 256) + ',' + ((64 * i) % 256) + ',' + ((128 * i) % 256) + ',1.0)' //pv.Colors.category20().by(i)
+    console.log(color)
+    vis.add(pv.Line)
         .data(data_for_stock.data)
         .interpolate("step-after")
         .left(function(d) {return x(d.x)})
         .bottom(function(d) {return y(d.y)})
         .strokeStyle(color)
         .lineWidth(3)
-        console.log(line.data())
-    line.data()[line.data().length-1].anchor("right").add(pv.Label)
+
+    /* Add labels for each line end */
+    vis.add(pv.Mark)
+        .data(data_for_stock.data.slice(-1))
+        .add(pv.Label)
         .textStyle(color)
+        .font("16px sans-serif")
+        .left(function(d) { return x(d.x) })
+        .bottom(function(d) { return y(d.y) })
         .text(data_for_stock.instruments)
   })
 
@@ -293,8 +301,9 @@ function displayInstrumentsLists(json) {
 	if (is_array(json) === false) {
     json = [json]
 	} 
+	console.log(json)
   $.each(json, function(i, row) {
-    var symbols  = row.symbols
+    var symbols  = row.stock_symbol
     if (symbols.length === 0) {
       $("#finance-table tbody").append(
         "<tr class='results-row'><td class='symbol-letter'>" + row.letter + "</td><td class='no-symbols'>No instruments!</td></tr>")        
