@@ -39,6 +39,8 @@
     <script language="javascript" type="text/javascript" src="scripts/jquery/jquery.datePicker-2.1.2.js"></script>
     <script language="javascript" type="text/javascript" src="scripts/jquery/jquery.tablesorter.min.js"></script>
     <script language="javascript" type="text/javascript" src="http://www.google.com/jsapi"></script>
+		<!-- Use protovis.js for graphs. Must be included before app.js -->
+    <script language="javascript" type="text/javascript" src="scripts/protovis-r3.3.js"></script>
     <script language="javascript" type="text/javascript" src="scripts/app.js"></script>
   </head>
   <body>
@@ -55,6 +57,7 @@
         Start: <input type="text" name="start" id="start" class="date-pick popup submit-on-CR" />
         End: <input type="text" name="end" id="end" class="date-pick popup submit-on-CR" />
         <input class="control" id="go" type="button" onclick="serverControl('stats');" value="Go!" />
+        <input class="control" id="graph" type="checkbox" value="Graph" checked="checked" />Graph
         <input class="control" id="unknown" type="button" onclick="serverControl('list_instruments');" value="List Stocks"/>
         <input class="control" id="ping" type="button" onclick="serverControl('ping');" value="Ping!"/>
       </div>
@@ -62,7 +65,9 @@
     <span class="message-box" id="message"></span>
     <div class='banner'></div>
     <div id='results-display'>
-      <div id='finance-display' class='hidden'>
+      <div id='finance-graph-display' class='hidden'>
+      </div>
+      <div id='finance-table-display' class='hidden'>
         <table id='finance-table' class='tablesorter rounded-corners'>
           <thead>
           </thead>

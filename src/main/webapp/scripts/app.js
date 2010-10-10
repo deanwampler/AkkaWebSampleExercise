@@ -88,7 +88,8 @@ function onSuccess(jsonString) {
         pongList.append("<li>" + item + "</li>")
       })
     })
-    $('#finance-display').hide()
+    $('#finance-graph-display').hide()
+    $('#finance-table-display').hide()
     $('#pong-display').show()
   } else if (json["info"]) {
     writeInfo(json["info"]);
@@ -117,11 +118,57 @@ function onSuccess(jsonString) {
 }
 
 function displayFinancialData(json, fields) {
-  // Plot the financial data. 
   // TODO: we more or less assume that there is really one instrument and
   // one statistic in each "row", because that's how the data is currently
   // returned, with one-element arrays for the instruments and statistics.
+
   $('#pong-display').hide()
+  var json2 = is_array(json) ? json : [json] // hack to deal with inconsistent returned results.
+  if ($('#graph:checked').length > 0)
+    displayFinancialDataInAGraph(json2, fields)
+  else
+    displayFinancialDataInATable(json2, fields)
+}
+
+// TODO: Does not handle more than one instrument at a time!
+function displayFinancialDataInAGraph(json, fields) {
+  var graph_data = []
+  var graph_data_bounds = undefined
+  if (json.length > 1) {
+    writeWarning("The graph currently doesn't properly handle more than one instrument at a time!")
+  }
+  $.each(json, function(i, row) {
+    var results  = row.results
+    if (results.length === 0) {
+      writeWarning("No results!")
+    } else {
+      $.each(results, function(j, result) {
+        var x = new Date(fields[1][1](result))
+        var y = fields[2][1](result)
+        if (graph_data_bounds === undefined) {
+          graph_data_bounds = {min_x: x, max_x: x, min_y: y, max_y: y}
+        } else {
+          if (x < graph_data_bounds.min_x)
+            graph_data_bounds.min_x = x
+          else if (x > graph_data_bounds.max_x)
+            graph_data_bounds.max_x = x
+          if (x < graph_data_bounds.min_x)
+            graph_data_bounds.min_x = x
+          else if (y > graph_data_bounds.max_y)
+            graph_data_bounds.max_y = y
+        }
+        
+        graph_data.push({x: x, y: y})
+      })
+    }
+    // Must delete and recreate the svg every time.
+    $('span svg').remove()
+    graphData(graph_data, graph_data_bounds)
+    $('#finance-graph-display').show()
+  })
+}
+
+function displayFinancialDataInATable(json, fields) {
   // Create the header row:
   $("#finance-table thead").html('<tr class="finance-head"></tr>') // start with a clean row.
   $.each(fields, function(i, field) {
@@ -135,6 +182,7 @@ function displayFinancialData(json, fields) {
   // Create the body rows:
   $("#finance-table tbody").html('') // clear the body first.
   $.each(json, function(i, row) {
+    
     var criteria = row.criteria
     var instruments = "unknown criteria"
     var statistics  = "unknown statistics"
@@ -161,8 +209,59 @@ function displayFinancialData(json, fields) {
       })
     }
   })
-  $('#finance-display').show()
+  $('#finance-table-display').show()
   setUpTableSorting()
+}
+
+function graphData(data, data_bounds) {
+  /* Sizing and scales. */
+  var w = 750,
+      h = 550,
+      x = pv.Scale.linear(data, function(d) {return d.x}).range(0, w),
+      y = pv.Scale.linear(data, function(d) {return d.y}).range(0, h);
+//      y = pv.Scale.linear(data_bounds.min_y, data_bounds.maxy).range(0, h);
+
+  /* The root panel. */
+  var vis = new pv.Panel()
+        .width(w)
+        .height(h)
+        .bottom(20)
+        .left(20)
+        .right(10)
+        .right(5)
+        // .right(data_bounds.max_x)
+        // .top(data_bounds.max_y + 5);
+  
+  /* X-axis ticks. */
+  vis.add(pv.Rule)
+      .data(x.ticks())
+      .visible(function(d) {return d > 0})
+      .left(x)
+      .strokeStyle("#eee")
+      .add(pv.Rule)
+      .bottom(-5)
+      .height(5)
+      .strokeStyle("#000")
+      .anchor("bottom").add(pv.Label)
+      .text(x.tickFormat);
+
+  /* Y-axis ticks. */
+  vis.add(pv.Rule)
+      .data(y.ticks(5))
+      .bottom(y)
+      .strokeStyle(function(d){return d ? "#eee" : "#000"})
+      .anchor("left").add(pv.Label)
+      .text(y.tickFormat);
+
+  /* The line. */
+  vis.add(pv.Line)
+      .data(data)
+      .interpolate("step-after")
+      .left(function(d) {return x(d.x)})
+      .bottom(function(d) {return y(d.y)})
+      .lineWidth(3);
+
+  vis.render();  
 }
 
 function displayInstrumentsLists(json) {
@@ -190,12 +289,20 @@ function displayInstrumentsLists(json) {
 			  "<tr class='results-row'><td class='symbol-letter'>" + row.letter + "</td><td class='symbols'>" + symbols.join(', ') + "</td></tr>")
 		}
   })
-  $('#finance-display').show()
+  $('#finance-table-display').show()
   setUpTableSorting()
 }
 
 function onError(request, textStatus, errorThrown) {
   writeDebug("Ajax request failed: XMLHttpRequest="+request.responseText+", textStatus: "+textStatus+", errorThrown: "+errorThrown);
+}
+
+function saveCookies(symbols, stats, start, end, graph) {
+  $.cookie('symbols', symbols)
+  $.cookie('stats-option', stats)
+  $.cookie('start', start)
+  $.cookie('end', end)
+  $.cookie('graph', graph)
 }
 
 function sendRequest(action) {
@@ -204,8 +311,11 @@ function sendRequest(action) {
   var stats   = $(toolbar).find('.stats-option:selected').val()
   var start   = $(toolbar).find('#start').val()
   var end     = $(toolbar).find('#end').val()
+  var graph   = $(toolbar).find('#graph:checked').length > 0
+  saveCookies(symbols, stats, start, end, graph)
+  
   $('#pong-display').hide()
-  $('#finance-display').hide()
+  $('#finance-table-display').hide()
   
   $.ajax({
     url: "ajax/" + action + 
@@ -267,6 +377,10 @@ function setupDatePicker(){
   $('.date-pick').dpSetOffset(25,0);
 }
 
+function cookied_defined(cookie) {
+  return cookie !== undefined && cookie !== ""
+}
+
 $(document).ready(function () {
   $('.icon').click(function(){
     $('.banner').fadeIn('slow');
@@ -275,5 +389,30 @@ $(document).ready(function () {
   setupDatePicker()
   setupDefaultDates()
   submitOnCarriageReturn($('.submit-on-CR'), $('#master-toolbar'))
+  $('#symbols').focus()
+
+  var symbols_val = $.cookie('symbols')
+  if (cookied_defined(symbols_val)) {
+    $('#symbols').val(symbols_val)
+  }
+  var stat_option_val = $.cookie('stats-option')
+  if (cookied_defined(stat_option_val)) {
+    $('#stats option[value='+stat_option_val+']').attr("selected", "selected");
+  }
+  var start_val = $.cookie('start')
+  if (cookied_defined(start_val)) {
+    $('#start').val(start_val)
+  }
+  var end_val = $.cookie('end')
+  if (cookied_defined(end_val)) {
+    $('#end').val(end_val)
+  }
+  var graph_val = $.cookie('graph')
+  if (cookied_defined(graph_val)) {
+    if (graph_val = "true")
+      $('#graph').attr('checked', true)
+    else
+      $('#graph').attr('checked', false)
+  }
 });
 

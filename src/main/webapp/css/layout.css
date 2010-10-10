@@ -2,7 +2,8 @@ body {
   font-family: "Lucida Grande", Palatino, Verdana, sans-serif;
   font-size: 1.0em;
   margin: 20px;
-  background-color: #FFF2E3;
+  background-color: #F8FBF9;
+/*  background-color: #FFF2E3;*/
 }
 
 font.tiny {
@@ -102,8 +103,22 @@ div.banner {
   height: 100%;
 }
 
+div#results-display {
+  background-color: #F8FBF9;
+}
+
 div#finance-display {
 }
+
+div#finance-graph-display {
+/*  position: relative;
+  margin: auto;
+  width:  800px;
+  height: 600px;
+  background-color: white;
+*/
+}
+
 div#pong-display {
 }
 
