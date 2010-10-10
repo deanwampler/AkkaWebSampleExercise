@@ -132,12 +132,17 @@ function displayFinancialData(json, fields) {
 
 // TODO: Does not handle more than one instrument at a time!
 function displayFinancialDataInAGraph(json, fields) {
-  var graph_data = []
+  var all_graph_data = []
   var graph_data_bounds = undefined
-  if (json.length > 1) {
-    writeWarning("The graph currently doesn't properly handle more than one instrument at a time!")
-  }
   $.each(json, function(i, row) {
+    var criteria = row.criteria
+    var instruments = "unknown criteria"
+    var statistics  = "unknown statistics"
+    if (criteria) {
+      instruments = criteria.instruments
+      statistics  = criteria.statistics
+    }
+    var graph_data = []
     var results  = row.results
     if (results.length === 0) {
       writeWarning("No results!")
@@ -152,20 +157,80 @@ function displayFinancialDataInAGraph(json, fields) {
             graph_data_bounds.min_x = x
           else if (x > graph_data_bounds.max_x)
             graph_data_bounds.max_x = x
-          if (x < graph_data_bounds.min_x)
-            graph_data_bounds.min_x = x
+          if (y < graph_data_bounds.min_y)
+            graph_data_bounds.min_y = y
           else if (y > graph_data_bounds.max_y)
             graph_data_bounds.max_y = y
         }
-        
         graph_data.push({x: x, y: y})
       })
     }
-    // Must delete and recreate the svg every time.
-    $('span svg').remove()
-    graphData(graph_data, graph_data_bounds)
-    $('#finance-graph-display').show()
+    all_graph_data.push({instruments: instruments, statistics: statistics, data: graph_data})
   })
+  // Must delete and recreate the svg every time.
+  $('span svg').remove()
+  graphData(all_graph_data, graph_data_bounds)
+  $('#finance-graph-display').show()
+}
+
+
+function graphData(data, data_bounds) {
+  console.log(data_bounds)
+  console.log(data)
+  /* Sizing and scales. */
+  var w = $(window).width() * .9,
+      h = $(window).height() * .8,
+      x = pv.Scale.linear(data_bounds.min_x, data_bounds.max_x).range(0, w),
+      y = pv.Scale.linear(data_bounds.min_y, data_bounds.max_y).range(0, h);
+
+  /* The root panel. */
+  var vis = new pv.Panel()
+        .width(w)
+        .height(h)
+        .bottom(20)
+        .left(20)
+        .right(10)
+        .right(5)
+  
+  /* X-axis ticks. */
+  vis.add(pv.Rule)
+      .data(x.ticks())
+      .visible(function(d) {return d})
+      .left(x)
+      .strokeStyle("#eee")
+      .add(pv.Rule)
+      .bottom(-5)
+      .height(5)
+      .strokeStyle("#000")
+      .anchor("bottom").add(pv.Label)
+      .text(x.tickFormat);
+
+  /* Y-axis ticks. */
+  vis.add(pv.Rule)
+      .data(y.ticks(5))
+      .bottom(y)
+      // .strokeStyle(function(d){return d ? "#eee" : "#000"})
+      .strokeStyle(function(d) {return d ? "rgba(128,128,128,.2)" : "#CCC"})
+      .anchor("left").add(pv.Label)
+      .text(y.tickFormat);
+  
+  /* The lines. */
+  $.each(data, function(i, data_for_stock) {
+    var color = 'rgba(' + ((128 * i) % 256) + ',128,128,1.0)' //pv.Colors.category20().by(i)
+    var line = vis.add(pv.Line)
+        .data(data_for_stock.data)
+        .interpolate("step-after")
+        .left(function(d) {return x(d.x)})
+        .bottom(function(d) {return y(d.y)})
+        .strokeStyle(color)
+        .lineWidth(3)
+        console.log(line.data())
+    line.data()[line.data().length-1].anchor("right").add(pv.Label)
+        .textStyle(color)
+        .text(data_for_stock.instruments)
+  })
+
+  vis.render();  
 }
 
 function displayFinancialDataInATable(json, fields) {
@@ -211,57 +276,6 @@ function displayFinancialDataInATable(json, fields) {
   })
   $('#finance-table-display').show()
   setUpTableSorting()
-}
-
-function graphData(data, data_bounds) {
-  /* Sizing and scales. */
-  var w = 750,
-      h = 550,
-      x = pv.Scale.linear(data, function(d) {return d.x}).range(0, w),
-      y = pv.Scale.linear(data, function(d) {return d.y}).range(0, h);
-//      y = pv.Scale.linear(data_bounds.min_y, data_bounds.maxy).range(0, h);
-
-  /* The root panel. */
-  var vis = new pv.Panel()
-        .width(w)
-        .height(h)
-        .bottom(20)
-        .left(20)
-        .right(10)
-        .right(5)
-        // .right(data_bounds.max_x)
-        // .top(data_bounds.max_y + 5);
-  
-  /* X-axis ticks. */
-  vis.add(pv.Rule)
-      .data(x.ticks())
-      .visible(function(d) {return d > 0})
-      .left(x)
-      .strokeStyle("#eee")
-      .add(pv.Rule)
-      .bottom(-5)
-      .height(5)
-      .strokeStyle("#000")
-      .anchor("bottom").add(pv.Label)
-      .text(x.tickFormat);
-
-  /* Y-axis ticks. */
-  vis.add(pv.Rule)
-      .data(y.ticks(5))
-      .bottom(y)
-      .strokeStyle(function(d){return d ? "#eee" : "#000"})
-      .anchor("left").add(pv.Label)
-      .text(y.tickFormat);
-
-  /* The line. */
-  vis.add(pv.Line)
-      .data(data)
-      .interpolate("step-after")
-      .left(function(d) {return x(d.x)})
-      .bottom(function(d) {return y(d.y)})
-      .lineWidth(3);
-
-  vis.render();  
 }
 
 function displayInstrumentsLists(json) {
