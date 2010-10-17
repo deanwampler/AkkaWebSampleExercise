@@ -58,6 +58,16 @@ class MongoDBDataStore(
       greaterThanEquals(dateTimeToAnyValue(from)).
       lessThanEquals(dateTimeToAnyValue(to))
     // Add the additional query criteria, if any.
+    // This is the minimal solution for the exercise given for Lecture 6:
+    // if (otherCriteria.contains("stock_symbol")) {
+    //   val myBasicDBList = new BasicDBList()
+    //   otherCriteria.get("stock_symbol") match {
+    //     case Some(list) => list.asInstanceOf[List[_]] foreach { x => myBasicDBList.add(x.asInstanceOf[AnyRef]) }
+    //     case None => throw new RuntimeException("help!")
+    //   }
+    //   qb.and("stock_symbol").in(myBasicDBList)
+    // }
+    // This is a more comprehensive solution that handles a wider variety of filter options.
     otherCriteria.foreach { (keyValue: Pair[String,Any]) =>
       keyValue._2 match {
         case list: List[_] => 

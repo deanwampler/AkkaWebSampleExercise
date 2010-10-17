@@ -130,7 +130,6 @@ function displayFinancialData(json, fields) {
     displayFinancialDataInATable(json2, fields)
 }
 
-// TODO: Does not handle more than one instrument at a time!
 function displayFinancialDataInAGraph(json, fields) {
   var all_graph_data = []
   var graph_data_bounds = undefined
