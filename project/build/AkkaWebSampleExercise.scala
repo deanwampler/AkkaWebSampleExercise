@@ -1,9 +1,10 @@
 import sbt._
 import sbt.CompileOrder._
+import reaktor.scct.ScctProject
 
 // Portions adapted from http://github.com/mgutz/sbt-console-template and from Akka's project structure.
 
-class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info)  {
+class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) with ScctProject {
 
 	object Repositories {
     lazy val AkkaRepo             = MavenRepository("Akka Repository", "http://scalablesolutions.se/akka/repository")
