@@ -86,7 +86,7 @@ class RestfulDataPublisher extends Logging {
         makeErrorString("", iae, instruments, stats, start, end)
       case fte: FutureTimeoutException =>
         makeErrorString("Actors timed out", fte, instruments, stats, start, end)
-      case awsee: AkkaWebSampleExerciseException =>
+      case awsee: GeneralAppException =>
         makeErrorString("Invalid input", awsee, instruments, stats, start, end)
       case th: Throwable => 
         makeErrorString("An unexpected problem occurred during processing the request", 
@@ -117,7 +117,7 @@ class RestfulDataPublisher extends Logging {
         makeAllInstrumentsErrorString(instruments, "", iae)
       case fte: FutureTimeoutException =>
         makeAllInstrumentsErrorString(instruments, "Actors timed out", fte)
-      case awsee: AkkaWebSampleExerciseException =>
+      case awsee: GeneralAppException =>
         makeAllInstrumentsErrorString(instruments, "Invalid input", awsee)
       case th: Throwable => 
         makeAllInstrumentsErrorString(instruments, "An unexpected problem occurred during processing the request", th)

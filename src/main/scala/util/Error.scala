@@ -1,7 +1,12 @@
 package org.chicagoscala.awse.util
 import se.scalablesolutions.akka.util.Logging
 
-case class AkkaWebSampleExerciseException(message: String, cause: Throwable) extends RuntimeException(message, cause) {
+/**
+ * This exception doesn't really add anything to RuntimeException, 
+ * except that it is only thrown in this application's code vs. any
+ * third-party code.
+ */
+case class GeneralAppException(message: String, cause: Throwable) extends RuntimeException(message, cause) {
   def this(message: String) = this(message, null)
 }
 
@@ -21,7 +26,7 @@ sealed trait LogAndThrow {
 
   def apply(message: String) = {
     _log(message)
-    throw new AkkaWebSampleExerciseException(message)
+    throw new GeneralAppException(message)
   }
 }
 
