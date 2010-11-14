@@ -96,7 +96,7 @@ class RestfulDataPublisher extends Logging {
   protected[rest] def getAllInstruments(instruments: String) = 
     try {
       // Hack! Just grab the first and last letter.
-			val symbolRange = instruments.trim match {
+      val symbolRange = instruments.trim match {
         case "" => 'A' to 'Z'
         case s  => s.length match {
           case 1 => s.charAt(0).toUpper to 'Z'
