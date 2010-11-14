@@ -1,17 +1,17 @@
 package org.chicagoscala.awse.server.rest
-import org.chicagoscala.awse.server._
-import org.chicagoscala.awse.server.persistence._
-import org.chicagoscala.awse.server.finance._
-import org.chicagoscala.awse.domain.finance._
-import org.chicagoscala.awse.util._
-import org.chicagoscala.awse.util.json._
-import se.scalablesolutions.akka.actor._
-import se.scalablesolutions.akka.dispatch.{Future, Futures, FutureTimeoutException}
-import se.scalablesolutions.akka.util.Logging
+import javax.ws.rs._
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
-import javax.ws.rs._
+import org.chicagoscala.awse.domain.finance._
+import org.chicagoscala.awse.server._
+import org.chicagoscala.awse.server.finance._
+import org.chicagoscala.awse.server.persistence._
+import org.chicagoscala.awse.util._
+import org.chicagoscala.awse.util.json._
 import org.joda.time._
+import se.scalablesolutions.akka.actor._
+import se.scalablesolutions.akka.dispatch.{FutureTimeoutException}
+import se.scalablesolutions.akka.util.Logging
 
 case object NoWorkersAvailable extends RuntimeException("No worker servers appear to be available!")
 
