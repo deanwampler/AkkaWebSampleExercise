@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>src/main/scala/server/rest/RestfulDataPublisher.scala</string>
+	<string>src/main/scala/domain/finance/CriteriaMap.scala</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -12,7 +12,7 @@
 			<key>name</key>
 			<string>AkkaWebSampleExercise</string>
 			<key>regexFolderFilter</key>
-			<string>!.*/(\.[^/]*|CVS|_darcs|_MTN|\{arch\}lib|lib_managed|data|target|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
+			<string>!.*/(\.[^/]*|CVS|_darcs|_MTN|\{arch\}|scala_2.8.*|project/boot|lib|lib_managed|data|target|blib|.*~\.nib|.*\.(framework|app|pbproj|pbxproj|xcode(proj)?|bundle))$</string>
 			<key>sourceDirectory</key>
 			<string></string>
 		</dict>
@@ -21,6 +21,78 @@
 	<integer>167</integer>
 	<key>metaData</key>
 	<dict>
+		<key>src/main/scala/domain/domain.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>src/main/scala/domain/finance/CriteriaMap.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>14</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>columnSelection</key>
+			<false/>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>1</integer>
+			</dict>
+		</dict>
+		<key>src/main/scala/domain/finance/FinanceJSONConverter.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>src/main/scala/domain/finance/Instrument.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>src/main/scala/domain/finance/InstrumentStatistic.scala</key>
 		<dict>
 			<key>caret</key>
@@ -35,7 +107,7 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>29</integer>
+			<integer>0</integer>
 			<key>selectFrom</key>
 			<dict>
 				<key>column</key>
@@ -51,6 +123,64 @@
 				<integer>42</integer>
 			</dict>
 		</dict>
+		<key>src/main/scala/persistence/DataStore.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>src/main/scala/persistence/JSONRecord.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>48</integer>
+		</dict>
+		<key>src/main/scala/persistence/inmemory/InMemoryDataStore.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>10</integer>
+				<key>line</key>
+				<integer>16</integer>
+			</dict>
+			<key>columnSelection</key>
+			<false/>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>3</integer>
+			<key>selectFrom</key>
+			<dict>
+				<key>column</key>
+				<integer>2</integer>
+				<key>line</key>
+				<integer>16</integer>
+			</dict>
+			<key>selectTo</key>
+			<dict>
+				<key>column</key>
+				<integer>10</integer>
+				<key>line</key>
+				<integer>16</integer>
+			</dict>
+		</dict>
 		<key>src/main/scala/server/rest/RestfulDataPublisher.scala</key>
 		<dict>
 			<key>caret</key>
@@ -63,7 +193,7 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>5</integer>
+			<integer>79</integer>
 		</dict>
 		<key>src/main/scala/util/Error.scala</key>
 		<dict>
@@ -77,18 +207,25 @@
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
-			<integer>16</integer>
+			<integer>0</integer>
 		</dict>
 	</dict>
 	<key>openDocuments</key>
 	<array>
 		<string>src/main/scala/util/Error.scala</string>
+		<string>src/main/scala/domain/domain.scala</string>
+		<string>src/main/scala/domain/finance/CriteriaMap.scala</string>
+		<string>src/main/scala/domain/finance/FinanceJSONConverter.scala</string>
+		<string>src/main/scala/domain/finance/Instrument.scala</string>
+		<string>src/main/scala/persistence/inmemory/InMemoryDataStore.scala</string>
+		<string>src/main/scala/persistence/DataStore.scala</string>
+		<string>src/main/scala/persistence/JSONRecord.scala</string>
 		<string>src/main/scala/domain/finance/InstrumentStatistic.scala</string>
 		<string>src/main/scala/server/rest/RestfulDataPublisher.scala</string>
 	</array>
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{177, 337}, {1263, 541}}</string>
+	<string>{{0, 4}, {1358, 1414}}</string>
 </dict>
 </plist>
