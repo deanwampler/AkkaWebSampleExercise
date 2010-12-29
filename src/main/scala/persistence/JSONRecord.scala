@@ -122,12 +122,12 @@ object JSONRecord {
   // Since the underlying Java map is mutable, we make a copy, rather than use
   // Scala's JavaConversions.
   def javaMapToMap[K,V](jmap: java.util.Map[K,V]): Map[String,Any] =
-    scala.collection.JavaConversions.asMap(jmap).foldLeft(Map[String,Any]()) { (map, kv) => 
+    scala.collection.JavaConversions.asScalaMap(jmap).foldLeft(Map[String,Any]()) { (map, kv) => 
       map + (kv._1.toString -> javaObjectToAny(kv._2)) 
     }
   
   def javaIterableToIterable(jiter: java.lang.Iterable[_]): Iterable[Any] = 
-    scala.collection.JavaConversions.asIterable(jiter) map { x => javaObjectToAny(x) }
+    scala.collection.JavaConversions.asScalaIterable(jiter) map { x => javaObjectToAny(x) }
 
   def javaObjectToAny(jobj: Any): Any = jobj match {
     case l: java.lang.Long    => l.longValue

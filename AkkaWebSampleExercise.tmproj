@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>currentDocument</key>
-	<string>src/main/scala/domain/finance/CriteriaMap.scala</string>
+	<string>project/build/AkkaWebSampleExercise.scala</string>
 	<key>documents</key>
 	<array>
 		<dict>
@@ -21,6 +21,62 @@
 	<integer>167</integer>
 	<key>metaData</key>
 	<dict>
+		<key>project/build.properties</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>26</integer>
+				<key>line</key>
+				<integer>6</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>project/build/AkkaWebSampleExercise.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>2</integer>
+				<key>line</key>
+				<integer>53</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>12</integer>
+		</dict>
+		<key>project/plugins/Plugins.scala</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>77</integer>
+				<key>line</key>
+				<integer>3</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
+		<key>project/plugins/project/build.properties</key>
+		<dict>
+			<key>caret</key>
+			<dict>
+				<key>column</key>
+				<integer>0</integer>
+				<key>line</key>
+				<integer>0</integer>
+			</dict>
+			<key>firstVisibleColumn</key>
+			<integer>0</integer>
+			<key>firstVisibleLine</key>
+			<integer>0</integer>
+		</dict>
 		<key>src/main/scala/domain/domain.scala</key>
 		<dict>
 			<key>caret</key>
@@ -40,30 +96,14 @@
 			<key>caret</key>
 			<dict>
 				<key>column</key>
-				<integer>14</integer>
+				<integer>41</integer>
 				<key>line</key>
-				<integer>0</integer>
+				<integer>51</integer>
 			</dict>
-			<key>columnSelection</key>
-			<false/>
 			<key>firstVisibleColumn</key>
 			<integer>0</integer>
 			<key>firstVisibleLine</key>
 			<integer>0</integer>
-			<key>selectFrom</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>0</integer>
-			</dict>
-			<key>selectTo</key>
-			<dict>
-				<key>column</key>
-				<integer>0</integer>
-				<key>line</key>
-				<integer>1</integer>
-			</dict>
 		</dict>
 		<key>src/main/scala/domain/finance/FinanceJSONConverter.scala</key>
 		<dict>
@@ -215,6 +255,10 @@
 		<string>src/main/scala/util/Error.scala</string>
 		<string>src/main/scala/domain/domain.scala</string>
 		<string>src/main/scala/domain/finance/CriteriaMap.scala</string>
+		<string>project/plugins/project/build.properties</string>
+		<string>project/plugins/Plugins.scala</string>
+		<string>project/build/AkkaWebSampleExercise.scala</string>
+		<string>project/build.properties</string>
 		<string>src/main/scala/domain/finance/FinanceJSONConverter.scala</string>
 		<string>src/main/scala/domain/finance/Instrument.scala</string>
 		<string>src/main/scala/persistence/inmemory/InMemoryDataStore.scala</string>
@@ -226,6 +270,6 @@
 	<key>showFileHierarchyDrawer</key>
 	<true/>
 	<key>windowFrame</key>
-	<string>{{0, 4}, {1358, 1414}}</string>
+	<string>{{706, 4}, {1358, 1414}}</string>
 </dict>
 </plist>

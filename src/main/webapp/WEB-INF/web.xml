@@ -7,11 +7,17 @@
 
   <display-name>Chicago Scala Akka Web Sample Exercise</display-name>
 
-  <!-- Our initializers does not mixin Camel support, which can cause mysterious ClassNotFoundErrors. -->
+  <!-- Our initializers does not mixin Camel support, which can cause mysterious ClassNotFoundErrors.
   <listener>
     <listener-class>org.chicagoscala.awse.servlet.Initializer</listener-class>
   </listener>
+ -->
   
+  <servlet>
+    <servlet-name>AkkaServlet</servlet-name>
+    <servlet-class>akka.comet.AkkaServlet</servlet-class>
+  </servlet>
+<!--
   <servlet>
 		<servlet-name>AkkaServlet</servlet-name>
     <servlet-class>se.scalablesolutions.akka.comet.AkkaServlet</servlet-class>
@@ -20,7 +26,7 @@
         <param-value>org.chicagoscala</param-value>
     </init-param>
 	</servlet>
-
+-->
 	<servlet-mapping>
 		<servlet-name>AkkaServlet</servlet-name>
 		<url-pattern>/ajax/*</url-pattern>
