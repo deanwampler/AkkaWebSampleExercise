@@ -8,17 +8,19 @@ import reaktor.scct.ScctProject
 class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) with ScctProject with AkkaProject {
 
 	object Repositories {
+    lazy val EmbeddedRepo         = MavenRepository("Embedded Repo", (info.projectPath / "embedded-repo").asURL.toString)
+    lazy val LocalMavenRepo       = MavenRepository("Local Maven Repo", (Path.userHome / ".m2" / "repository").asURL.toString)
     lazy val AkkaRepo             = MavenRepository("Akka Repository", "http://scalablesolutions.se/akka/repository")
 	  lazy val ScalaToolsRepo       = MavenRepository("Scala Tools Repo", "http://nexus.scala-tools.org/content/repositories/hosted")
 	  lazy val DavScalaToolsRepo    = MavenRepository("Dav Scala Tools", "http://dav.scala-tools.org/repo-releases/")
     lazy val CodehausRepo         = MavenRepository("Codehaus Repo", "http://repository.codehaus.org")
     lazy val CasbahRepo           = MavenRepository("Casbah Repo", "http://repo.bumnetworks.com/releases/")    
-    lazy val EmbeddedRepo         = MavenRepository("Embedded Repo", (info.projectPath / "embedded-repo").asURL.toString)
     lazy val FusesourceSnapshotRepo = MavenRepository("Fusesource Snapshots", "http://repo.fusesource.com/nexus/content/repositories/snapshots")
     lazy val GuiceyFruitRepo      = MavenRepository("GuiceyFruit Repo", "http://guiceyfruit.googlecode.com/svn/repo/releases/")
     lazy val JBossRepo            = MavenRepository("JBoss Repo", "http://repository.jboss.org/nexus/content/groups/public/")
     lazy val JavaNetRepo          = MavenRepository("java.net Repo", "http://download.java.net/maven/2")
     lazy val SonatypeSnapshotRepo = MavenRepository("Sonatype OSS Repo", "http://oss.sonatype.org/content/repositories/releases")
+    lazy val GlassfishRepo        = MavenRepository("Glassfish Repo", "http://download.java.net/maven/glassfish")
     lazy val SunJDMKRepo          = MavenRepository("Sun JDMK Repo", "http://wp5.e-taxonomy.eu/cdmlib/mavenrepo")
     lazy val Maven2Repo           = MavenRepository("Maven2 Repo", "http://repo2.maven.org/maven2/")
   }
@@ -30,29 +32,33 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
   // Therefore, if repositories are defined, this must happen as def, not as val.
   // -------------------------------------------------------------------------------------------------------------------
 
-  val akkaStm = akkaModule("stm")
+  // akkaActor is already defined by the akk sbt plugin.
+  // val akkaActor      = akkaModule("actor")
+  val akkaStm        = akkaModule("stm")
   val akkaTypedActor = akkaModule("typed-actor")
-  val akkaRemote = akkaModule("remote")
-  val akkaHttp = akkaModule("http")
-  //val akkaAmqp = akkaModule("amqp")
-  val akkaCamel = akkaModule("camel")
-  //val akkaJta = akkaModule("jta")
-  val akkaKernel = akkaModule("kernel")
-  //val akkaCassandra = akkaModule("persistence-cassandra")
-  val akkaMongo = akkaModule("persistence-mongo")
-  //val akkaRedis = akkaModule("persistence-redis")
-  //val akkaSpring = akkaModule("spring")
+  val akkaRemote     = akkaModule("remote")
+  val akkaHttp       = akkaModule("http")
+  val akkaAmqp       = akkaModule("amqp")
+  val akkaCamel      = akkaModule("camel")
+  val akkaJta        = akkaModule("jta")
+  val akkaKernel     = akkaModule("kernel")
+  val akkaCassandra  = akkaModule("persistence-cassandra")
+  val akkaMongo      = akkaModule("persistence-mongo")
+  val akkaRedis      = akkaModule("persistence-redis")
+  val akkaSpring     = akkaModule("spring")
   
   import Repositories._
+  lazy val embeddedRepo            = EmbeddedRepo   // This is the only exception, because the embedded repo is fast!
+  lazy val localMavenRepo          = LocalMavenRepo // Second exception, also fast! ;-)
+  lazy val jettyModuleConfig       = ModuleConfiguration("org.eclipse.jetty", sbt.DefaultMavenRepository)
   lazy val databinderModuleConfig  = ModuleConfiguration("net.databinder",  ScalaToolsRepo)
+  lazy val liftModuleConfig        = ModuleConfiguration("net.liftweb",     ScalaToolsReleases)
+  lazy val scalaTestModuleConfig   = ModuleConfiguration("org.scalatest",   ScalaToolsRepo)
 //  lazy val atmosphereModuleConfig  = ModuleConfiguration("org.atmosphere",  SonatypeSnapshotRepo)
 //  lazy val casbahModuleConfig      = ModuleConfiguration("com.novus",       CasbahRepo)
 //  lazy val grizzlyModuleConfig     = ModuleConfiguration("com.sun.grizzly", JavaNetRepo)
 //  lazy val guiceyFruitModuleConfig = ModuleConfiguration("org.guiceyfruit", GuiceyFruitRepo)
-  lazy val liftModuleConfig        = ModuleConfiguration("net.liftweb",     ScalaToolsReleases)
-//  lazy val multiverseModuleConfig  = ModuleConfiguration("org.multiverse",  CodehausRepo)
 //  lazy val nettyModuleConfig       = ModuleConfiguration("org.jboss.netty", JBossRepo)
-  lazy val scalaTestModuleConfig   = ModuleConfiguration("org.scalatest",   ScalaToolsRepo)
 
   override def repositories = Set(
     AkkaRepo, DavScalaToolsRepo, CasbahRepo, CodehausRepo, EmbeddedRepo, FusesourceSnapshotRepo, 
@@ -62,13 +68,13 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
   // Versions
   // -------------------------------------------------------------------------------------------------------------------
 
-  lazy val AKKA_VERSION          = "0.10"
+  lazy val AKKA_VERSION          = "1.0-RC2"
   lazy val ATMO_VERSION          = "0.6.1"
   lazy val CAMEL_VERSION         = "2.4.0"
   lazy val CASBAH_VERSION        = "1.0.8.5"
   lazy val JERSEY_VERSION        = "1.2"
   lazy val LIFT_VERSION          = "2.1-M1"
-  lazy val MULTIVERSE_VERSION    = "0.6"
+  lazy val MULTIVERSE_VERSION    = "0.6.1"
   lazy val SCALATEST_VERSION     = "1.2" //"-for-scala-2.8.0.final-SNAPSHOT"
 
   lazy val ECLIPSE_JETTY_VERSION = "7.1.6.v20100715" //  "7.0.2.v20100331"
@@ -80,11 +86,11 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
 
     // Compile
 
-    lazy val akkaCore         = "se.scalablesolutions.akka" % "akka-core_2.8.0"        % AKKA_VERSION % "compile"
-    lazy val akkaCamel        = "se.scalablesolutions.akka" % "akka-camel_2.8.0"       % AKKA_VERSION % "compile"
-    lazy val akkaHttp         = "se.scalablesolutions.akka" % "akka-http_2.8.0"        % AKKA_VERSION % "compile"
-    lazy val akkaKernel       = "se.scalablesolutions.akka" % "akka-kernel_2.8.0"      % AKKA_VERSION % "compile"
-    lazy val akkaPersistence  = "se.scalablesolutions.akka" % "akka-persistence_2.8.0" % AKKA_VERSION % "compile"
+    // lazy val akkaActor        = "se.scalablesolutions.akka" % "akka-actor"       % AKKA_VERSION % "compile"
+    // lazy val akkaCamel        = "se.scalablesolutions.akka" % "akka-camel"       % AKKA_VERSION % "compile"
+    // lazy val akkaHttp         = "se.scalablesolutions.akka" % "akka-http"        % AKKA_VERSION % "compile"
+    // lazy val akkaKernel       = "se.scalablesolutions.akka" % "akka-kernel"      % AKKA_VERSION % "compile"
+    // lazy val akkaPersistence  = "se.scalablesolutions.akka" % "akka-persistence" % AKKA_VERSION % "compile"
 
     lazy val dispatch_futures = "net.databinder" % "dispatch-futures_2.8.0" % DISPATH_VERSION % "compile"
     lazy val dispatch_http    = "net.databinder" % "dispatch-http_2.8.0"    % DISPATH_VERSION % "compile"
@@ -119,15 +125,15 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
   import Dependencies._
   override def libraryDependencies = Set(
     dispatch_futures, dispatch_http, dispatch_json, 
-    akkaCore, akkaCamel, akkaHttp, akkaKernel, 
     atmo, atmoRuntime, 
-    // casbah, 
     configgy, 
     liftJSON, 
     mongo, mongoScalaDriver,
+    // casbah, 
     jettyBase,
-    jersey, jersey_json, jersey_server, jersey_contrib,
-    scalatest, junit)
+    // jersey, jersey_json, jersey_server, jersey_contrib,
+    scalatest, junit) ++
+    (Set(akkaStm, akkaActor, akkaTypedActor, akkaCamel, akkaHttp, akkaKernel, akkaMongo) map (_ % "compile"))
 
   
   // For continuous redeployment: http://code.google.com/p/simple-build-tool/wiki/WebApplications
@@ -141,6 +147,8 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
         "-Xmigration",
         "-Xcheckinit",
         "-Xwarninit",
+				// "-Xstrict-warnings",
+				// "-optimise",  // for releases.
         "-encoding", "utf8")
         .map(x => CompileOption(x))
   override def javaCompileOptions = JavaCompileOption("-Xlint:unchecked") :: super.javaCompileOptions.toList
