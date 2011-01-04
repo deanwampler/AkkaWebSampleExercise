@@ -54,11 +54,6 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
   lazy val databinderModuleConfig  = ModuleConfiguration("net.databinder",  ScalaToolsRepo)
   lazy val liftModuleConfig        = ModuleConfiguration("net.liftweb",     ScalaToolsReleases)
   lazy val scalaTestModuleConfig   = ModuleConfiguration("org.scalatest",   ScalaToolsRepo)
-//  lazy val atmosphereModuleConfig  = ModuleConfiguration("org.atmosphere",  SonatypeSnapshotRepo)
-//  lazy val casbahModuleConfig      = ModuleConfiguration("com.novus",       CasbahRepo)
-//  lazy val grizzlyModuleConfig     = ModuleConfiguration("com.sun.grizzly", JavaNetRepo)
-//  lazy val guiceyFruitModuleConfig = ModuleConfiguration("org.guiceyfruit", GuiceyFruitRepo)
-//  lazy val nettyModuleConfig       = ModuleConfiguration("org.jboss.netty", JBossRepo)
 
   override def repositories = Set(
     AkkaRepo, DavScalaToolsRepo, CasbahRepo, CodehausRepo, EmbeddedRepo, FusesourceSnapshotRepo, 
@@ -85,12 +80,6 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
   object Dependencies {
 
     // Compile
-
-    // lazy val akkaActor        = "akka" % "akka-actor"       % AKKA_VERSION % "compile"
-    // lazy val akkaCamel        = "akka" % "akka-camel"       % AKKA_VERSION % "compile"
-    // lazy val akkaHttp         = "akka" % "akka-http"        % AKKA_VERSION % "compile"
-    // lazy val akkaKernel       = "akka" % "akka-kernel"      % AKKA_VERSION % "compile"
-    // lazy val akkaPersistence  = "akka" % "akka-persistence" % AKKA_VERSION % "compile"
 
     lazy val dispatch_futures = "net.databinder" % "dispatch-futures_2.8.0" % DISPATH_VERSION % "compile"
     lazy val dispatch_http    = "net.databinder" % "dispatch-http_2.8.0"    % DISPATH_VERSION % "compile"
@@ -131,7 +120,6 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
     mongo, mongoScalaDriver,
     // casbah, 
     jettyBase,
-    // jersey, jersey_json, jersey_server, jersey_contrib,
     scalatest, junit) ++
     (Set(akkaStm, akkaActor, akkaTypedActor, akkaCamel, akkaHttp, akkaKernel, akkaMongo) map (_ % "compile"))
 
