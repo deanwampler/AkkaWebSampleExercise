@@ -101,9 +101,14 @@ function onSuccess(jsonString) {
     writeError(json["error"])
   } else if (json["financial-data"]) {
 		displayFinancialData(json["financial-data"],
-      [["Symbol", function(row) { return row.stock_symbol; }],
-       ["Date",   function(row) { return row.date; }],
-       ["Price",  function(row) { return row.close; }]])
+      [["Symbol",  function(row) { return row.stock_symbol; }],
+       ["Date",    function(row) { return row.date; }],
+       ["Open",    function(row) { return row.open; }],
+       ["Close",   function(row) { return row.close; }],
+       ["Low",     function(row) { return row.low; }],
+       ["High",    function(row) { return row.high; }],
+       ["Volume",  function(row) { return row.volume; }]
+       ])
   } else if (json["instrument-list"]) {
 		displayInstrumentsLists(json["instrument-list"])
   } else {
@@ -147,24 +152,35 @@ function displayFinancialDataInAGraph(json, fields) {
       writeWarning("No " + statistics + " results for " + instruments + "!")
     } else {
       $.each(results, function(j, result) {
-        var x = new Date(fields[1][1](result))
-        var y = fields[2][1](result)
+        var t  = new Date(fields[1][1](result))
+        // p is "price".
+        var open_p  = fields[2][1](result)
+        var close_p = fields[3][1](result)
+        var low_p   = fields[4][1](result)
+        var high_p  = fields[5][1](result)
+        var volume  = fields[6][1](result)
         if (graph_data_bounds === undefined) {
-          graph_data_bounds = {min_x: x, max_x: x, min_y: y, max_y: y}
+          graph_data_bounds = {min_t: t, max_t: t, min_p: low_p, max_p: high_p, max_volume: volume}
         } else {
-          if (x < graph_data_bounds.min_x)
-            graph_data_bounds.min_x = x
-          else if (x > graph_data_bounds.max_x)
-            graph_data_bounds.max_x = x
-          if (y < graph_data_bounds.min_y)
-            graph_data_bounds.min_y = y
-          else if (y > graph_data_bounds.max_y)
-            graph_data_bounds.max_y = y
+          if (t < graph_data_bounds.min_t) {
+            graph_data_bounds.min_t = t
+          }
+          if (t > graph_data_bounds.max_t) {
+            graph_data_bounds.max_t = t
+          }
+          if (low_p < graph_data_bounds.min_p) {
+            graph_data_bounds.min_p = low_p
+          }
+          if (high_p > graph_data_bounds.max_p) {
+            graph_data_bounds.max_p = high_p
+          }
+          if (volume > graph_data_bounds.max_volume) {
+            graph_data_bounds.max_volume = volume
+          }
         }
-        graph_data.push({x: x, y: y})
       })
     }
-    all_graph_data.push({instruments: instruments, statistics: statistics, data: graph_data})
+    all_graph_data.push({instruments: instruments, statistics: statistics, field_mapping: fields, data: results})
   })
   // Must delete and recreate the svg every time.
   $('span svg').remove()
@@ -174,14 +190,14 @@ function displayFinancialDataInAGraph(json, fields) {
 
 
 function graphData(data, data_bounds) {
-  time_delta = data_bounds.max_x.getTime() - data_bounds.min_x.getTime()
+  time_delta = data_bounds.max_t.getTime() - data_bounds.min_t.getTime()
   padding_on_the_right = time_delta * .05
-  max_x = new Date(data_bounds.max_x.getTime() + padding_on_the_right)
+  max_t = new Date(data_bounds.max_t.getTime() + padding_on_the_right)
   /* Sizing and scales. */
   var w = $(window).width() * .9,
       h = $(window).height() * .8,
-      x = pv.Scale.linear(data_bounds.min_x, max_x).range(0, w),
-      y = pv.Scale.linear(data_bounds.min_y, data_bounds.max_y).range(0, h);
+      x = pv.Scale.linear(data_bounds.min_t, max_t).range(0, w),
+      y = pv.Scale.linear(data_bounds.min_p, data_bounds.max_p).range(0, h);
 
   /* The root panel. */
   var vis = new pv.Panel()
@@ -214,26 +230,41 @@ function graphData(data, data_bounds) {
       .anchor("left").add(pv.Label)
       .text(y.tickFormat);
   
-  /* The lines. */
+  /* Lines and candlesticks. */
   $.each(data, function(i, data_for_stock) {
-    var color = 'rgba(' + ((32 * i) % 256) + ',' + ((64 * i) % 256) + ',' + ((128 * i) % 256) + ',1.0)' //pv.Colors.category20().by(i)
-    console.log(color)
+    var color = 'rgba(' + ((32 * i) % 256) + ',' + ((64 * i) % 256) + ',' + ((128 * i) % 256) + ', .5)' //pv.Colors.category20().by(i)
+
+    /* Line. each colored differently.
+       The lines don't work well with candelsticks.
     vis.add(pv.Line)
         .data(data_for_stock.data)
         .interpolate("step-after")
-        .left(function(d) {return x(d.x)})
-        .bottom(function(d) {return y(d.y)})
+        .left(function(d) {return x(new Date (d.date))})
+        .bottom(function(d) {return y(d.close)})
         .strokeStyle(color)
         .lineWidth(3)
-
+    */
+    /* Candlestick. */
+    console.log(data_for_stock)
+    vis.add(pv.Rule)
+        .data(data_for_stock.data)
+        .left(function(d) { return x(new Date(d.date))})
+        .bottom(function(d) { return y(Math.min(d.high, d.low)) })
+        .height(function(d) { return Math.abs(y(d.high) - y(d.low)) })
+        .strokeStyle(function(d) { return d.open <= d.close ? "#06982d" : "#ae1325" })
+      .add(pv.Rule)
+        .bottom(function(d) { return y(Math.min(d.open, d.close)) })
+        .height(function(d) { return Math.abs(y(d.open) - y(d.close)) })
+        .lineWidth(10);
+    
     /* Add labels for each line end */
     vis.add(pv.Mark)
         .data(data_for_stock.data.slice(-1))
         .add(pv.Label)
         .textStyle(color)
         .font("16px sans-serif")
-        .left(function(d) { return x(d.x) })
-        .bottom(function(d) { return y(d.y) })
+        .left(function(d) { return x(d.date) })
+        .bottom(function(d) { return y(d.close) })
         .text(data_for_stock.instruments)
   })
 
