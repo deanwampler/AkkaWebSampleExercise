@@ -2,8 +2,8 @@ package org.chicagoscala.awse.server.persistence
 import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.persistence._
 import org.chicagoscala.awse.persistence.inmemory.InMemoryDataStore
-import se.scalablesolutions.akka.actor.Actor._
-import se.scalablesolutions.akka.actor._
+import akka.actor.Actor._
+import akka.actor._
 import org.scalatest.{FlatSpec, FunSuite, BeforeAndAfterEach}
 import org.scalatest.matchers.ShouldMatchers
 import org.joda.time._

@@ -1,5 +1,5 @@
 package org.chicagoscala.awse.util
-import se.scalablesolutions.akka.util.Logging
+import akka.util.Logging
 
 /**
  * This exception doesn't really add anything to RuntimeException, 

@@ -1,6 +1,6 @@
 package org.chicagoscala.awse.persistence.inmemory
 import org.chicagoscala.awse.persistence._
-import se.scalablesolutions.akka.util.Logging
+import akka.util.Logging
 import scala.collection.SortedMap
 import org.joda.time._
 import net.liftweb.json.JsonAST._

@@ -3,24 +3,22 @@ import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.server.finance._
 import org.chicagoscala.awse.server.rest._
-import se.scalablesolutions.akka.actor._
-import se.scalablesolutions.akka.actor.Actor._
-import se.scalablesolutions.akka.config.ScalaConfig._
-import se.scalablesolutions.akka.config.OneForOneStrategy
-import se.scalablesolutions.akka.util.Logging
+import akka.actor._
+import akka.actor.Actor._
+import akka.config.Config._
+import akka.config.Supervision._
+import akka.util.Logging
 
 class BootAWSE {
 
   // Some global initialization:
   InstrumentAnalysisServerSupervisor.init
   
-  val factory = SupervisorFactory(
+  val factory = Supervisor(
     SupervisorConfig(
-      RestartStrategy(OneForOne, 5, 5000, List(classOf[Throwable])),
-    Supervise(
-      actorOf(new InstrumentAnalysisServerSupervisor).start,
-      LifeCycle(Permanent)) :: 
-    Nil))
-      
-  factory.newInstance.start
+      OneForOneStrategy(List(classOf[Throwable]), 5, 5000),
+      Supervise(
+        actorOf(new InstrumentAnalysisServerSupervisor).start,
+        Permanent) :: 
+      Nil))
 }

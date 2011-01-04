@@ -6,12 +6,10 @@ import org.chicagoscala.awse.persistence.mongodb._
 import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.domain.finance._
-import se.scalablesolutions.akka.actor._
-import se.scalablesolutions.akka.actor.Actor._
-import se.scalablesolutions.akka.dispatch.Futures
-import se.scalablesolutions.akka.config.ScalaConfig._
-import se.scalablesolutions.akka.config.OneForOneStrategy
-import se.scalablesolutions.akka.util.Logging
+import akka.actor._
+import akka.actor.Actor._
+import akka.dispatch.Futures
+import akka.util.Logging
 import org.joda.time._
 import org.joda.time.format._
 import net.liftweb.json.JsonAST._
@@ -102,7 +100,7 @@ object InstrumentAnalysisServerSupervisor {
   }
   
   def dataStorageServerFactory(storeName: String): ActorRef = {
-    import se.scalablesolutions.akka.config.Config.config
+    import akka.config.Config.config
 
     val dataStoreKind = System.getProperty("app.datastore.type", config.getString("app.datastore.type", "mongodb"))
     val dataStore = if (dataStoreKind.toLowerCase.trim == "mongodb") {

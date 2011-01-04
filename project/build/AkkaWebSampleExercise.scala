@@ -10,7 +10,7 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
 	object Repositories {
     lazy val EmbeddedRepo         = MavenRepository("Embedded Repo", (info.projectPath / "embedded-repo").asURL.toString)
     lazy val LocalMavenRepo       = MavenRepository("Local Maven Repo", (Path.userHome / ".m2" / "repository").asURL.toString)
-    lazy val AkkaRepo             = MavenRepository("Akka Repository", "http://scalablesolutions.se/akka/repository")
+    lazy val AkkaRepo             = MavenRepository("Akka Repository", "http://akka.io/repository")
 	  lazy val ScalaToolsRepo       = MavenRepository("Scala Tools Repo", "http://nexus.scala-tools.org/content/repositories/hosted")
 	  lazy val DavScalaToolsRepo    = MavenRepository("Dav Scala Tools", "http://dav.scala-tools.org/repo-releases/")
     lazy val CodehausRepo         = MavenRepository("Codehaus Repo", "http://repository.codehaus.org")
@@ -86,11 +86,11 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
 
     // Compile
 
-    // lazy val akkaActor        = "se.scalablesolutions.akka" % "akka-actor"       % AKKA_VERSION % "compile"
-    // lazy val akkaCamel        = "se.scalablesolutions.akka" % "akka-camel"       % AKKA_VERSION % "compile"
-    // lazy val akkaHttp         = "se.scalablesolutions.akka" % "akka-http"        % AKKA_VERSION % "compile"
-    // lazy val akkaKernel       = "se.scalablesolutions.akka" % "akka-kernel"      % AKKA_VERSION % "compile"
-    // lazy val akkaPersistence  = "se.scalablesolutions.akka" % "akka-persistence" % AKKA_VERSION % "compile"
+    // lazy val akkaActor        = "akka" % "akka-actor"       % AKKA_VERSION % "compile"
+    // lazy val akkaCamel        = "akka" % "akka-camel"       % AKKA_VERSION % "compile"
+    // lazy val akkaHttp         = "akka" % "akka-http"        % AKKA_VERSION % "compile"
+    // lazy val akkaKernel       = "akka" % "akka-kernel"      % AKKA_VERSION % "compile"
+    // lazy val akkaPersistence  = "akka" % "akka-persistence" % AKKA_VERSION % "compile"
 
     lazy val dispatch_futures = "net.databinder" % "dispatch-futures_2.8.0" % DISPATH_VERSION % "compile"
     lazy val dispatch_http    = "net.databinder" % "dispatch-http_2.8.0"    % DISPATH_VERSION % "compile"
@@ -147,8 +147,8 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
         "-Xmigration",
         "-Xcheckinit",
         "-Xwarninit",
-				// "-Xstrict-warnings",
-				// "-optimise",  // for releases.
+        // "-Xstrict-warnings",
+        // "-optimise",  // for releases.
         "-encoding", "utf8")
         .map(x => CompileOption(x))
   override def javaCompileOptions = JavaCompileOption("-Xlint:unchecked") :: super.javaCompileOptions.toList

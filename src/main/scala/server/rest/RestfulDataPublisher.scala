@@ -9,9 +9,9 @@ import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.util._
 import org.chicagoscala.awse.util.json._
 import org.joda.time._
-import se.scalablesolutions.akka.actor._
-import se.scalablesolutions.akka.dispatch.{FutureTimeoutException}
-import se.scalablesolutions.akka.util.Logging
+import akka.actor._
+import akka.dispatch.{FutureTimeoutException}
+import akka.util.Logging
 
 case object NoWorkersAvailable extends RuntimeException("No worker servers appear to be available!")
 

@@ -1,5 +1,5 @@
 package org.chicagoscala.awse.server
-import se.scalablesolutions.akka.dispatch.{Future, Futures}
+import akka.dispatch.{Future, Futures}
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 

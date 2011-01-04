@@ -1,9 +1,9 @@
 package org.chicagoscala.awse.server
 import org.chicagoscala.awse.util.json.JSONMap._
-import se.scalablesolutions.akka.actor._
-import se.scalablesolutions.akka.actor.Actor._
-import se.scalablesolutions.akka.dispatch.{Future, Futures, FutureTimeoutException}
-import se.scalablesolutions.akka.util.Logging
+import akka.actor._
+import akka.actor.Actor._
+import akka.dispatch.{Future, Futures, FutureTimeoutException}
+import akka.util.Logging
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 

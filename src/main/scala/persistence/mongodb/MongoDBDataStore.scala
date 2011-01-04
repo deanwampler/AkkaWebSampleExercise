@@ -1,8 +1,8 @@
 package org.chicagoscala.awse.persistence.mongodb
 import org.chicagoscala.awse.persistence._
 import org.chicagoscala.awse.persistence.mongodb.MongoDBJSONRecord._
-import se.scalablesolutions.akka.config.Config.config
-import se.scalablesolutions.akka.util.Logging
+import akka.config.Config.config
+import akka.util.Logging
 import scala.collection.immutable.SortedSet
 import org.joda.time._
 import net.liftweb.json.JsonAST._

@@ -1,7 +1,7 @@
 package org.chicagoscala.awse.server
-import se.scalablesolutions.akka.actor._
-import se.scalablesolutions.akka.actor.Actor._
-import se.scalablesolutions.akka.util.Logging
+import akka.actor._
+import akka.actor.Actor._
+import akka.util.Logging
 
 /**
  * Constructor actors.

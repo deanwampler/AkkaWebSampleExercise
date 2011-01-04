@@ -5,9 +5,9 @@ import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.persistence._
 import org.chicagoscala.awse.domain.finance._
 import org.chicagoscala.awse.domain.finance.FinanceJSONConverter._
-import se.scalablesolutions.akka.actor._
-import se.scalablesolutions.akka.actor.Actor._
-import se.scalablesolutions.akka.util.Logging
+import akka.actor._
+import akka.actor.Actor._
+import akka.util.Logging
 import org.joda.time._
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
@@ -27,7 +27,7 @@ case class GetInstrumentList(range: scala.collection.immutable.NumericRange[Char
  * TODO: The relationship and management of these servers, DataStorageServers and DataStores is
  * convoluted and messy. Refactor...
  */
-class InstrumentAnalysisServer(val service: String, dataStorageServer: ActorRef) extends Transactor 
+class InstrumentAnalysisServer(val service: String, dataStorageServer: ActorRef) extends Actor 
     with ActorUtil with ActorFactory with PingHandler with Logging {
   
   val actorName = "InstrumentAnalysisServer("+service+")"

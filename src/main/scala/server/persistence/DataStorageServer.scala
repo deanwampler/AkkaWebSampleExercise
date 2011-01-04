@@ -5,10 +5,10 @@ import org.chicagoscala.awse.persistence.inmemory._
 import org.chicagoscala.awse.persistence.mongodb._
 import org.chicagoscala.awse.util._
 import org.chicagoscala.awse.util.json.JSONMap._
-import se.scalablesolutions.akka.actor._
-import se.scalablesolutions.akka.actor.Actor._
-import se.scalablesolutions.akka.stm.Transaction._
-import se.scalablesolutions.akka.util.Logging
+import akka.actor._
+import akka.actor.Actor._
+import akka.stm.Transaction._
+import akka.util.Logging
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 import org.joda.time._
@@ -24,7 +24,7 @@ case class InvalidCriteria(message: String, criteria: JValue) extends RuntimeExc
  * TODO: Currently, the query capabilities are limited to date-time range queries.
  */
 class DataStorageServer(val serviceName: String, val dataStore: DataStore) 
-    extends Transactor with PingHandler with Logging {
+    extends Actor with PingHandler with Logging {
 
   val actorName = "DataStoreServer("+serviceName+")"
 

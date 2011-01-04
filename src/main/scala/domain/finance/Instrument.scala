@@ -1,5 +1,5 @@
 package org.chicagoscala.awse.domain.finance
-import se.scalablesolutions.akka.util.Logging
+import akka.util.Logging
 
 /**
  * A financial instrument.
