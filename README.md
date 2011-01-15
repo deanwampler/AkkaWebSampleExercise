@@ -46,6 +46,8 @@ You can exit this infinite loop by entering a carriage return. The sbt `>` promp
 
 While the `sbt update` was slow, this step is somewhat tedious (TBD).
 
+**UPDATE:** It looks like InfoChimps has changed the location of the data set. It may also no longer be available in YAML. I'll update the following instructions when I can. The updated location appears to be [here](http://infochimps.com/datasets/daily-1970-2010-open-close-hi-low-and-volume-nyse-exchange).
+
 This application requires a [NYSE stock ticker data set](http://infochimps.org/datasets/daily-1970-current-open-close-hi-low-and-volume-nyse-exchange-up--2) from [infochimps](http://infochimps.org). Select the YAML format. Note that there are similar data sets on the site; use this one! Put the files in a `data` directory at the root of this project.
 
 The script `bin/data-import.sh` munges this YAML data into a format that `mongoimport` likes, creates the `stocks_yahoo_NYSE` database, creates many tables, and imports the data. It takes a long time to run. Unfortunately, it has a lot of moving parts, so you may have trouble completing it successfully. Contact me, if you get stuck. If you are loading this data on a small machine (like a Netbook), I strongly recommend that you hack the scripts to only load part of the data, for example, `A-E`. You'll have to hack on the scripts in `bin` to figure out what to edit.
