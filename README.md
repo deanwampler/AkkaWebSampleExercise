@@ -44,23 +44,26 @@ You can exit this infinite loop by entering a carriage return. The sbt `>` promp
 
 # Import the Data
 
-While the `sbt update` was slow, this step is somewhat tedious (TBD).
+**UPDATE:** InfoChimps has changed the location of the data set and removed the YAML version. I updated the following instructions to use the new location and CSV format. (I also simplified process and made it more flexible...)
 
-**UPDATE:** It looks like InfoChimps has changed the location of the data set. It may also no longer be available in YAML. I'll update the following instructions when I can. The updated location appears to be [here](http://infochimps.com/datasets/daily-1970-2010-open-close-hi-low-and-volume-nyse-exchange).
+The import process uses the `bash` script in `bin/data-import.sh`. There is a preliminary, *but untested*, windows shell script in `bin/windows`. If you try it and find bugs, let me know. (Or better, provide patches!)
 
-This application requires a [NYSE stock ticker data set](http://infochimps.org/datasets/daily-1970-current-open-close-hi-low-and-volume-nyse-exchange-up--2) from [infochimps](http://infochimps.org). Select the YAML format. Note that there are similar data sets on the site; use this one! Put the files in a `data` directory at the root of this project.
+You must also install **MongoDB** before proceeding.
 
-The script `bin/data-import.sh` munges this YAML data into a format that `mongoimport` likes, creates the `stocks_yahoo_NYSE` database, creates many tables, and imports the data. It takes a long time to run. Unfortunately, it has a lot of moving parts, so you may have trouble completing it successfully. Contact me, if you get stuck. If you are loading this data on a small machine (like a Netbook), I strongly recommend that you hack the scripts to only load part of the data, for example, `A-E`. You'll have to hack on the scripts in `bin` to figure out what to edit.
+This application requires a [NYSE stock ticker data set](http://infochimps.com/datasets/daily-1970-2010-open-close-hi-low-and-volume-nyse-exchange) from [infochimps](http://infochimps.org). The files are in CSV format. Download and expand the ZIP file somewhere convenient on your system.
 
-A much better import process, including optional restriction to a subset of the the data, is TBD.
+The script `bin/data-import.sh` creates the `stocks_yahoo_NYSE` database, creates many tables, and imports the data. It takes a long time to run.
 
-**Before you run it, make sure `mongod` is running,** per the instructions above. Also, if you're running `mongod` with the `--dbpath some_directory/data/db` argument, you'll need to add the same argument to the invocations of `mongoimport` and `mongo` in the script(s).
+To see the options for this script, run:
 
-Next, before you run the script, you'll need to install the Scala distribution (if it isn't already installed), as this script runs Scala and it is not set up to use the Scala distribution embedded in the `sbt` project. Go to [scala-lang.org/downloads](http://scala-lang.org/downloads) and follow the instructions to install Scala. (I prefer the _IzPack_ installer myself; you just double click and go. However, on Windows, the Windows-specific installer might be best.)
- 
-(**Note:** there is `bin/data-import.bat` script for windows that attempts to do the same steps, but it is untested! Feedback is welcome!)
+    bin/data-import.sh --help
 
-When `bin/data-import.sh` is finished, you should have 52 collections in `stocks_yahoo_NYSE`, of the form `A_prices`, `A_dividends`, ... `Z_prices`, `Z_dividends` (or less, if you decided to use a subset of the data). 
+The only required option is the directory where the CSV files are located, as described. You can also limit the data imported with the `--min_letter=C` and/or
+`--max_letter=C` options. If you are loading this data on a small machine (like a Netbook), I strongly recommend that you use these options, say for example, `--max_letter=E`, to only load data for stock symbols that begin with the letters A through E.
+
+**Before you run it, make sure `mongod` is running,** per the instructions above. Also, if you're running `mongod` with the `--dbpath some_directory/data/db` argument, you'll need to invoke `bin/data-import.sh` with the same argument.
+
+When `bin/data-import.sh` is finished, you should have 52 collections in `stocks_yahoo_NYSE`, of the form `A_prices`, `A_dividends`, ... `Z_prices`, `Z_dividends` (or less, if you decided to import a subset of the data). 
 
 To get a sense of the installed data, start the `mongo` interactive shell (it's in the same directory as `mongod`) and run the following commands. The `>` is the `mongo` prompt, which you don't type, and the rest of the lines are the output that I got in response. Your results should be similar, but not identical.
 
@@ -74,24 +77,24 @@ To get a sense of the installed data, start the `mongo` interactive shell (it's 
     switched to db stocks_yahoo_NYSE
     
     > db.A_prices.count()              
-    693733
+    693733     // Or some similar, largish number
     
     > db.A_prices.findOne()
     {
       "_id" : ObjectId("4c89b27c48bc853f23fc87ae"),
-      "close" : 27.13,
-      "high" : 27.4,
+      "exchange" : "NYSE",
       "date" : "2008-03-07",
       "stock_symbol" : "ATU",
-      "exchange" : "NYSE",
-      "volume" : 591000,
-      "adj close" : 27.13,
-      "low" : 26.18,
-      "open" : 26.18
+      "stock_price_close" : 27.13,
+      "stock_price_high" : 27.4,
+      "stock_price_adj_close" : 27.13,
+      "stock_price_low" : 26.18,
+      "stock_price_open" : 26.18,
+      "stock_volume" : 591000
     }
     
     > db.A_dividends.count()           
-    8322
+    8322     // Or some similar, middling number
     
     > db.A_dividends.findOne()
     {
@@ -118,11 +121,9 @@ Repeat the last `count()` and `findOne()` commands for any of the collections th
       "AZZ"
     ]
             
-If you encounter any problems with these commands, the data import might have failed. If you want to try again with a clean slate, the commands `db.dropDatabase()` will drop the whole database you're in (e.g., `stocks_yahoo_NYSE`), while a command like `db.A_prices.drop()` will drop just the `A_prices` collection.
+If you encounter any problems with these commands, the data import might have failed. If you want to try again with a clean slate, the `mongo` command `db.dropDatabase()` will drop the whole database you're in (e.g., `stocks_yahoo_NYSE`). Similarly, the command `db.A_prices.drop()` will drop just the `A_prices` collection, etc.
 
-**NOTE:** To get help in the `mongo` console, start with `help()`. See the [MongoDB](http://mongodb.org) web site for more details. The console is quite powerful!
-
-Finally, the last message of the import script tells you to delete the `datatmp` directory. This is where temporary data files were staged. The script doesn't delete them automatically, in case you need to do some diagnostics...
+**NOTE:** To get help in the `mongo` console, start with `help()`, `db.help()` and `db.coll.help()`. See the [MongoDB](http://mongodb.org) web site for more details. The console is quite powerful!
 
 # The Web App
 
