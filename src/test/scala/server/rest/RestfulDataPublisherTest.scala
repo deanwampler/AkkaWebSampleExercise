@@ -52,7 +52,7 @@ class RestfulDataPublisherTest extends FunSuite
         val fake = actorOf(new Actor {
           def receive = {
             case CalculateStatistics(x) => self.reply(returnedJSON)
-            case GetInstrumentList(range, x) => self.reply(returnedJSON)
+            case GetInstrumentList(symbols, x) => self.reply(returnedJSON)
           }
         }) 
         fake.start

@@ -17,7 +17,7 @@ import net.lag.logging.Level
 sealed trait InstrumentCalculationMessages
 
 case class CalculateStatistics(criteria: CriteriaMap) extends InstrumentCalculationMessages
-case class GetInstrumentList(range: scala.collection.immutable.NumericRange[Char], keyForInstrumentSymbols: String) 
+case class GetInstrumentList(symbolFirstLetters: List[Char], keyForInstrumentSymbols: String) 
   extends InstrumentCalculationMessages
       
 /**
@@ -27,12 +27,14 @@ case class GetInstrumentList(range: scala.collection.immutable.NumericRange[Char
  * TODO: The relationship and management of these servers, DataStorageServers and DataStores is
  * convoluted and messy. Refactor...
  */
-class InstrumentAnalysisServer(val service: String, dataStorageServer: ActorRef) extends Actor 
+class InstrumentAnalysisServer(val service: String, pricesDataStorageServer: ActorRef, dividendsDataStorageServer: ActorRef) extends Actor 
     with ActorUtil with ActorFactory with PingHandler with Logging {
   
-  val actorName = "InstrumentAnalysisServer("+service+")"
+  def actorName = "InstrumentAnalysisServer("+service+")"
   
-  manageNewActor(dataStorageServer)
+  manageNewActor(pricesDataStorageServer)
+  manageNewActor(dividendsDataStorageServer)
+  override protected def subordinatesToPing: List[ActorRef] = List(pricesDataStorageServer, dividendsDataStorageServer)
   
   /**
    * The message handler calls the "pingHandler" first. If it doesn't match on the
@@ -42,13 +44,13 @@ class InstrumentAnalysisServer(val service: String, dataStorageServer: ActorRef)
   def receive = pingHandler orElse defaultHandler orElse unrecognizedMessageHandler
 
   def defaultHandler: PartialFunction[Any, Unit] = {
-    case CalculateStatistics(criteria) => self.reply(helper.calculateStatistics(criteria))
-    case GetInstrumentList(range, keyForInstrumentSymbols) => self.reply(helper.getInstrumentList(range, keyForInstrumentSymbols))
-  }
+    case CalculateStatistics(criteria) => 
+      self.reply(helper.calculateStatistics(criteria))
+    case GetInstrumentList(symbolFirstLetters, keyForInstrumentSymbols) => 
+      self.reply(helper.getInstrumentList(symbolFirstLetters, keyForInstrumentSymbols))
+  }  
   
-  override protected def subordinatesToPing: List[ActorRef] = List(dataStorageServer)
-  
-  val helper = new InstrumentAnalysisServerHelper(dataStorageServer)
+  val helper = new InstrumentAnalysisServerHelper(pricesDataStorageServer, dividendsDataStorageServer)
 }
 
 /**
@@ -56,7 +58,7 @@ class InstrumentAnalysisServer(val service: String, dataStorageServer: ActorRef)
  * and the logic it performs, primarily when testing this code.
  @ param dataStorageServer a by-name parameter so it is lazy!
  */
-class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
+class InstrumentAnalysisServerHelper(pricesDataStorageServer: => ActorRef, dividendsDataStorageServer: => ActorRef) {
   
   def calculateStatistics(criteria: CriteriaMap): JValue = criteria match {
     case CriteriaMap(instruments, statistics, start, end) => fetchPrices(instruments, statistics, start, end)
@@ -66,25 +68,45 @@ class InstrumentAnalysisServerHelper(dataStorageServer: => ActorRef) {
   /**
    * Fetch the instrument prices between the time range. Must make a synchronous call to the data store server
    * because clients calling this actor need a synchronous response.
-   * TODO: Ignores the instruments criteria. Fix!
+   * TODO While you could in principle ask for dividends, we currently don't support them. However, it should be straightforward
+   * to add a query of the dividend collections here.
    */
   protected def fetchPrices(
         instruments: List[Instrument], statistics: List[InstrumentStatistic], 
         start: DateTime, end: DateTime): JValue = {
-    (dataStorageServer !! Get(Map("start" -> start, "end" -> end, "stock_symbol" -> Instrument.toSymbolNames(instruments)))) match {
+    val (dividends, prices) = statistics partition {
+      case d: Dividend => true
+      case _ => false
+    }
+    if (dividends.size > 0) {
+      log.error ("You asked for Dividends, but they are currently not supported!")
+    }
+    (pricesDataStorageServer !! Get(Map("start" -> start, "end" -> end, "stock_symbol" -> Instrument.toSymbolNames(instruments)))) match {
       case None => 
         Pair("warning", "Nothing returned for query (start, end, instruments) = (" + start + ", " + end + ", " + instruments + ")")
       case Some(result) => 
-        formatPriceResults(filter(result), instruments, statistics, start, end)
+        formatPriceResults(filter(result), instruments, prices, start, end)
     }
   }
   
+  /*
+   * Only works with one instrument letter, despite the "range" argument.
+   */
   def getInstrumentList(
-        range: scala.collection.immutable.NumericRange[Char], keyForInstrumentSymbols: String): JValue = {
-    (dataStorageServer !! Get(Map("instrument_list" -> range.toList.head.toString, "instrument_symbols_key" -> keyForInstrumentSymbols))) match {
-      case None => 
-        Pair("warning", "Nothing returned for instrument list in range "+range)
-      case Some(result) => result
+        symbolFirstLetters: List[Char], keyForInstrumentSymbols: String): JValue = {
+    if (symbolFirstLetters.size != 1) {
+      val errMsg = "The input list of of symbol letters does not contain just one item: "+symbolFirstLetters+". (Implementation restriction)"
+      log.error(errMsg)
+      Pair("error", errMsg)
+    } else {
+      val letter = symbolFirstLetters.head.toString
+      (pricesDataStorageServer !! Get(Map("instrument_list" -> letter, "instrument_symbols_key" -> keyForInstrumentSymbols))) match {
+        case None         => Pair("warning", "Nothing returned for instrument list in list "+symbolFirstLetters)
+        case Some(result) => result match {
+          case jv:JValue => jv + Pair("key", letter)
+          case _         => log.error("Expected a JValue to be returned by pricesDataStorageServer!"); result
+        }
+      }
     }
   }
   

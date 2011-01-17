@@ -58,14 +58,18 @@ class InstrumentAnalysisServerTest extends FunSuite
 
   var analysisServer: InstrumentAnalysisServerHelper = _
   var testDataStore: InMemoryDataStore = _
+  var testDivDataStore: InMemoryDataStore = _
   var dss: ActorRef = _
+  var ddss: ActorRef = _
   var driverActor: ActorRef = _
   var answer: Option[String] = None
 
   override def beforeEach = {
     testDataStore = new InMemoryDataStore("testDataStore")
     dss = actorOf(new DataStorageServer("testService", testDataStore))
-    analysisServer = new InstrumentAnalysisServerHelper(dss) 
+    testDivDataStore = new InMemoryDataStore("testDataStoreForDividends")
+    ddss = actorOf(new DataStorageServer("testServiceForDividends", testDivDataStore))
+    analysisServer = new InstrumentAnalysisServerHelper(dss, ddss) 
     driverActor = actorOf(new Actor {
       def receive = {
         case msg => (dss !!! msg).await.result match {
@@ -75,12 +79,14 @@ class InstrumentAnalysisServerTest extends FunSuite
       }
     })
     dss.start
+    ddss.start
     driverActor.start
     loadData
   }
   override def afterEach = {
     driverActor.stop
     dss.stop
+    ddss.stop
   }
 
   test ("calculateStatistics returns a JSON string containing all data when all data matches the query criteria") {

@@ -1,5 +1,18 @@
 // JavaScript for the AkkaWebSampleExercise
 
+// An object that maps from the actual data fields in the returned JSON
+// to fixed keys used in this code. So, if the JSON format changes, you
+// only need to modify this map.
+var field_map = { 
+  Symbol: function(row) { return row.stock_symbol; },
+  Date:   function(row) { return row.date; },
+  Open:   function(row) { return row.stock_price_open; },
+  Close:  function(row) { return row.stock_price_close; },
+  Low:    function(row) { return row.stock_price_low; },
+  High:   function(row) { return row.stock_price_high; },
+  Volume: function(row) { return row.stock_volume; }
+}
+
 function padLeft(s, l, c) {
   s += '';
   while (s.length < l) {
@@ -81,9 +94,9 @@ function onSuccess(jsonString) {
     pongList.html('')
     // TODO: Fix, the returned json is a EITHER a singly- or doubly-nested array [[...]]
     $.each($(json["pong"]), function(i, arrayOrObject) {
-  	  if (is_array(arrayOrObject) === false) {
+      if (is_array(arrayOrObject) === false) {
         arrayOrObject = [arrayOrObject]
-			}
+      }
       $.each(arrayOrObject, function(j, item) {
         pongList.append("<li>" + item + "</li>")
       })
@@ -100,15 +113,8 @@ function onSuccess(jsonString) {
   } else if (json["error"]) {
     writeError(json["error"])
   } else if (json["financial-data"]) {
-		displayFinancialData(json["financial-data"],
-      [["Symbol",  function(row) { return row.stock_symbol; }],
-       ["Date",    function(row) { return row.date; }],
-       ["Open",    function(row) { return row.open; }],
-       ["Close",   function(row) { return row.close; }],
-       ["Low",     function(row) { return row.low; }],
-       ["High",    function(row) { return row.high; }],
-       ["Volume",  function(row) { return row.volume; }]
-       ])
+    displayFinancialData(json["financial-data"],
+      function(row, newDate) { row.date = newDate; })
   } else if (json["instrument-list"]) {
 		displayInstrumentsLists(json["instrument-list"])
   } else {
@@ -122,7 +128,7 @@ function onSuccess(jsonString) {
   // }, 3000);
 }
 
-function displayFinancialData(json, fields) {
+function displayFinancialData(json, setDate) {
   // TODO: we more or less assume that there is really one instrument and
   // one statistic in each "row", because that's how the data is currently
   // returned, with one-element arrays for the instruments and statistics.
@@ -130,14 +136,15 @@ function displayFinancialData(json, fields) {
   $('#pong-display').hide()
   var json2 = is_array(json) ? json : [json] // hack to deal with inconsistent returned results.
   if ($('#graph:checked').length > 0)
-    displayFinancialDataInAGraph(json2, fields)
+    displayFinancialDataInAGraph(json2, setDate)
   else
-    displayFinancialDataInATable(json2, fields)
+    displayFinancialDataInATable(json2, setDate)
 }
 
-function displayFinancialDataInAGraph(json, fields) {
+function displayFinancialDataInAGraph(json, setDate) {
   var all_graph_data = []
   var graph_data_bounds = undefined
+  var empty_results = []
   $.each(json, function(i, row) {
     var criteria = row.criteria
     var instruments = "unknown criteria"
@@ -149,16 +156,17 @@ function displayFinancialDataInAGraph(json, fields) {
     var graph_data = []
     var results  = row.results
     if (results.length === 0) {
-      writeWarning("No " + statistics + " results for " + instruments + "!")
+      empty_results.push("No " + statistics + " results for " + instruments + "!")
     } else {
       $.each(results, function(j, result) {
-        var t  = new Date(fields[1][1](result))
+        var t  = new Date(field_map.Date(result))
+        setDate(result, t)
         // p is "price".
-        var open_p  = fields[2][1](result)
-        var close_p = fields[3][1](result)
-        var low_p   = fields[4][1](result)
-        var high_p  = fields[5][1](result)
-        var volume  = fields[6][1](result)
+        var open_p  = field_map.Open(result)
+        var close_p = field_map.Close(result)
+        var low_p   = field_map.Low(result)
+        var high_p  = field_map.High(result)
+        var volume  = field_map.Volume(result)
         if (graph_data_bounds === undefined) {
           graph_data_bounds = {min_t: t, max_t: t, min_p: low_p, max_p: high_p, max_volume: volume}
         } else {
@@ -180,8 +188,11 @@ function displayFinancialDataInAGraph(json, fields) {
         }
       })
     }
-    all_graph_data.push({instruments: instruments, statistics: statistics, field_mapping: fields, data: results})
+    all_graph_data.push({instruments: instruments, statistics: statistics, data: results})
   })
+  if (empty_results.length > 0) {
+    writeWarning(_.reduce(empty_results, function(s, item) { return s + "</br>" + item }, ""))
+  }
   // Must delete and recreate the svg every time.
   $('span svg').remove()
   graphData(all_graph_data, graph_data_bounds)
@@ -190,9 +201,19 @@ function displayFinancialDataInAGraph(json, fields) {
 
 
 function graphData(data, data_bounds) {
+  if (data_bounds === undefined) {
+    console.log("graphData: data_bounds is undefined!!")
+    return
+  }
+  
+  /* Parse dates. */
+  // var dateFormat = pv.Format.date("%y-%b-%s");
+  // data.forEach(function(d) { d.date = dateFormat.parse(d.date) });
+  
   time_delta = data_bounds.max_t.getTime() - data_bounds.min_t.getTime()
   padding_on_the_right = time_delta * .05
   max_t = new Date(data_bounds.max_t.getTime() + padding_on_the_right)
+  
   /* Sizing and scales. */
   var w = $(window).width() * .9,
       h = $(window).height() * .8,
@@ -210,7 +231,7 @@ function graphData(data, data_bounds) {
   
   /* X-axis ticks. */
   vis.add(pv.Rule)
-      .data(x.ticks())
+      .data(x.ticks(20))
       .visible(function(d) {return d})
       .left(x)
       .strokeStyle("#eee")
@@ -223,7 +244,7 @@ function graphData(data, data_bounds) {
 
   /* Y-axis ticks. */
   vis.add(pv.Rule)
-      .data(y.ticks(5))
+      .data(y.ticks(20))
       .bottom(y)
       // .strokeStyle(function(d){return d ? "#eee" : "#000"})
       .strokeStyle(function(d) {return d ? "rgba(128,128,128,.2)" : "#CCC"})
@@ -234,8 +255,8 @@ function graphData(data, data_bounds) {
   $.each(data, function(i, data_for_stock) {
     var color = 'rgba(' + ((32 * i) % 256) + ',' + ((64 * i) % 256) + ',' + ((128 * i) % 256) + ', .5)' //pv.Colors.category20().by(i)
 
-    /* Line. each colored differently.
-       The lines don't work well with candelsticks.
+    /* A line for each stock, colored differently.
+       However, the lines don't work well with candelsticks, so they are commented out.
     vis.add(pv.Line)
         .data(data_for_stock.data)
         .interpolate("step-after")
@@ -248,14 +269,14 @@ function graphData(data, data_bounds) {
     console.log(data_for_stock)
     vis.add(pv.Rule)
         .data(data_for_stock.data)
-        .left(function(d) { return x(new Date(d.date))})
-        .bottom(function(d) { return y(Math.min(d.high, d.low)) })
-        .height(function(d) { return Math.abs(y(d.high) - y(d.low)) })
-        .strokeStyle(function(d) { return d.open <= d.close ? "#06982d" : "#ae1325" })
+        .left(function(d) { return x(new Date(field_map.Date(d)))})
+        .bottom(function(d) { return y(Math.min(field_map.High(d), field_map.Low(d))) })
+        .height(function(d) { return Math.abs(y(field_map.High(d)) - y(field_map.Low(d))) })
+        .strokeStyle(function(d) { return field_map.Open(d) <= field_map.Close(d) ? "#06982d" : "#ae1325" })
       .add(pv.Rule)
-        .bottom(function(d) { return y(Math.min(d.open, d.close)) })
-        .height(function(d) { return Math.abs(y(d.open) - y(d.close)) })
-        .lineWidth(10);
+        .bottom(function(d) { return y(Math.min(field_map.Open(d), field_map.Close(d))) })
+        .height(function(d) { return Math.abs(y(field_map.Open(d)) - y(field_map.Close(d))) })
+        .lineWidth(4);
     
     /* Add labels for each line end */
     vis.add(pv.Mark)
@@ -263,24 +284,24 @@ function graphData(data, data_bounds) {
         .add(pv.Label)
         .textStyle(color)
         .font("16px sans-serif")
-        .left(function(d) { return x(d.date) })
-        .bottom(function(d) { return y(d.close) })
+        .left(function(d) { return x(field_map.Date(d)) })
+        .bottom(function(d) { return y(field_map.Close(d)) })
         .text(data_for_stock.instruments)
   })
 
   vis.render();  
 }
 
-function displayFinancialDataInATable(json, fields) {
+function displayFinancialDataInATable(json, setDate) {
   // Create the header row:
   $("#finance-table thead").html('<tr class="finance-head"></tr>') // start with a clean row.
-  $.each(fields, function(i, field) {
+  $.each(field_map, function(key, value) {
     if (i == 0)
-      $(".finance-head").append("<th class='top-left-rounded-corners'>" + field[0] + "</th>")
-    else if (i == fields.length - 1)
-      $(".finance-head").append("<th class='top-right-rounded-corners'>" + field[0] + "</th>")
+      $(".finance-head").append("<th class='top-left-rounded-corners'>" + key + "</th>")
+    else if (i == field_map.length - 1)
+      $(".finance-head").append("<th class='top-right-rounded-corners'>" + key + "</th>")
     else
-      $(".finance-head").append("<th>" + field[0] + "</th>")    
+      $(".finance-head").append("<th>" + key + "</th>")    
   })
   // Create the body rows:
   $("#finance-table tbody").html('') // clear the body first.
@@ -298,15 +319,15 @@ function displayFinancialDataInATable(json, fields) {
       var start = $('#master-toolbar').find('#start').val()
       var end   = $('#master-toolbar').find('#end').val()
       $("#finance-table tbody").append(
-        "<tr class='results-row'><tr><td colspan='"+fields.length+"'><b>No "+statistics+" data for "+instruments+". Time range: "+start+" to "+end+
+        "<tr class='results-row'><tr><td colspan='"+field_map.length+"'><b>No "+statistics+" data for "+instruments+". Time range: "+start+" to "+end+
           "</b></br><font class='tiny'>(Note: time range may not be relevant for all queries...).</font></td></tr>")        
     } else {
       $.each(results, function(j, result) {
         var idij = "results-row-" + i+"_"+j
         $("#finance-table tbody").append("<tr class='results-row' id='results-row-" + idij + "'></tr>")
-        $.each(fields, function(k, field) {
+        $.each(field_map, function(k, field) {
           var idijk = "results-row-" + i+"_"+j+"_"+k
-          var value = field[1](result)
+          var value = field(result)
           $('#results-row-' + idij).append("<td class='statistic' id='statistic-'" + idijk + "'>" + value + "</td>")
         })
       })
@@ -321,7 +342,7 @@ function displayInstrumentsLists(json) {
   // Create the header row:
   $("#finance-table thead").html(     // start with a clean row.
     "<tr class='finance-head'>" + 
-    "<th class='top-left-rounded-corners'>Letter</th>" +
+    "<th class='top-left-rounded-corners'>&nbsp;</th>" +
     "<th class='top-right-rounded-corners'>Symbols</th>" +
     "</tr>")
 
@@ -336,10 +357,10 @@ function displayInstrumentsLists(json) {
     var symbols  = row.stock_symbol
     if (symbols.length === 0) {
       $("#finance-table tbody").append(
-        "<tr class='results-row'><td class='symbol-letter'>" + row.letter + "</td><td class='no-symbols'>No instruments!</td></tr>")        
+        "<tr class='results-row'><td class='symbol-letter'>" + row.key + "</td><td class='no-symbols'>No instruments!</td></tr>")        
     } else {
       $("#finance-table tbody").append(
-			  "<tr class='results-row'><td class='symbol-letter'>" + row.letter + "</td><td class='symbols'>" + symbols.join(', ') + "</td></tr>")
+			  "<tr class='results-row'><td class='symbol-letter'>" + row.key + "</td><td class='symbols'>" + symbols.join(', ') + "</td></tr>")
 		}
   })
   $('#finance-table-display').show()

@@ -24,9 +24,9 @@ case class InvalidCriteria(message: String, criteria: JValue) extends RuntimeExc
  * TODO: Currently, the query capabilities are limited to date-time range queries.
  */
 class DataStorageServer(val serviceName: String, val dataStore: DataStore) 
-    extends Actor with PingHandler with Logging {
+    extends Actor with ActorUtil with PingHandler with Logging {
 
-  val actorName = "DataStoreServer("+serviceName+")"
+  def actorName = "DataStoreServer("+serviceName+")"
 
   log.info("Creating: "+actorName)
   
@@ -94,7 +94,7 @@ class DataStorageServer(val serviceName: String, val dataStore: DataStore)
   protected[persistence] def getDistinctValuesFor(key: String): JValue = {
     log.debug(actorName + ": Starting getDistinctValuesFor for key = "+key)
     val data = for {
-			json <- dataStore.getDistinctValuesFor(key)
+      json <- dataStore.getDistinctValuesFor(key)
     } yield json
     val result = toJSON(data toList)
     log.info("DataStorageServer.getDistinctValuesFor returning: "+result)

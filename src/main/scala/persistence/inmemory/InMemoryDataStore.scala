@@ -47,7 +47,6 @@ class InMemoryDataStore(val name: String) extends DataStore with Logging {
           // If the criterium is a map, we don't support it yet.
           // For anything else, we require the data value to equal the criterium value.
           case list: List[_]  => list contains value
-          // case ary:  Array[_] => ary.toList contains value
           case map:  Map[_,_] => throw new RuntimeException("Construction of Query with a Map is TODO.")
           case a:    Any      => a == value
         }

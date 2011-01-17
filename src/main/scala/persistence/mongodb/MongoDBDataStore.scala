@@ -15,12 +15,15 @@ import com.mongodb.{BasicDBObject, BasicDBList, DBCursor, Mongo, MongoException,
  * MongoDB-based storage of data. 
  * Some sections adapted from http://gist.github.com/370577. 
  * Other sections adapted from Akka's own MongoStorageBackend.scala.
+ * Note the implicit dateTimeToTimestamp, which converts DateTime objects 
+ * into the correct type  for the actual records. It defaults to milliseconds.
  */
 class MongoDBDataStore(
     val collectionName: String,
     val dataBaseName: String      = MongoDBDataStore.MONGODB_SERVER_DBNAME,
     val hostName: String          = MongoDBDataStore.MONGODB_SERVER_HOSTNAME,
     val port: Int                 = MongoDBDataStore.MONGODB_SERVER_PORT)
+   (implicit dateTimeToTimestamp: DateTime => Any = {_.getMillis})
       extends DataStore with Logging {
 
   lazy val name = collectionName
@@ -55,19 +58,9 @@ class MongoDBDataStore(
   def range(from: DateTime, to: DateTime, otherCriteria: Map[String,Any] = Map.empty, maxNum: Int): Iterable[JSONRecord] = try {
     val qb = new QueryBuilder
     qb.and(JSONRecord.timestampKey).
-      greaterThanEquals(dateTimeToAnyValue(from)).
-      lessThanEquals(dateTimeToAnyValue(to))
+      greaterThanEquals(dateTimeToTimestamp(from)).
+      lessThanEquals(dateTimeToTimestamp(to))
     // Add the additional query criteria, if any.
-    // This is the minimal solution for the exercise given for Lecture 6:
-    // if (otherCriteria.contains("stock_symbol")) {
-    //   val myBasicDBList = new BasicDBList()
-    //   otherCriteria.get("stock_symbol") match {
-    //     case Some(list) => list.asInstanceOf[List[_]] foreach { x => myBasicDBList.add(x.asInstanceOf[AnyRef]) }
-    //     case None => throw new RuntimeException("help!")
-    //   }
-    //   qb.and("stock_symbol").in(myBasicDBList)
-    // }
-    // This is a more comprehensive solution that handles a wider variety of filter options.
     otherCriteria.foreach { (keyValue: Pair[String,Any]) =>
       keyValue._2 match {
         case list: List[_] => 
@@ -115,13 +108,6 @@ class MongoDBDataStore(
     }
     buff
   }
-  
-  /**
-   * Convert a DateTime to whatever type is actually used in the data records.
-   * This implementation converts the input DateTime to milliseconds. 
-   * Subclasses can transform the input DateTime as appropriate.
-   */
-  protected def dateTimeToAnyValue(dateTime: DateTime): Any = dateTime.getMillis
 }
 
 object MongoDBDataStore extends Logging {

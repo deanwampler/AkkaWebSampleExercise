@@ -24,7 +24,7 @@ import net.liftweb.json.JsonDSL._
  */
 class InstrumentAnalysisServerSupervisor extends Actor with ActorFactory with ActorUtil with PingHandler with Logging {
   
-  val actorName = "InstrumentAnalysisServerSupervisor"
+  def actorName = "InstrumentAnalysisServerSupervisor"
 
   /**
    * The message handler calls "pingHandler" first. If it doesn't match on the message
@@ -34,8 +34,10 @@ class InstrumentAnalysisServerSupervisor extends Actor with ActorFactory with Ac
   def receive = pingHandler orElse defaultHandler orElse unrecognizedMessageHandler
 
   def defaultHandler: PartialFunction[Any,Unit] = {
-    case CalculateStatistics(criteria) => self.reply(calculate(criteria))
-    case GetInstrumentList(range, keyForInstrumentSymbols) => self.reply(getInstrumentList(range, keyForInstrumentSymbols))
+    case CalculateStatistics(criteria) => 
+      self.reply(calculate(criteria))
+    case GetInstrumentList(symbolFirstLetters, keyForInstrumentSymbols) => 
+      self.reply(getInstrumentList(symbolFirstLetters, keyForInstrumentSymbols))
   }
   
   /**
@@ -51,22 +53,24 @@ class InstrumentAnalysisServerSupervisor extends Actor with ActorFactory with Ac
     val futures = for {
       instrument <- criteria.instruments
       statistic  <- criteria.statistics
-      calculator <- getOrMakeInstrumentAnalysisServerFor(instrument, statistic)
+      calculator <- getOrMakeInstrumentAnalysisServerFor(instrument)
     } yield (calculator !!! CalculateStatistics(criteria.withInstruments(instrument).withStatistics(statistic)))
     Futures.awaitAll(futures)
     futuresToJSON(futures, "None!")
   }
   
-  def getInstrumentList(range: scala.collection.immutable.NumericRange[Char], keyForInstrumentSymbols: String) = {
+  def getInstrumentList(symbolList: List[Char], keyForInstrumentSymbols: String) = {
     val futures = for {
-      letter <- range
-      oneLetterRange = letter to letter
+      letter <- symbolList
       instrument = Instrument(letter.toString)
-      calculator <- getOrMakeInstrumentAnalysisServerFor(instrument, Price(Dollars))
-    } yield (calculator !!! GetInstrumentList(oneLetterRange, keyForInstrumentSymbols))
+      calculator <- getOrMakeInstrumentAnalysisServerFor(instrument)
+    } yield (calculator !!! GetInstrumentList(List(letter), keyForInstrumentSymbols))
     Futures.awaitAll(futures.toList)
     futuresToJSON(futures.toList, "None!")
   }
+  
+  protected def collectionNameFromSymbol(symbol: String, suffix: String) = 
+    symbol.charAt(0).toUpper + "_" + suffix
   
   /**
    * Where we embed some of the knowledge described in the class comments above. Specifically, the
@@ -74,17 +78,13 @@ class InstrumentAnalysisServerSupervisor extends Actor with ActorFactory with Ac
    * (e.g., "A" for "APPL") and the "class" of statistic being calculated. For example, "A_prices".
    * Also, the timestamp values are date strings. (Handled by JSONRecord automatically)
    */   
-  def getOrMakeInstrumentAnalysisServerFor(instrument: Instrument, statistic: InstrumentStatistic): Some[ActorRef] = {
-    val newActorName  = instrument.symbol+":"+statistic.toString
-    val dataStoreName = instrument.symbol.charAt(0).toUpper + "_" + (statistic match {
-      case d: Dividend => "dividends"
-      case _ => "prices"
+  def getOrMakeInstrumentAnalysisServerFor(instrument: Instrument): Some[ActorRef] = {
+    Some(getOrMakeActorFor(instrument.symbol) {
+      name => new InstrumentAnalysisServer(name, 
+        InstrumentAnalysisServerSupervisor.dataStorageServerFactory(collectionNameFromSymbol(instrument.symbol,"prices")),
+        InstrumentAnalysisServerSupervisor.dataStorageServerFactory(collectionNameFromSymbol(instrument.symbol,"dividends")))
     })
-    Some(getOrMakeActorFor(newActorName) {
-      name => new InstrumentAnalysisServer(
-        name, InstrumentAnalysisServerSupervisor.dataStorageServerFactory(dataStoreName))
-    })
-  }  
+  }
 }
 
 /**
@@ -105,19 +105,14 @@ object InstrumentAnalysisServerSupervisor {
     val dataStoreKind = System.getProperty("app.datastore.type", config.getString("app.datastore.type", "mongodb"))
     val dataStore = if (dataStoreKind.toLowerCase.trim == "mongodb") {
       log.info("Using MongoDB-backed data storage. name = "+storeName)
-      new MongoDBDataStore(storeName) {
-        // We actually store DateTimes as Date strings.
-        val format = DateTimeFormat.forPattern("yyyy-MM-dd")
-        
-        override protected def dateTimeToAnyValue(dateTime: DateTime): Any = format.print(dateTime)
-      }
+      // We actually store DateTimes as Date strings.
+      new MongoDBDataStore(storeName)(dateTime => YearMonthDayTimestamp(dateTime).toString) 
     } else {
       log.info("Using in-memory data storage. name = "+storeName)
       new InMemoryDataStore(storeName) // always uses DateTime for queries
     }
-    val id = storeName+"_data_storage_server"
-    val ref = actorOf(new DataStorageServer(id, dataStore))
-    ref.id = id
+    val ref = actorOf(new DataStorageServer(storeName, dataStore))
+    ref.id = storeName
     ref
   }
 }

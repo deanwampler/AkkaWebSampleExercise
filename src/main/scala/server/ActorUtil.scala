@@ -8,6 +8,8 @@ import net.liftweb.json.JsonDSL._
  */
 trait ActorUtil {
 
+  def actorName: String
+  
   /**
    * When an unknown message is received, return a uniform error message.
    */
@@ -36,4 +38,6 @@ trait ActorUtil {
     }
     case None => Pair("error", messageForNone)
   }
+
+  override def toString = actorName
 }

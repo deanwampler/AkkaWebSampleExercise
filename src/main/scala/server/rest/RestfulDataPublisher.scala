@@ -95,16 +95,16 @@ class RestfulDataPublisher extends Logging {
     
   protected[rest] def getAllInstruments(instruments: String) = 
     try {
-      // Hack! Just grab the first and last letter.
-      val symbolRange = instruments.trim match {
-        case "" => 'A' to 'Z'
+      // Hack! Grab all unique letters.
+      val symbols = instruments.trim match {
+        case "" => ('A' to 'Z') toList
         case s  => s.length match {
-          case 1 => s.charAt(0).toUpper to 'Z'
-          case n => s.charAt(0).toUpper to s.charAt(n-1).toUpper
+          case 1 => (s.charAt(0).toUpper to 'Z') toList
+          case n => convertStringToUniqueLetters(s)
         }
       }
-      val results = getStatsFromInstrumentAnalysisServerSupervisors(GetInstrumentList(symbolRange, "stock_symbol"))
-      log.info("Rest: instruments results: "+results)
+      val results = getStatsFromInstrumentAnalysisServerSupervisors(GetInstrumentList(symbols, "stock_symbol"))
+      log.info("Rest: list of instruments for symbols "+symbols+": "+results)
       val result = compact(render(JSONMap.toJValue(
           Map("instrument-list" -> results, "instrument_symbols_key" -> "stock_symbol"))))
       val length = if (result.length > 200) 200 else result.length
@@ -145,4 +145,8 @@ class RestfulDataPublisher extends Logging {
 
   protected def makeAllInstrumentsErrorString(instruments: String, message: String, th: Throwable) =
     "{\"error\": \"Getting instruments for " + instruments + " failed. " + (if (message.length > 0) (message + ". ") else "") + th.getMessage + "\"}"
+
+  protected[rest] def convertStringToUniqueLetters(s: String): List[Char] =
+    s.replaceAll("""[\W_]""", "").toUpperCase.foldLeft(Set[Char]()) {(s,x) => s + x}.toList.sortBy(c => c)
+
 }
