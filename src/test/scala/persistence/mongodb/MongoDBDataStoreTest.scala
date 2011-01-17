@@ -16,7 +16,7 @@ class MongoDBDataStoreTest extends DataStoreTestBase with BeforeAndAfterEach wit
   var dataStore: DS = _
   
   override def beforeAll = {
-    dataStore = new MongoDBDataStore("testColl", "testDb")
+    dataStore = new MongoDBDataStore("testColl", "testDb")(dateTime => dateTime.getMillis)
   }
   
   override def afterEach = dataStore.collection.drop

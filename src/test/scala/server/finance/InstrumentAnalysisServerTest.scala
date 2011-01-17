@@ -22,11 +22,11 @@ class InstrumentAnalysisServerTest extends FunSuite
   val epochStart   = new DateTime(0)
 
   val js = List(
-    makeJSONRecord(thenms,        "A",  0.0),
-    makeJSONRecord(thenms + 4000, "A", 40.0),
-    makeJSONRecord(thenms + 2000, "A", 20.0),
-    makeJSONRecord(thenms + 1000, "C", 10.0),
-    makeJSONRecord(thenms + 3000, "B", 30.0))
+    makeJSONRecord(thenms,        "AX",  0.0),
+    makeJSONRecord(thenms + 4000, "AY", 40.0),
+    makeJSONRecord(thenms + 2000, "AZ", 20.0),
+    makeJSONRecord(thenms + 1000, "CZ", 10.0),
+    makeJSONRecord(thenms + 3000, "BZ", 30.0))
 
 
   def makeJSONRecord(time: Long, symbol: String, price: Double) = {
@@ -90,42 +90,44 @@ class InstrumentAnalysisServerTest extends FunSuite
   }
 
   test ("calculateStatistics returns a JSON string containing all data when all data matches the query criteria") {
-    val criteria = makeCriteria("A,B,C", "price", 0, nowms)
+    val criteria = makeCriteria("AX,AY,AZ,BZ,CZ", "price", 0, nowms)
     val expected = makeExpected(makeJSON((List(js(0), js(3), js(2), js(4), js(1)))), criteria)
     analysisServer.calculateStatistics(criteria) should equal (expected)
   }
 
   test ("calculateStatistics returns a JSON string containing all data that matches the time criteria") {
     // Return all data for the specified time range, low to high (inclusive)
-    val criteria = makeCriteria("A,B,C", "price", thenms + 1000, thenms + 3000)
+    val criteria = makeCriteria("AX,AY,AZ,BZ,CZ", "price", thenms + 1000, thenms + 3000)
     val expected = makeExpected(makeJSON((List(js(3), js(2), js(4)))), criteria)
     analysisServer.calculateStatistics(criteria) should equal (expected)
   }
 
   test ("The time criteria are inclusive for the earliest time and the latest time") {
-    val criteria = makeCriteria("A,B,C", "price", thenms + 1000, thenms + 3000)
+    val criteria = makeCriteria("AX,AY,AZ,BZ,CZ", "price", thenms + 1000, thenms + 3000)
     val expected = makeExpected(makeJSON((List(js(3), js(2), js(4)))), criteria)
     analysisServer.calculateStatistics(criteria) should equal (expected)
   }
 
   test ("calculateStatistics returns a JSON string containing all data that matches the instrument criteria") {
-    val criteria = makeCriteria("A", "price", 0, nowms)
+    val criteria = makeCriteria("AX,AY,AZ", "price", 0, nowms)
     val expected = makeExpected(makeJSON((List(js(0), js(1), js(2)))), criteria)
     analysisServer.calculateStatistics(criteria) should equal (expected)
   }
 
   test ("calculateStatistics returns a JSON string containing all data that matches the statistics criteria") {
-    val criteria1 = makeCriteria("A,B,C", "price", 0, nowms)
-    val criteria2 = makeCriteria("A,B,C", "50dma", 0, nowms)
+    val criteria1 = makeCriteria("AX,AY,AZ,BZ,CZ", "price", 0, nowms)
+    val criteria2 = makeCriteria("AX,AY,AZ,BZ,CZ", "50dma", 0, nowms)
     val expected1 = makeExpected(makeJSON((List(js(0), js(3), js(2), js(4), js(1)))), criteria1)
     val expected2 = makeExpected(makeJSON((List(js(0), js(3), js(2), js(4), js(1)))), criteria2)
     analysisServer.calculateStatistics(criteria1) should equal (expected1)
     analysisServer.calculateStatistics(criteria2) should equal (expected2)
   }
   
-  test ("getInstrumentList returns a list of instruments that start with the specified range of letters") {
-    analysisServer.getInstrumentList('A' to 'D', "stock_symbol") \ "stock_symbol" match {
-      case JField("stock_symbol", array) => array.values should equal (List("A", "B", "C"))
+  // TODO: In fact, all the instruments in the corresponding datastore are returned.
+  // The datastores are structured to only store symbols beginning with a particular letter.
+  test ("getInstrumentList returns a list of all the instruments, independent of the input starting letter") {
+    analysisServer.getInstrumentList(List('A'), "stock_symbol") \ "stock_symbol" match {
+      case JField("stock_symbol", array) => array.values should equal (List("AX", "AY", "AZ", "BZ", "CZ"))
       case _ => fail
     }
   }

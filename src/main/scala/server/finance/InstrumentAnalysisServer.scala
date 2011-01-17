@@ -91,6 +91,8 @@ class InstrumentAnalysisServerHelper(pricesDataStorageServer: => ActorRef, divid
   
   /*
    * Only works with one instrument letter, despite the "range" argument.
+   * TODO: Currently does no actual filtering, because it assumes that the datastore
+   * only contains instruments whose symbols begin with the input Char!
    */
   def getInstrumentList(
         symbolFirstLetters: List[Char], keyForInstrumentSymbols: String): JValue = {
