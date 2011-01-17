@@ -182,6 +182,14 @@ It's a bit messy and in your face in the server code. Lot's of room for code cle
 
 In `MongoDBDataStore.scala`, which interacts with MongoDB, there is a mixture of `mongo-scala-driver` code and the standard Mongo Java driver. This could be cleaned up substantially. For example, I want to replace this code with  [Casbah](http://github.com/novus/casbah).
 
+## Simplify? 
+
+The server-side code is more complex than it needs to be. I was experimenting with ideas... 
+
+## Testing
+
+The testing of the server-side Scala code is pretty good. The testing of the web-tier JavaScript is non-existent.
+
 # Notes
 
 ## Global Configuration
@@ -190,7 +198,7 @@ Many global configuration properties are set in `src/main/resources/akka.conf`. 
 
 ## Persistence Options
 
-While MongoDB is the primary persistence option, this is abstracted to allow other options. There is an in-memory hash map implementation, useful primarily for testing. A straightforward exercise would be to replace this with a key-value store.
+While MongoDB is the primary persistence option, this is abstracted to allow other options. There is an in-memory hash map implementation, useful primarily for testing. Note that it is not as feature complete as the MongoDB code. A straightforward exercise would be to replace this with a key-value store, like Redis.
 
 The persistence option is set in `src/main/resources/akka.conf`. Look for these lines around line 13,
 
