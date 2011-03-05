@@ -1,11 +1,19 @@
 package org.chicagoscala.awse.domain.finance
 import org.chicagoscala.awse.util.datetime._
-import org.scalatest.{FlatSpec, FunSuite}
+import org.chicagoscala.awse.util.Logging
+import org.scalatest.{FlatSpec, FunSuite, BeforeAndAfterAll}
 import org.scalatest.matchers.ShouldMatchers
 import org.joda.time._
 
-class CriteriaMapTest extends FunSuite with ShouldMatchers {
-
+class CriteriaMapTest extends FunSuite with ShouldMatchers with BeforeAndAfterAll {
+  
+  override def beforeAll(configMap: Map[String, Any]) {
+    Logging.disable
+  }
+  override def afterAll(configMap: Map[String, Any]) {
+    Logging.enable
+  }
+  
   def checkInstruments(cm: CriteriaMap) = cm.instruments match {
     case Nil => fail("No instruments! ")
     case list => 

@@ -1,5 +1,4 @@
 package org.chicagoscala.awse.util
-import akka.util.Logging
 
 /**
  * This exception doesn't really add anything to RuntimeException, 
@@ -10,32 +9,29 @@ case class GeneralAppException(message: String, cause: Throwable) extends Runtim
   def this(message: String) = this(message, null)
 }
 
-sealed trait LogAndThrow {
-  protected def _log(cause: Throwable, message: String)
-  protected def _log(message: String)
-
+sealed trait LogAndThrow extends Logging {
+  val level: Logging.Levels.Level
+  
   def apply(cause: Throwable, message: String) = {
-    _log(cause, message)
+    logAt(level, cause, message)
     throw cause
   }
 
   def apply(cause: Throwable) = {
-    _log(cause, "")
+    logAt(level, cause)
     throw cause
   }
 
   def apply(message: String) = {
-    _log(message)
+    logAt(level, message)
     throw new GeneralAppException(message)
   }
 }
 
 object error extends LogAndThrow with Logging {
-  protected def _log(cause: Throwable, message: String) = log.error(cause, message)
-  protected def _log(message: String) = log.error(message)
+  val level = Logging.Levels.Error
 }
 
 object fatal extends LogAndThrow with Logging {
-  protected def _log(cause: Throwable, message: String) = log.error(cause, message)
-  protected def _log(message: String) = log.error(message)
+  val level = Logging.Levels.Fatal
 }

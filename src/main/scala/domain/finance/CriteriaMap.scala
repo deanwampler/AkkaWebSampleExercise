@@ -1,4 +1,5 @@
 package org.chicagoscala.awse.domain.finance
+import  org.chicagoscala.awse.util.fatal
 import  org.chicagoscala.awse.util.datetime.ToDateTime._
 import  org.joda.time._
 
@@ -9,28 +10,43 @@ import  org.joda.time._
 class CriteriaMap(val map: Map[String, Any]) {
   import CriteriaMap._
   
-  def withInstruments(instruments: String): CriteriaMap = withInstruments(Instrument.makeInstrumentsList(instruments))
-  def withInstruments(instruments: Instrument*): CriteriaMap = withInstruments(instruments.toList)
+  def withInstruments(instruments: String): CriteriaMap = 
+    withInstruments(Instrument.makeInstrumentsList(instruments))
+    
+  def withInstruments(instruments: Instrument*): CriteriaMap = 
+    withInstruments(instruments.toList)
+  
   def withInstruments(instruments: List[Instrument]): CriteriaMap =
     new CriteriaMap(map + ("instruments" -> instruments))
+  
     
-  def withStatistics(statistics: String): CriteriaMap = withStatistics(InstrumentStatistic.makeInstrumentStatisticsList(statistics))
-  def withStatistics(statistics: InstrumentStatistic*): CriteriaMap = withStatistics(statistics.toList)
+  def withStatistics(statistics: String): CriteriaMap = 
+    withStatistics(InstrumentStatistic.makeInstrumentStatisticsList(statistics))
+    
+  def withStatistics(statistics: InstrumentStatistic*): CriteriaMap = 
+    withStatistics(statistics.toList)
+  
   def withStatistics(statistics: List[InstrumentStatistic]): CriteriaMap =
     new CriteriaMap(map + ("statistics" -> statistics))
 
+
   def withStart(start: String): CriteriaMap = 
-    withStart(start.toDateTime getOrElse throwBadDateTime(start))
-  def withStart(start: Long): CriteriaMap = 
-    withStart(new DateTime(start))
+    withStart(start.toDateTime getOrElse fatal(InvalidDateTime(start)))
+    
+  def withStart(start: Long): CriteriaMap = withStart(new DateTime(start))
+  
   def withStart(start: DateTime): CriteriaMap =
     new CriteriaMap(map + ("start" -> start))
 
+
   def withEnd(end: String): CriteriaMap = 
-    withEnd(end.toDateTime getOrElse throwBadDateTime(end))
+    withEnd(end.toDateTime getOrElse fatal(InvalidDateTime(end)))
+
   def withEnd(end: Long): CriteriaMap = withEnd(new DateTime(end))
+
   def withEnd(end: DateTime): CriteriaMap =
     new CriteriaMap(map + ("end" -> end))
+
     
   def get(key: String) = map get key
   def getOrElse(key: String, default: => Any) = map.getOrElse (key, default)
@@ -60,10 +76,8 @@ class CriteriaMap(val map: Map[String, Any]) {
 
   protected def determineDateTime(value: Option[_], defaultDateTime: DateTime): DateTime = value match {
     case None => defaultDateTime
-    case Some(x) => x.toDateTime getOrElse throwBadDateTime(x)
+    case Some(x) => x.toDateTime getOrElse fatal(InvalidDateTime(x))
   }
-  
-  protected def throwBadDateTime(value: Any):DateTime = throw InvalidDateTime(value)
 }
 
 object CriteriaMap {

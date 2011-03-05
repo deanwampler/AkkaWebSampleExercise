@@ -109,6 +109,7 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
     lazy val jettyBase      = "org.mortbay.jetty"      % "jetty"           % MORTBAY_JETTY_VERSION  % "test"
     lazy val scalatest      = "org.scalatest"          % "scalatest"       % SCALATEST_VERSION      % "test"
     lazy val junit          = "junit"                  % "junit"           % "4.5"                  % "test"
+    lazy val borachio       = "com.borachio"  %% "borachio"  % "latest.integration"
   }
 
   import Dependencies._
@@ -120,7 +121,7 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
     mongo, mongoScalaDriver,
     // casbah, 
     jettyBase,
-    scalatest, junit) ++
+    scalatest, junit, borachio) ++
     (Set(akkaStm, akkaActor, akkaTypedActor, akkaCamel, akkaHttp, akkaKernel, akkaMongo) map (_ % "compile"))
 
   
