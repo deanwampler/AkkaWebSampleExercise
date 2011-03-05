@@ -1,4 +1,5 @@
 package org.chicagoscala.awse.domain.finance
+import org.chicagoscala.awse.util.datetime._
 import org.scalatest.{FlatSpec, FunSuite}
 import org.scalatest.matchers.ShouldMatchers
 import org.joda.time._
@@ -86,8 +87,8 @@ class CriteriaMapTest extends FunSuite with ShouldMatchers {
     cm.map.size should equal (1)
     checkStart(cm, new DateTime())
   }
-  test ("withStart(bogus string) throws an exception") {
-    intercept[CriteriaMap.InvalidTimeString] {
+  test ("withStart(bogus string) throws exception") {
+    intercept[ToDateTime.InvalidDateTime] {
       CriteriaMap(Map()).withStart("x")
     }
   }
@@ -112,17 +113,17 @@ class CriteriaMapTest extends FunSuite with ShouldMatchers {
     cm.map.size should equal (1)
     checkEnd(cm, new DateTime())
   }
-  test ("withEnd(bogus string) throws an exception") {
-    intercept[CriteriaMap.InvalidTimeString] {
+  test ("withEnd(bogus string) throws exception") {
+    intercept[ToDateTime.InvalidDateTime] {
       CriteriaMap(Map()).withEnd("x")
     }
   }
-  test ("withEnd(Long) adds a end time to a CriteriaMap") {
+  test ("withEnd(Long) adds an end time to a CriteriaMap") {
     val cm = CriteriaMap(Map()).withEnd(thenms)
     cm.map.size should equal (1)
     checkEnd(cm, then)
   }
-  test ("withEnd(DateTime) adds a end time to a CriteriaMap") {
+  test ("withEnd(DateTime) adds an end time to a CriteriaMap") {
     val cm = CriteriaMap(Map()).withEnd(then)
     cm.map.size should equal (1)
     checkEnd(cm, then)

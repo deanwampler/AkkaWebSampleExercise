@@ -8,6 +8,7 @@ import org.chicagoscala.awse.server.finance._
 import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.util._
 import org.chicagoscala.awse.util.json._
+import org.chicagoscala.awse.util.datetime._
 import org.joda.time._
 import akka.actor._
 import akka.dispatch.{FutureTimeoutException}
@@ -82,7 +83,7 @@ class RestfulDataPublisher extends Logging {
     } catch {
       case NoWorkersAvailable =>
         makeErrorString("", NoWorkersAvailable, instruments, stats, start, end)
-      case iae: CriteriaMap.InvalidTimeString => 
+      case iae: ToDateTime.InvalidDateTime => 
         makeErrorString("", iae, instruments, stats, start, end)
       case fte: FutureTimeoutException =>
         makeErrorString("Actors timed out", fte, instruments, stats, start, end)
@@ -113,7 +114,7 @@ class RestfulDataPublisher extends Logging {
     } catch {
       case NoWorkersAvailable =>
         makeAllInstrumentsErrorString(instruments, "", NoWorkersAvailable)
-      case iae: CriteriaMap.InvalidTimeString => 
+      case iae: ToDateTime.InvalidDateTime => 
         makeAllInstrumentsErrorString(instruments, "", iae)
       case fte: FutureTimeoutException =>
         makeAllInstrumentsErrorString(instruments, "Actors timed out", fte)

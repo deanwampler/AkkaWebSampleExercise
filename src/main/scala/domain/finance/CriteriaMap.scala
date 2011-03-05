@@ -1,5 +1,6 @@
 package org.chicagoscala.awse.domain.finance
-import org.joda.time._
+import  org.chicagoscala.awse.util.datetime.ToDateTime._
+import  org.joda.time._
 
 /**
  * Builder for constructing of a map of "criteria" with convenience methods for extraction, etc.
@@ -18,12 +19,15 @@ class CriteriaMap(val map: Map[String, Any]) {
   def withStatistics(statistics: List[InstrumentStatistic]): CriteriaMap =
     new CriteriaMap(map + ("statistics" -> statistics))
 
-  def withStart(start: String): CriteriaMap = withStart(makeDateTime(start, (l:Long) => new DateTime(l)))
-  def withStart(start: Long): CriteriaMap = withStart(new DateTime(start))
+  def withStart(start: String): CriteriaMap = 
+    withStart(start.toDateTime getOrElse throwBadDateTime(start))
+  def withStart(start: Long): CriteriaMap = 
+    withStart(new DateTime(start))
   def withStart(start: DateTime): CriteriaMap =
     new CriteriaMap(map + ("start" -> start))
 
-  def withEnd(end: String): CriteriaMap = withEnd(makeDateTime(end, computeEndFromMillis _))
+  def withEnd(end: String): CriteriaMap = 
+    withEnd(end.toDateTime getOrElse throwBadDateTime(end))
   def withEnd(end: Long): CriteriaMap = withEnd(new DateTime(end))
   def withEnd(end: DateTime): CriteriaMap =
     new CriteriaMap(map + ("end" -> end))
@@ -44,53 +48,22 @@ class CriteriaMap(val map: Map[String, Any]) {
   override def hashCode: Int = map.hashCode
   
   /** Determine the start time from the criteria map, using a default value if necessary. */
-  protected def determineStart(criteria: CriteriaMap): DateTime = criteria.get("start") match {
-    case None => defaultStartTime
-    case Some(x) => x match {
-      case d: DateTime => d
-      case l: Long => new DateTime(l)
-      case _ => makeDateTime(x.toString, (l:Long) => new DateTime(l))
-    }
-  }
+  protected def determineStart(criteria: CriteriaMap): DateTime =   
+    determineDateTime(criteria.get("start"), defaultStartTime)
 
   /** 
    * Determine the end time from the criteria map, using a default value if necessary.
    */
-  protected def determineEnd(criteria: CriteriaMap): DateTime = criteria.get("end") match {
-    case None => defaultEndTime
-    case Some(x) => x match {
-      case d: DateTime => d
-      case l: Long => computeEndFromMillis(l)
-      case _ => makeDateTime(x.toString, computeEndFromMillis _)
-    }
-  }
+  protected def determineEnd(criteria: CriteriaMap): DateTime =
+    determineDateTime(criteria.get("end"), defaultEndTime)
 
-  protected def computeEndFromMillis(millis: Long) = 
-    if (millis > 0) new DateTime(millis) else defaultEndTime
 
-  // TODO: Move this date time parsing to a separate Utils class.
-  protected def makeDateTime(dateTimeString: String, makeFromMillis: Long => DateTime): DateTime = 
-    (tryBlank(dateTimeString) orElse tryLong(dateTimeString, makeFromMillis) orElse tryDateTimeString(dateTimeString)) match {
-      case Some(dateTime) => dateTime
-      case None => throw CriteriaMap.InvalidTimeString(dateTimeString)
-    }
-
-  protected def tryBlank(candidate: String): Option[DateTime] = candidate.trim match {
-    case "" => Some(new DateTime)
-    case _  => None
+  protected def determineDateTime(value: Option[_], defaultDateTime: DateTime): DateTime = value match {
+    case None => defaultDateTime
+    case Some(x) => x.toDateTime getOrElse throwBadDateTime(x)
   }
   
-  protected def tryLong(candidate: String, makeFromMillis: Long => DateTime): Option[DateTime] = try {
-    Some(makeFromMillis(java.lang.Long.parseLong(candidate)))
-  } catch {
-    case ex => None
-  }
-  
-  protected def tryDateTimeString(candidate: String): Option[DateTime] = try {
-    Some(new DateTime(candidate))
-  } catch {
-    case ex => throw CriteriaMap.InvalidTimeString(candidate)
-  }
+  protected def throwBadDateTime(value: Any):DateTime = throw InvalidDateTime(value)
 }
 
 object CriteriaMap {
@@ -105,6 +78,4 @@ object CriteriaMap {
   
   def unapply(criteria: CriteriaMap): Option[UnapplyType] = 
     Some(Tuple4(criteria.instruments, criteria.statistics, criteria.start, criteria.end))
-    
-  case class InvalidTimeString(timeString: String) extends RuntimeException("Invalid date time string: "+timeString)
 }

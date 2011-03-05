@@ -97,9 +97,9 @@ class RestfulDataPublisherTest extends FunSuite
   
   test ("if one or both input times are invalid, getAllDataFor should return an error message") {
     restfulPublisher.getAllDataFor("A,B,C", "price", "x", "y") should equal (
-      """{"error": "Invalid date time string: x. Investment instruments = 'A,B,C', statistics = 'price', start = 'x', end = 'y'."}""")
+      """{"error": "Invalid date time: x. Investment instruments = 'A,B,C', statistics = 'price', start = 'x', end = 'y'."}""")
     restfulPublisher.getAllDataFor("A,B,C", "price", "2010-01-01", "y") should equal (
-        """{"error": "Invalid date time string: y. Investment instruments = 'A,B,C', statistics = 'price', start = '2010-01-01', end = 'y'."}""")
+        """{"error": "Invalid date time: y. Investment instruments = 'A,B,C', statistics = 'price', start = '2010-01-01', end = 'y'."}""")
   }
   
   test ("getAllDataFor should return an error message is there are appear to be no worker servers available") {
