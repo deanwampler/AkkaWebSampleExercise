@@ -1,5 +1,6 @@
 package org.chicagoscala.awse.server.rest
 import org.chicagoscala.awse.util.json._
+import org.chicagoscala.awse.util.Logging
 import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.persistence.inmemory._
 import org.chicagoscala.awse.persistence._
@@ -8,14 +9,14 @@ import org.chicagoscala.awse.domain.finance._
 import akka.actor._
 import akka.actor.Actor._
 import akka.actor.ActorRef
-import org.scalatest.{FlatSpec, FunSuite, BeforeAndAfterEach}
+import org.scalatest.{FlatSpec, FunSuite, BeforeAndAfterEach, BeforeAndAfterAll}
 import org.scalatest.matchers.ShouldMatchers
 import org.joda.time._
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 
 class RestfulDataPublisherTest extends FunSuite 
-    with ShouldMatchers with BeforeAndAfterEach {
+    with ShouldMatchers with BeforeAndAfterEach with BeforeAndAfterAll {
   
   val now          = new DateTime
   val nowms        = now.getMillis
@@ -45,6 +46,13 @@ class RestfulDataPublisherTest extends FunSuite
   var returnedJSON: JValue = _
   var ias: ActorRef = _
   var restfulPublisher: RestfulDataPublisher = _
+
+  override def beforeAll(configMap: Map[String, Any]) {
+    Logging.disable
+  }
+  override def afterAll(configMap: Map[String, Any]) {
+    Logging.enable
+  }
 
   override def beforeEach = {
     restfulPublisher = new RestfulDataPublisher {

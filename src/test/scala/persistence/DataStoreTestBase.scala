@@ -65,7 +65,6 @@ abstract class DataStoreTestBase extends FunSuite with ShouldMatchers {
   test("range returns a subset of a DataStore from a starting bounds upto AND including an upper bound, with a maximum number of values to return") {
     populateDataStore(100)
     val range = dataStore.range(new DateTime(20L), new DateTime(50L), Map.empty, 7).toList
-    println(range)
     range.size should equal (7)
     range zip (List(makeTR(23L, 230), makeTR(27L, 270), makeTR(31L, 310), makeTR(35L, 350), makeTR(39L, 390), makeTR(43L, 430), makeTR(47L, 470))) map {
       pair => pair._1 equalsIgnoringId pair._2

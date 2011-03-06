@@ -3,6 +3,7 @@ import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.persistence._
 import org.chicagoscala.awse.persistence.inmemory._
 import org.chicagoscala.awse.persistence.mongodb._
+import org.chicagoscala.awse.util.error
 import org.chicagoscala.awse.util.Logging
 import org.chicagoscala.awse.util.json.JSONMap._
 import akka.actor._
@@ -57,14 +58,14 @@ class DataStorageServer(val serviceName: String, val dataStore: DataStore)
       case prefix: String => criteria.get("instrument_symbols_key") match {
         case Some(y) => y match {
           case keyForInstruments: String => getDistinctValuesFor(keyForInstruments)
-          case _ => throw new InvalidCriteria(
-            "Map contained key-value pairs for keys 'instrument_list' and 'instrument_symbols_key', but the value for 'instrument_symbols_key' was not a string: value = ", y)
+          case _ => error(InvalidCriteria(
+            "Map contained key-value pairs for keys 'instrument_list' and 'instrument_symbols_key', but the value for 'instrument_symbols_key' was not a string: value = ", y))
         }          
-        case _ => throw new InvalidCriteria(
-          "Map contained a key-value pair for key 'instrument_list', but not for key 'instrument_symbols_key': criteria = ", criteria)
+        case _ => error(InvalidCriteria(
+          "Map contained a key-value pair for key 'instrument_list', but not for key 'instrument_symbols_key': criteria = ", criteria))
       }
-      case _ => throw new InvalidCriteria(
-        "Map contained a key-value pair for key 'instrument_list', but the value was not a string: value = ", x)
+      case _ => error(InvalidCriteria(
+        "Map contained a key-value pair for key 'instrument_list', but the value was not a string: value = ", x))
     }
     case _ => getDataForRange(criteria)    
   }
@@ -83,10 +84,7 @@ class DataStorageServer(val serviceName: String, val dataStore: DataStore)
         start + ", " + end)
       result
     } catch {
-      case th => 
-        log.error(actorName + ": Exception thrown: ", th)
-        th.printStackTrace
-        throw th
+      case th => error(th, actorName + ": Exception thrown: ")
     }
   }
 
@@ -106,10 +104,7 @@ class DataStorageServer(val serviceName: String, val dataStore: DataStore)
       dataStore.add(jsonRecord)
       toJValue(Pair("message", "Put received and data storage started."))
     } catch {
-      case ex => 
-        log.error(actorName + ": PUT: exception thrown while attempting to add JSON to the data store: "+jsonRecord)
-        ex.printStackTrace();
-        throw ex
+      case ex => error(ex, actorName + ": PUT: exception thrown while attempting to add JSON to the data store: "+jsonRecord)
     }
   }
 

@@ -1,4 +1,5 @@
 package org.chicagoscala.awse.server
+import org.chicagoscala.awse.util.error
 import akka.dispatch.{Future, Futures}
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
@@ -34,7 +35,7 @@ trait ActorUtil {
   def futureToJSON(future: Future[_], messageForNone: String): JValue = future.result match {
     case Some(result) => result match {
       case jv: JValue => jv
-      case _ => throw new RuntimeException("Expected a JValue, got this: "+result)
+      case _ => error("Expected a JValue, got this: "+result)
     }
     case None => Pair("error", messageForNone)
   }
