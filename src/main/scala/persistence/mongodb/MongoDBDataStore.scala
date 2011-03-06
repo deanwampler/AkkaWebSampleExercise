@@ -1,8 +1,9 @@
 package org.chicagoscala.awse.persistence.mongodb
 import org.chicagoscala.awse.persistence._
 import org.chicagoscala.awse.persistence.mongodb.MongoDBJSONRecord._
+import org.chicagoscala.awse.util.Logging
+import org.chicagoscala.awse.util.error
 import akka.config.Config.config
-import akka.util.Logging
 import scala.collection.immutable.SortedSet
 import org.joda.time._
 import net.liftweb.json.JsonAST._
@@ -23,16 +24,16 @@ class MongoDBDataStore(
     val dataBaseName: String      = MongoDBDataStore.MONGODB_SERVER_DBNAME,
     val hostName: String          = MongoDBDataStore.MONGODB_SERVER_HOSTNAME,
     val port: Int                 = MongoDBDataStore.MONGODB_SERVER_PORT)
-   (implicit dateTimeToTimestamp: DateTime => Any = {_.getMillis})
-      extends DataStore with Logging {
+   (implicit dateTimeToTimestamp: DateTime => Any = {_.getMillis}) 
+    extends DataStore with Logging {
 
   lazy val name = collectionName
   
   lazy val dataBase = 
     MongoDBDataStore.getDb(dataBaseName, hostName, port)
     
-  // The MongoDB Java API documentation lies: createCollection throws an exception if the collection
-  // already exists. So, we catch it and call getCollection.
+  // The MongoDB Java API documentation lies: createCollection throws an exception
+  // if the collection already exists. So, we catch it and call getCollection.
   lazy val collection = try {
     val coll = dataBase.createCollection(collectionName, Map.empty[String,Any])  // options
     // We setup indices when we create the collections; otherwise, do this:
@@ -69,22 +70,21 @@ class MongoDBDataStore(
             dbl
           }
           qb.and(keyValue._1).in(dbList)
-        case map: Map[_,_] => throw new RuntimeException("Construction of Query with a Map is TODO.")
+        case map: Map[_,_] => error("Construction of a query with a Map is TODO.")
         case x: AnyRef => qb.is(x)
-        case x: Any => throw new RuntimeException("Construction of Query with an Any is TODO.")
+        case x: Any => error("Construction of a query with an Any is TODO.")
       }
     }
     val query = qb.get
     val cursor = collection.find(query).sort(new BasicDBObject(JSONRecord.timestampKey, 1))
-    log.info("db name: query, cursor.count, maxNum: "+collection.getFullName+", "+query+", "+cursor.count+", "+maxNum)
+    log.info("db name: query, cursor.count, maxNum: "+collection.getFullName+", "+
+              query+", "+cursor.count+", "+maxNum)
     if (cursor.count > maxNum)
       cursorToRecords(cursor.skip(cursor.count - maxNum).limit(maxNum))
     else
       cursorToRecords(cursor)
   } catch {
-    case th => 
-      log.error("MongoDB Exception: ", th)
-      throw th
+    case th => error(th, "MongoDB Exception while during range().")
   }
   
   def getDistinctValuesFor(keyForValues: String): Iterable[JSONRecord] = try {
@@ -96,9 +96,7 @@ class MongoDBDataStore(
     }
     List(JSONRecord(keyForValues -> buff.toList))
   } catch {
-    case th => 
-      log.error("MongoDB Exception: ", th)
-      throw th
+    case th => error(th, "MongoDB Exception while during getDistinctValuesFor().")
   }
   
   protected def cursorToRecords(cursor: DBCursor) = {

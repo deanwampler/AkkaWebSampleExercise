@@ -1,11 +1,10 @@
 package org.chicagoscala.awse.domain.finance
-import akka.util.Logging
 
 /**
  * A financial instrument.
  */
 case class Instrument(symbol: String) 
-object Instrument extends Logging {  
+object Instrument {  
   
   def makeInstrumentsList(names: String*): List[Instrument] = makeInstrumentsList(names toList)
   

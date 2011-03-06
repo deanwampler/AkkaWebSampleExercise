@@ -3,7 +3,6 @@ import org.chicagoscala.awse.util.json.JSONMap._
 import akka.actor._
 import akka.actor.Actor._
 import akka.dispatch.{Future, Futures, FutureTimeoutException}
-import akka.util.Logging
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 

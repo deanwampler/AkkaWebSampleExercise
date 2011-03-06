@@ -1,5 +1,6 @@
 package org.chicagoscala.awse.server.finance
 import org.chicagoscala.awse.util.json._
+import org.chicagoscala.awse.util.Logging
 import org.chicagoscala.awse.persistence._
 import org.chicagoscala.awse.persistence.inmemory._
 import org.chicagoscala.awse.persistence.mongodb._
@@ -9,20 +10,20 @@ import org.chicagoscala.awse.domain.finance._
 import akka.actor._
 import akka.actor.Actor._
 import akka.dispatch.Futures
-import akka.util.Logging
 import org.joda.time._
 import org.joda.time.format._
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 
 /**
- * Supervisor for InstrumentAnalysisServers. It also has methods that are called directly to
- * invoke InstrumentAnalysisServers to do calculations, return data, etc.
+ * Supervisor for InstrumentAnalysisServers. It also has methods that are called
+ * directly to invoke InstrumentAnalysisServers to do calculations, return data, etc.
  * Also, this class and its companion are where we embed knowledge about how the data 
  * on instruments and statistics is structured and how processing of that data is 
  * distributed among InstrumentAnalysisServer, etc.
  */
-class InstrumentAnalysisServerSupervisor extends Actor with ActorFactory with ActorUtil with PingHandler with Logging {
+class InstrumentAnalysisServerSupervisor extends Actor with ActorFactory 
+    with ActorUtil with PingHandler with Logging {
   
   def actorName = "InstrumentAnalysisServerSupervisor"
 

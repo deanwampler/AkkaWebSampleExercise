@@ -1,5 +1,6 @@
 package org.chicagoscala.awse.server.finance
 import org.chicagoscala.awse.util.json.JSONMap._
+import org.chicagoscala.awse.util.Logging
 import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.persistence._
@@ -7,7 +8,6 @@ import org.chicagoscala.awse.domain.finance._
 import org.chicagoscala.awse.domain.finance.FinanceJSONConverter._
 import akka.actor._
 import akka.actor.Actor._
-import akka.util.Logging
 import org.joda.time._
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._

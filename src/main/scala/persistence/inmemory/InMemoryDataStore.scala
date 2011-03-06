@@ -1,6 +1,7 @@
 package org.chicagoscala.awse.persistence.inmemory
 import org.chicagoscala.awse.persistence._
-import akka.util.Logging
+import org.chicagoscala.awse.util.error
+import org.chicagoscala.awse.util.Logging
 import scala.collection.SortedMap
 import org.joda.time._
 import net.liftweb.json.JsonAST._
@@ -24,8 +25,10 @@ class InMemoryDataStore(val name: String) extends DataStore with Logging {
     
   def getAll() = store map {p => p._2}
   
-  def range(from: DateTime, to: DateTime, otherCriteria: Map[String,Any] = Map.empty, maxNum: Int): Iterable[JSONRecord] = {
-    // Get the data as as a map of times to JSONRecords in the time range and extract just the JSONRecords and convert them to Maps.
+  def range(from: DateTime, to: DateTime, 
+            otherCriteria: Map[String,Any] = Map.empty, maxNum: Int): Iterable[JSONRecord] = {
+    // Get the data as as a map of times to JSONRecords in the time range and 
+    // extract just the JSONRecords and convert them to Maps.
     val rangeResult = store.range(from, dateTimePlus1(to)).toIterable map { p => p._2.toMap }
     val rangeResult2: Iterable[Map[String,Any]] = otherCriteria.size match {
       case 0 => rangeResult
@@ -34,8 +37,9 @@ class InMemoryDataStore(val name: String) extends DataStore with Logging {
     rangeResult2 map { (r: Map[String,Any]) => JSONRecord(r) } take maxNum
   }
   
-  // A function value that takes a criteria map and returns another function that takes a map of data. 
-  // It requires the data map to satisfy at least one of the criteria.
+  // A function value that takes a criteria map and returns another function that 
+  // takes a map of data. It requires the data map to satisfy at least one of the 
+  // criteria.
   val filters = (criteria: Map[String,Any]) => (data: Map[String,Any]) => 
     criteria exists { kv => 
       data.get(kv._1) match {
@@ -47,7 +51,7 @@ class InMemoryDataStore(val name: String) extends DataStore with Logging {
           // If the criterium is a map, we don't support it yet.
           // For anything else, we require the data value to equal the criterium value.
           case list: List[_]  => list contains value
-          case map:  Map[_,_] => throw new RuntimeException("Construction of Query with a Map is TODO.")
+          case map:  Map[_,_] => error("Construction of a query with a Map is TODO.")
           case a:    Any      => a == value
         }
       }
@@ -57,7 +61,7 @@ class InMemoryDataStore(val name: String) extends DataStore with Logging {
     val values = store.valuesIterator map { (jsonRecord: JSONRecord) =>
       (jsonRecord.json \ keyForValues) match {
         case JField(_, JString(s)) => s
-        case x => throw new RuntimeException("Value '" + x + "' for '"+ keyForValues + "' is not a string. json = "+jsonRecord)
+        case x => error("Value '" + x + "' for '"+ keyForValues + "' is not a string. json = "+jsonRecord)
       }
     }
     println ("values: "+values)

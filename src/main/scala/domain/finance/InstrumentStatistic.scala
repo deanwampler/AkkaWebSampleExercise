@@ -1,5 +1,4 @@
 package org.chicagoscala.awse.domain.finance
-import akka.util.Logging
 import org.chicagoscala.awse.util.error
 
 /**
@@ -33,7 +32,7 @@ case class UnknownCurrency(s: String) extends RuntimeException("Unknown currency
  * The possible statistics to calculate.
  */
 sealed trait InstrumentStatistic
-object InstrumentStatistic extends Logging {
+object InstrumentStatistic {
 
   def make(whichKind: String): InstrumentStatistic = apply(whichKind)
   

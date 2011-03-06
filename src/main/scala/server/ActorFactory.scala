@@ -1,7 +1,7 @@
 package org.chicagoscala.awse.server
 import akka.actor._
 import akka.actor.Actor._
-import akka.util.Logging
+import org.chicagoscala.awse.util.Logging
 
 /**
  * Constructor actors.

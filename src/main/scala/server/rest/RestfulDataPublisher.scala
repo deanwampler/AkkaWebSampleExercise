@@ -6,13 +6,14 @@ import org.chicagoscala.awse.domain.finance._
 import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.server.finance._
 import org.chicagoscala.awse.server.persistence._
-import org.chicagoscala.awse.util._
+import org.chicagoscala.awse.util.Logging
+import org.chicagoscala.awse.util.error
+import org.chicagoscala.awse.util.GeneralAppException
 import org.chicagoscala.awse.util.json._
 import org.chicagoscala.awse.util.datetime._
 import org.joda.time._
 import akka.actor._
 import akka.dispatch.{FutureTimeoutException}
-import akka.util.Logging
 
 case object NoWorkersAvailable extends RuntimeException("No worker servers appear to be available!")
 

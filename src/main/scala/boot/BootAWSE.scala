@@ -7,7 +7,6 @@ import akka.actor._
 import akka.actor.Actor._
 import akka.config.Config._
 import akka.config.Supervision._
-import akka.util.Logging
 
 class BootAWSE {
 

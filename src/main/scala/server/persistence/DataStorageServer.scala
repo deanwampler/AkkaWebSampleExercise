@@ -3,12 +3,11 @@ import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.persistence._
 import org.chicagoscala.awse.persistence.inmemory._
 import org.chicagoscala.awse.persistence.mongodb._
-import org.chicagoscala.awse.util._
+import org.chicagoscala.awse.util.Logging
 import org.chicagoscala.awse.util.json.JSONMap._
 import akka.actor._
 import akka.actor.Actor._
 import akka.stm.Transaction._
-import akka.util.Logging
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
 import org.joda.time._
