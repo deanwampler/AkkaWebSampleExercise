@@ -5,7 +5,7 @@ import reaktor.scct.ScctProject
 // Portions adapted from http://github.com/mgutz/sbt-console-template and from Akka's project structure
 // and Victor Klang's blog post on speeding up sbt update times (http://klangism.tumblr.com/post/2141977562/hardcore-pom).
 
-class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) with ScctProject with AkkaProject {
+class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) with ScctProject with AkkaProject with IdeaProject {
 
 	object Repositories {
     lazy val EmbeddedRepo         = MavenRepository("Embedded Repo", (info.projectPath / "embedded-repo").asURL.toString)
@@ -108,8 +108,6 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
 
     lazy val jettyBase      = "org.mortbay.jetty"      % "jetty"           % MORTBAY_JETTY_VERSION  % "test"
     lazy val scalatest      = "org.scalatest"          % "scalatest"       % SCALATEST_VERSION      % "test"
-    lazy val junit          = "junit"                  % "junit"           % "4.5"                  % "test"
-    lazy val borachio       = "com.borachio"  %% "borachio"  % "latest.integration"
   }
 
   import Dependencies._
@@ -121,7 +119,7 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
     mongo, mongoScalaDriver,
     // casbah, 
     jettyBase,
-    scalatest, junit, borachio) ++
+    scalatest) ++
     (Set(akkaStm, akkaActor, akkaTypedActor, akkaCamel, akkaHttp, akkaKernel, akkaMongo) map (_ % "compile"))
 
   
