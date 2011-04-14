@@ -134,6 +134,8 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
         "-Xmigration",
         "-Xcheckinit",
         "-Xwarninit",
+        // "-Xfatal-warnings",
+        // "-verbose",
         // "-Xstrict-warnings",
         // "-optimise",  // for releases.
         "-encoding", "utf8")

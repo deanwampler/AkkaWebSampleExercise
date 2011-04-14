@@ -30,6 +30,7 @@ object JSONMap {
     case j: JValue       => j
     case m: Map[_,_]     => mapToJSON(m)
     case i: Iterable[_]  => iterableToJSON(i)
+    case a: Array[_]     => iterableToJSON(a.toIterable)
     case p: Pair[_,_]    => pairToJSON(p)
     case s: String       => stringToJValue(s)
     case l: Long         => JInt(BigInt(l))
