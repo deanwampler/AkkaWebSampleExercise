@@ -36,7 +36,7 @@ class RestfulDataPublisher extends Logging {
    *   list_instruments: Return a list of the symbols of all the financial instruments. 
    *   ping:    Send a "ping" message to each actor and return the responses.
    *   <other>  If any other message is received, an error response is returned.
-   * @todo: It would be nice to use an HTML websocket to stream results to the browser more dynamically.
+   * TODO: It would be nice to use an HTML websocket to stream results to the browser more dynamically.
    * Consider also Atmosphere 6 and its JQuery plugin as an abstraction that supports
    * websockets, but can degrade to Comet, etc., when used with a browser-server combination that doesn't support
    * websockets (@see http://jfarcand.wordpress.com/2010/06/15/using-atmospheres-jquery-plug-in-to-build-applicationsupporting-both-websocket-and-comet/).

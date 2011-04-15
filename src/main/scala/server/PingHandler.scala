@@ -21,10 +21,10 @@ trait PingHandler extends Actor with ActorUtil {
   protected def subordinatesToPing: List[ActorRef] = Nil
   
   /**
-   * Handle ping-related messages. Use in the the receive method:
-   * e.g., def receive = pingHandler orElse ...
+   * Handle ping-related messages. Use in the receive method:
+   * e.g., <tt>def receive = pingHandler orElse ...</tt>.
    * TODO: If there is only one actor running, an array with that actor is returned. If there
-   * are multiple actors, an array of an array is returned ([[actor1, actor2, ...]]). Fix so only
+   * are multiple actors, an array of an array is returned, <tt>[[actor1, actor2, ...]]</tt>. Fix so only
    * a single-level array is always returned!
    */
   def pingHandler: PartialFunction[Any, Unit] = {
