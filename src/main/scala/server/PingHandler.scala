@@ -24,8 +24,8 @@ trait PingHandler extends Actor with ActorUtil {
    * Handle ping-related messages. Use in the receive method:
    * e.g., <tt>def receive = pingHandler orElse ...</tt>.
    * TODO: If there is only one actor running, an array with that actor is returned. If there
-   * are multiple actors, an array of an array is returned, <tt>[[actor1, actor2, ...]]</tt>. Fix so only
-   * a single-level array is always returned!
+   * are multiple actors, an array of an array is returned. Fix so only a single-level array
+	 * is always returned!
    */
   def pingHandler: PartialFunction[Any, Unit] = {
     case Ping(message) => 
