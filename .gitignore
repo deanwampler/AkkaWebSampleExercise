@@ -8,3 +8,4 @@ tags
 project/plugins/project/**
 bin/main
 bin/org
+project/plugins/src_managed/
