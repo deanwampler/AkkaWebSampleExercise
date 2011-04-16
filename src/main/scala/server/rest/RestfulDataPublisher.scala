@@ -69,7 +69,7 @@ class RestfulDataPublisher extends Logging {
         log.debug("Requesting statistics for instruments, stats, start, end = "+instruments+", "+stats+", "+start+", "+end)
         getAllDataFor(instruments, stats, start, end)
         
-      case x => """{"error": "Unrecognized 'action': """ + action + "\"}"
+      case x => "{\"error\": \"Unrecognized 'action': " + action + "\"}"
     }
     
   // Scoped to the "rest" package so tests can call it directly (bypassing actor logic...)
@@ -138,7 +138,7 @@ class RestfulDataPublisher extends Logging {
     }
     
   protected def instrumentAnalysisServerSupervisors =
-    ActorRegistry.actorsFor(classOf[InstrumentAnalysisServerSupervisor]).toList
+    Actors.registry.actorsFor(classOf[InstrumentAnalysisServerSupervisor]).toList
   
   protected def makeErrorString(message: String, th: Throwable, 
       instruments: String, stats: String, start: String, end: String) =

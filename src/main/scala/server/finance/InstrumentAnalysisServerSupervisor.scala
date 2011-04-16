@@ -3,7 +3,8 @@ import org.chicagoscala.awse.util.json._
 import org.chicagoscala.awse.util.Logging
 import org.chicagoscala.awse.persistence._
 import org.chicagoscala.awse.persistence.inmemory._
-import org.chicagoscala.awse.persistence.mongodb._
+import org.chicagoscala.awse.persistence.mongodb.MongoDBDataStore
+import org.chicagoscala.awse.persistence.mongodb.MongoDBDataStore.Implicits._
 import org.chicagoscala.awse.server._
 import org.chicagoscala.awse.server.persistence._
 import org.chicagoscala.awse.domain.finance._
@@ -48,7 +49,7 @@ class InstrumentAnalysisServerSupervisor extends Actor with ActorFactory
     getAllInstrumentAnalysisServers
     
   def getAllInstrumentAnalysisServers: List[ActorRef] = 
-    ActorRegistry.actorsFor(classOf[InstrumentAnalysisServer]).toList
+    Actors.registry.actorsFor(classOf[InstrumentAnalysisServer]).toList
 
   def calculate (criteria: CriteriaMap) = {
     val futures = for {

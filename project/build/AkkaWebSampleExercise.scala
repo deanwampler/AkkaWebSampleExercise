@@ -1,11 +1,12 @@
 import sbt._
 import sbt.CompileOrder._
 import reaktor.scct.ScctProject
+import de.element34.sbteclipsify._
 
 // Portions adapted from http://github.com/mgutz/sbt-console-template and from Akka's project structure
 // and Victor Klang's blog post on speeding up sbt update times (http://klangism.tumblr.com/post/2141977562/hardcore-pom).
 
-class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) with ScctProject with AkkaProject with IdeaProject with Exec {
+class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) with ScctProject with AkkaProject with IdeaProject with Eclipsify with Exec {
 
 	object Repositories {
     lazy val EmbeddedRepo         = MavenRepository("Embedded Repo", (info.projectPath / "embedded-repo").asURL.toString)
@@ -14,7 +15,6 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
     lazy val ScalaToolsRepo       = MavenRepository("Scala Tools Repo", "http://nexus.scala-tools.org/content/repositories/hosted")
     lazy val DavScalaToolsRepo    = MavenRepository("Dav Scala Tools", "http://dav.scala-tools.org/repo-releases/")
     lazy val CodehausRepo         = MavenRepository("Codehaus Repo", "http://repository.codehaus.org")
-    lazy val CasbahRepo           = MavenRepository("Casbah Repo", "http://repo.bumnetworks.com/releases/")    
     lazy val FusesourceSnapshotRepo = MavenRepository("Fusesource Snapshots", "http://repo.fusesource.com/nexus/content/repositories/snapshots")
     lazy val GuiceyFruitRepo      = MavenRepository("GuiceyFruit Repo", "http://guiceyfruit.googlecode.com/svn/repo/releases/")
     lazy val JBossRepo            = MavenRepository("JBoss Repo", "http://repository.jboss.org/nexus/content/groups/public/")
@@ -42,10 +42,11 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
   val akkaCamel      = akkaModule("camel")
   val akkaJta        = akkaModule("jta")
   val akkaKernel     = akkaModule("kernel")
-  val akkaCassandra  = akkaModule("persistence-cassandra")
-  val akkaMongo      = akkaModule("persistence-mongo")
-  val akkaRedis      = akkaModule("persistence-redis")
-  val akkaSpring     = akkaModule("spring")
+  val akkaModules    = akkaModule("modules")
+  // val akkaCassandra  = akkaModule("persistence-cassandra")
+  // val akkaMongo      = akkaModule("persistence-mongo")
+  // val akkaRedis      = akkaModule("persistence-redis")
+  // val akkaSpring     = akkaModule("spring")
   
   import Repositories._
   lazy val embeddedRepo            = EmbeddedRepo   // This is the only exception, because the embedded repo is fast!
@@ -56,21 +57,21 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
   lazy val scalaTestModuleConfig   = ModuleConfiguration("org.scalatest",   ScalaToolsRepo)
 
   override def repositories = Set(
-    AkkaRepo, DavScalaToolsRepo, CasbahRepo, CodehausRepo, EmbeddedRepo, FusesourceSnapshotRepo, 
+    AkkaRepo, DavScalaToolsRepo, CodehausRepo, EmbeddedRepo, FusesourceSnapshotRepo, 
     GuiceyFruitRepo, JBossRepo, JavaNetRepo, SonatypeSnapshotRepo, SunJDMKRepo)
     
   // -------------------------------------------------------------------------------------------------------------------
   // Versions
   // -------------------------------------------------------------------------------------------------------------------
 
-  lazy val AKKA_VERSION          = "1.0-RC2"
+  lazy val AKKA_VERSION          = "1.1-M1"
   lazy val ATMO_VERSION          = "0.6.1"
   lazy val CAMEL_VERSION         = "2.4.0"
-  lazy val CASBAH_VERSION        = "1.0.8.5"
+  lazy val CASBAH_VERSION        = "2.0.2"
   lazy val JERSEY_VERSION        = "1.2"
   lazy val LIFT_VERSION          = "2.1-M1"
   lazy val MULTIVERSE_VERSION    = "0.6.1"
-  lazy val SCALATEST_VERSION     = "1.2" //"-for-scala-2.8.0.final-SNAPSHOT"
+  lazy val SCALATEST_VERSION     = "1.2"
 
   lazy val ECLIPSE_JETTY_VERSION = "7.1.6.v20100715" //  "7.0.2.v20100331"
   lazy val MORTBAY_JETTY_VERSION = "6.1.22"  
@@ -88,7 +89,7 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
     lazy val atmo         = "org.atmosphere" % "atmosphere-annotations"     % ATMO_VERSION % "compile"
     lazy val atmoRuntime  = "org.atmosphere" % "atmosphere-runtime"         % ATMO_VERSION % "compile"
 
-    lazy val casbah   = "com.novus" % "casbah_2.8.0" % CASBAH_VERSION % "compile"
+    lazy val casbah   = "com.mongodb.casbah" %% "casbah" % CASBAH_VERSION % "compile"
 
     lazy val configgy = "net.lag" % "configgy" % "2.8.0-1.5.5" % "compile"
 
@@ -96,7 +97,7 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
 
     lazy val mongo = "org.mongodb" % "mongo-java-driver" % "2.0" % "compile"
 
-    lazy val mongoScalaDriver = "com.osinka" % "mongo-scala-driver_2.8.0" % "0.8.3" % "compile"
+    // lazy val mongoScalaDriver = "com.osinka" % "mongo-scala-driver_2.8.0" % "0.8.3" % "compile"
 
     lazy val jersey         = "com.sun.jersey"          % "jersey-core"   % JERSEY_VERSION % "compile"
     lazy val jersey_json    = "com.sun.jersey"          % "jersey-json"   % JERSEY_VERSION % "compile"
@@ -116,11 +117,11 @@ class AkkaWebSampleExercise(info: ProjectInfo) extends DefaultWebProject(info) w
     atmo, atmoRuntime, 
     configgy, 
     liftJSON, 
-    mongo, mongoScalaDriver,
-    // casbah, 
+    mongo, // mongoScalaDriver,
+    casbah, 
     jettyBase,
     scalatest) ++
-    (Set(akkaStm, akkaActor, akkaTypedActor, akkaCamel, akkaHttp, akkaKernel, akkaMongo) map (_ % "compile"))
+    (Set(akkaStm, akkaActor, akkaTypedActor, akkaCamel, akkaHttp, akkaKernel) map (_ % "compile"))
 
   
   // For continuous redeployment: http://code.google.com/p/simple-build-tool/wiki/WebApplications

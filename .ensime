@@ -6,4 +6,47 @@
 
 :use-sbt t
 
+; TODO clean up
+(defun make-akka-actor-doc-url (type &optional member)
+  (ensime-make-scala-doc-url-helper 
+	  "http://akka.io/api/1.0/akka-actor" type member))
+(defun make-akka-amqp-doc-url (type &optional member)
+  (ensime-make-scala-doc-url-helper 
+	  "http://akka.io/api/1.0/akka-amqp" type member))
+(defun make-akka-camel-doc-url (type &optional member)
+  (ensime-make-scala-doc-url-helper 
+	  "http://akka.io/api/1.0/akka-camel" type member))
+(defun make-akka-http-doc-url (type &optional member)
+  (ensime-make-scala-doc-url-helper 
+	  "http://akka.io/api/1.0/akka-http" type member))
+(defun make-akka-jta-doc-url (type &optional member)
+  (ensime-make-scala-doc-url-helper 
+	  "http://akka.io/api/1.0/akka-jta" type member))
+(defun make-akka-kernel-doc-url (type &optional member)
+  (ensime-make-scala-doc-url-helper 
+	  "http://akka.io/api/1.0/akka-kernel" type member))
+(defun make-akka-remote-doc-url (type &optional member)
+  (ensime-make-scala-doc-url-helper 
+	  "http://akka.io/api/1.0/akka-remote" type member))
+(defun make-akka-spring-doc-url (type &optional member)
+  (ensime-make-scala-doc-url-helper 
+	  "http://akka.io/api/1.0/akka-spring" type member))
+(defun make-akka-stm-doc-url (type &optional member)
+  (ensime-make-scala-doc-url-helper 
+	  "http://akka.io/api/1.0/akka-stm" type member))
+(defun make-akka-typed-actor-doc-url (type &optional member)
+  (ensime-make-scala-doc-url-helper 
+	  "http://akka.io/api/1.0/akka-typed-actor" type member))
+
+(add-to-list 'ensime-doc-lookup-map '("^akka\\.actor\\."  . make-akka-actor-doc-url))
+(add-to-list 'ensime-doc-lookup-map '("^akka\\.amqp\\."   . make-akka-amqp-doc-url))
+(add-to-list 'ensime-doc-lookup-map '("^akka\\.camel\\."  . make-akka-camel-doc-url))
+(add-to-list 'ensime-doc-lookup-map '("^akka\\.http\\."   . make-akka-http-doc-url))
+(add-to-list 'ensime-doc-lookup-map '("^akka\\.jta\\."    . make-akka-jta-doc-url))
+(add-to-list 'ensime-doc-lookup-map '("^akka\\.kernel\\." . make-akka-kernel-doc-url))
+(add-to-list 'ensime-doc-lookup-map '("^akka\\.remote\\." . make-akka-remote-doc-url))
+(add-to-list 'ensime-doc-lookup-map '("^akka\\.spring\\." . make-akka-spring-doc-url))
+(add-to-list 'ensime-doc-lookup-map '("^akka\\.stm\\."    . make-akka-stm-doc-url))
+;; typed-actor is also package akka.actor!
+;; (add-to-list 'ensime-doc-lookup-map '("^akka\\.actor\\." . make-akka-typed-actor-doc-url))
 )

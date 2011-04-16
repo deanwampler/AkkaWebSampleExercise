@@ -1,6 +1,5 @@
 package org.chicagoscala.awse.persistence.mongodb
 import org.chicagoscala.awse.persistence._
-import org.chicagoscala.awse.persistence.mongodb.MongoDBJSONRecord._
 import org.chicagoscala.awse.util.Logging
 import org.chicagoscala.awse.util.error
 import akka.config.Config.config
@@ -8,48 +7,36 @@ import scala.collection.immutable.SortedSet
 import org.joda.time._
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
-import com.osinka.mongodb._
 import com.mongodb.{BasicDBObject, BasicDBList, DBCursor, Mongo, MongoException, QueryBuilder}
-// import com.novus.casbah.mongodb.Imports._
+import com.mongodb.casbah.Imports._
+import com.mongodb.casbah.commons.conversions.scala._
+
+import MongoDBDataStore.Implicits._
 
 /**
- * MongoDB-based storage of data. 
- * Some sections adapted from http://gist.github.com/370577. 
- * Other sections adapted from Akka's own MongoStorageBackend.scala.
+ * MongoDB-based storage of data, using the Casbah API. 
  * Note the implicit dateTimeToTimestamp, which converts DateTime objects 
  * into the correct type  for the actual records. It defaults to milliseconds.
  */
-class MongoDBDataStore(
+class MongoDBDataStore[T: ValidDateOrNumericType](
     val collectionName: String,
     val dataBaseName: String      = MongoDBDataStore.MONGODB_SERVER_DBNAME,
     val hostName: String          = MongoDBDataStore.MONGODB_SERVER_HOSTNAME,
     val port: Int                 = MongoDBDataStore.MONGODB_SERVER_PORT)
-   (implicit dateTimeToTimestamp: DateTime => Any = {_.getMillis}) 
+   (dateTimeToTimestamp: DateTime => T) 
     extends DataStore with Logging {
 
   lazy val name = collectionName
   
-  lazy val dataBase = 
-    MongoDBDataStore.getDb(dataBaseName, hostName, port)
-    
-  // The MongoDB Java API documentation lies: createCollection throws an exception
-  // if the collection already exists. So, we catch it and call getCollection.
-  lazy val collection = try {
-    val coll = dataBase.createCollection(collectionName, Map.empty[String,Any])  // options
-    // We setup indices when we create the collections; otherwise, do this:
-    // coll ensureIndex Map(JSONRecord.timestampKey -> 1)
-    coll asScala
-  } catch {
-    case ex: MongoException => 
-      log.info("MongoException thrown, probably because we called createCollection on a collection that exists, in which case this is harmless (and contrary to the documentation...): "+ex)
-      dataBase.getCollection(collectionName) asScala
-  }
+  lazy val connection = MongoConnection(hostName, port)
+  lazy val dataBase   = connection(dataBaseName)
+  lazy val collection = dataBase(collectionName)
   
-  def add(record: JSONRecord): Unit = collection << record
+  def add(record: JSONRecord): Unit = collection += record.toMap
   
-  def getAll() = cursorToRecords(collection.find())
+  def getAll() = (for (record <- collection.find()) yield(JSONRecord(record.toMap))).toList
 
-  def size: Long = collection.underlying.getCount
+  def size: Long = collection.count
   
   def head: Option[JSONRecord] = collection.headOption match {
     case None => None
@@ -57,58 +44,45 @@ class MongoDBDataStore(
   }
   
   def range(from: DateTime, to: DateTime, otherCriteria: Map[String,Any] = Map.empty, maxNum: Int): Iterable[JSONRecord] = try {
-    val qb = new QueryBuilder
-    qb.and(JSONRecord.timestampKey).
-      greaterThanEquals(dateTimeToTimestamp(from)).
-      lessThanEquals(dateTimeToTimestamp(to))
-    // Add the additional query criteria, if any.
-    otherCriteria.foreach { (keyValue: Pair[String,Any]) =>
-      keyValue._2 match {
-        case list: List[_] => 
-          val dbList = list.foldLeft(new BasicDBList()) { (dbl: BasicDBList, x:Any) => 
-            dbl.add(x.asInstanceOf[AnyRef])
-            dbl
-          }
-          qb.and(keyValue._1).in(dbList)
-        case map: Map[_,_] => error("Construction of a query with a Map is TODO.")
-        case x: AnyRef => qb.is(x)
-        case x: Any => error("Construction of a query with an Any is TODO.")
-      }
-    }
-    val query = qb.get
-    val cursor = collection.find(query).sort(new BasicDBObject(JSONRecord.timestampKey, 1))
+    val rangeQuery: DBObject = JSONRecord.timestampKey $gte dateTimeToTimestamp(from) $lte dateTimeToTimestamp(to)
+		val otherQueryParameters = for {
+			keyValue <- otherCriteria
+			criterium <- toCriterium(keyValue)
+		} yield (criterium)
+		val query: DBObject = otherQueryParameters.foldLeft(rangeQuery) {(query,dbo) => query ++ dbo}
+    val cursor = collection.find(query).sort(MongoDBObject(JSONRecord.timestampKey -> 1))
     log.info("db name: query, cursor.count, maxNum: "+collection.getFullName+", "+
               query+", "+cursor.count+", "+maxNum)
-    if (cursor.count > maxNum)
-      cursorToRecords(cursor.skip(cursor.count - maxNum).limit(maxNum))
-    else
-      cursorToRecords(cursor)
+    val cursor2 = if (cursor.count <= maxNum) cursor else cursor.skip(cursor.count - maxNum).limit(maxNum)
+    (for (record <- cursor2) yield (JSONRecord(record.toMap))).toList
   } catch {
     case th => error(th, "MongoDB Exception while during range().")
   }
+
+	def toCriterium(keyValue: Pair[_,_]): Option[DBObject] = keyValue._1 match {
+		case key:String =>
+			keyValue._2 match {
+				case list: List[_] => Some(key $in list)
+        case map: Map[_,_] => error("Construction of a query with a Map is TBD.")
+        case x: Any => Some(MongoDBObject(key -> x))
+      }
+    case x => error("Unexpected key "+x+". Wasn't a string.")
+	}
   
   def getDistinctValuesFor(keyForValues: String): Iterable[JSONRecord] = try {
-    val list = collection.distinct(keyForValues)
-    val buff = new scala.collection.mutable.ArrayBuffer[String]()
-    var iter = list.iterator
-    while (iter.hasNext) {
-      buff += iter.next.toString
-    }
-    List(JSONRecord(keyForValues -> buff.toList))
+    List(JSONRecord(Map(keyForValues -> collection.distinct(keyForValues).toList)))
   } catch {
-    case th => error(th, "MongoDB Exception while during getDistinctValuesFor().")
-  }
-  
-  protected def cursorToRecords(cursor: DBCursor) = {
-    val buff = new scala.collection.mutable.ArrayBuffer[JSONRecord]()
-    while (cursor.hasNext) {
-      buff += JSONRecord(cursor.next.toMap)
-    }
-    buff
+    case th => error(th, "MongoDB Exception in getDistinctValuesFor().")
   }
 }
 
-object MongoDBDataStore extends Logging {
+object MongoDBDataStore {
+	object Implicits {
+		implicit val validStringDate = new ValidDateOrNumericType[String] {}
+	}
+
+	//RegisterJodaTimeConversionHelpers()
+
   val mongodbConfigPrefix = "akka.remote.server.server.client.storage.mongodb"
   val MONGODB_SERVER_HOSTNAME = config.getString(mongodbConfigPrefix+".hostname", "127.0.0.1")
   val MONGODB_SERVER_DBNAME = config.getString(mongodbConfigPrefix+".dbname", "statistics")

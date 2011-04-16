@@ -131,5 +131,5 @@ class DataStorageServer(val serviceName: String, val dataStore: DataStore)
 object DataStorageServer extends Logging {
 
   def getAllDataStorageServers: List[ActorRef] = 
-    ActorRegistry.actorsFor(classOf[DataStorageServer]).toList 
+    Actors.registry.actorsFor(classOf[DataStorageServer]).toList 
 }

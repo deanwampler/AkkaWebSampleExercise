@@ -9,7 +9,7 @@ import org.chicagoscala.awse.util.Logging
 trait ActorFactory { this: Actor with Logging =>
     
   def getOrMakeActorFor(actorId: String)(makeActor: (String) => Actor): ActorRef = 
-    ActorRegistry.actorsFor(actorId).toList match {
+    Actors.registry.actorsFor(actorId).toList match {
       case Nil => 
         log.info("Created new actor with id "+actorId+".")
         val actorRef = actorOf(makeActor(actorId))

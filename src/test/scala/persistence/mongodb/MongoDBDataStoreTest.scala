@@ -6,13 +6,14 @@ import org.scalatest.matchers.ShouldMatchers
 import org.joda.time._
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json.JsonAST._
+import com.mongodb.casbah.Imports._
 
 /**
  * Mocks Mongo by using an in-memory DB instead when doing CI builds.
  */
 class MongoDBDataStoreTest extends DataStoreTestBase with BeforeAndAfterEach with BeforeAndAfterAll {
 
-  type DS = MongoDBDataStore
+  type DS = MongoDBDataStore[Long]
   var dataStore: DS = _
   
   override def beforeAll = {

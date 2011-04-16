@@ -8,6 +8,7 @@ import org.joda.time._
 import net.liftweb.json.JsonDSL._
 import net.liftweb.json.JsonAST._
 
+// TODO: This doesn't actually test MongoDBJSONRecord. What is it testing?
 class MongoDBJSONRecordTest extends FunSuite with ShouldMatchers with BeforeAndAfterEach {
   
   val now     = (new DateTime).getMillis

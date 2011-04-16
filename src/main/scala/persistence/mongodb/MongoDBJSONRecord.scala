@@ -1,10 +1,10 @@
 package org.chicagoscala.awse.persistence.mongodb
 import org.chicagoscala.awse.util.json._
 import org.chicagoscala.awse.persistence._
-import com.osinka.mongodb._
 import net.liftweb.json.JsonAST._
 import net.liftweb.json.JsonDSL._
-import com.mongodb._
+import com.mongodb.casbah.Imports._
+import com.mongodb.casbah.commons.conversions.scala._
 
 /**
  * A Utility that handles conversion between MongoDB JSON objects and JSONRecords.
@@ -13,33 +13,38 @@ import com.mongodb._
  * we prefer to use (TODO - fix?).
  */
 object MongoDBJSONRecord {
-  
+
+	RegisterJodaTimeConversionHelpers()
+
   /**
    * Convert a JSONRecord to a DBObject.
    */ 
-  implicit def toDBObject(json: JSONRecord): DBObject = mapToDBObject(json.toMap)
+  implicit def toDBObject(json: JSONRecord): DBObject = (json.toMap)
+  //implicit def toDBObject(json: JSONRecord): DBObject = mapToDBObject(json.toMap)
   
   /**
    * Convert a Lift JSON JValue to a DBObject.
    */ 
-  implicit def toDBObject(json: JValue): DBObject = mapToDBObject(JSONMap.jsonToMap(json))
+  implicit def toDBObject(json: JValue): DBObject = JSONMap.jsonToMap(json)
+  //implicit def toDBObject(json: JValue): DBObject = mapToDBObject(JSONMap.jsonToMap(json))
   
   def apply(dbo: DBObject): JSONRecord = JSONRecord(dbo.toMap.asInstanceOf[java.util.Map[String,Any]])
       
-  def mapToDBObject(map: Map[String,Any]): DBObject = {
-  	val dbo = new BasicDBObject
-  	map map { kv => kv._2 match {
-  	  case map2: Map[_,_] => dbo.put(kv._1, mapToDBObject(map2.asInstanceOf[Map[String,Any]]))
-  		case iter:Iterable[_] => dbo.put(kv._1, iterToDBObject(iter))
-  		case _ => dbo.put(kv._1, otherToDBValue(kv._2))
-  	}}
-  	dbo
-  }
+  // def mapToDBObject(map: Map[String,Any]): DBObject = {
+  // 	val dbo = new BasicDBObject
+  // 	map map { kv => kv._2 match {
+  // 	  case map2: Map[_,_] => dbo.put(kv._1, mapToDBObject(map2.asInstanceOf[Map[String,Any]]))
+  // 		case iter:Iterable[_] => dbo.put(kv._1, iterToDBObject(iter))
+  // 		case _ => dbo.put(kv._1, otherToDBValue(kv._2))
+  // 	}}
+  // 	dbo
+  // }
 
   def iterToDBObject(iter: Iterable[Any]): DBObject = {
   	val dbl = new BasicDBList
   	iter map {
-  	  case map: Map[_,_] => dbl.add(mapToDBObject(map.asInstanceOf[Map[String,Any]]))
+  	  case map: Map[_,_] => dbl.add(map.asInstanceOf[Map[String,Any]])
+  	  //case map: Map[_,_] => dbl.add(mapToDBObject(map.asInstanceOf[Map[String,Any]]))
   		case iter2:Iterable[_] => dbl.add(iterToDBObject(iter2))
   		case x => dbl.add(otherToDBValue(x))
   	}
