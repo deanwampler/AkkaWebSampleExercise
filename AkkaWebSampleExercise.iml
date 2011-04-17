@@ -52,7 +52,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-actor-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-actor-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -61,7 +61,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-amqp-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-amqp-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -70,7 +70,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-camel-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-camel-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -79,7 +79,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-http-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-http-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -88,7 +88,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-jta-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-jta-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -97,7 +97,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-kernel-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-kernel-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -106,7 +106,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-cassandra-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-cassandra-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -115,7 +115,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-common-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-common-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -124,7 +124,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-couchdb-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-couchdb-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -133,7 +133,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-hbase-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-hbase-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -142,7 +142,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-memcached-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-memcached-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -151,7 +151,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-mongo-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-mongo-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -160,7 +160,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-redis-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-redis-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -169,7 +169,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-riak-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-riak-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -178,7 +178,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-simpledb-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-simpledb-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -187,7 +187,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-voldemort-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-terrastore-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -196,7 +196,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-remote-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-persistence-voldemort-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -205,7 +205,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-spring-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-remote-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -214,7 +214,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-stm-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-spring-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -223,7 +223,16 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-typed-actor-1.0-RC2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-stm-1.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/akka-typed-actor-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -259,52 +268,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/asm-3.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/asm-all-3.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/asm-analysis-3.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/asm-commons-3.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/asm-tree-3.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/asm-util-3.2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/asm-3.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -394,7 +358,34 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/casbah_2.8.0-1.0.8.5.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/casbah-commons_2.8.1-2.0.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/casbah-core_2.8.1-2.0.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/casbah-gridfs_2.8.1-2.0.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/casbah-query_2.8.1-2.0.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -449,6 +440,15 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/commons-io-1.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/commons-lang-2.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -646,7 +646,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/jackson-core-asl-1.7.4.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/jackson-core-asl-1.7.6.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -655,7 +655,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/jackson-mapper-asl-1.4.3.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/jackson-mapper-asl-1.6.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -682,6 +682,15 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/javassist-3.8.0.GA.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
           <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/jaxb-api-2.1.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -692,6 +701,24 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/jaxb-impl-2.1.12.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/jaxrs-api-2.0.0.GA.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/jcip-annotations-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -979,7 +1006,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/mongo-java-driver-2.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/mongo-java-driver-2.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -988,43 +1015,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/mongo-scala-driver_2.8.0-0.8.3.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/multiverse-alpha-0.6.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/multiverse-alpha-unborn-0.6.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/multiverse-core-0.6.1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/multiverse-instrumentation-0.6.1.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/multiverse-alpha-0.6.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -1069,7 +1060,16 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/redisclient-2.8.0-2.0.3.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/redisclient-2.8.1-2.3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/resteasy-jaxrs-2.0.0.GA.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -1114,6 +1114,15 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/scannotation-1.0.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
           <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/servlet-api-2.5.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -1150,7 +1159,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/slf4j-api-1.6.0.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/slf4j-api-1.6.1.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -1231,6 +1240,15 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/terrastore-javaclient-2.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
           <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/thrift-r917130.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -1240,7 +1258,7 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/time-2.8.0-0.2-SNAPSHOT.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/time_2.8.0-0.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -1322,15 +1340,6 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib_managed/scala_2.8.1/compile/zookeeper-3.2.2.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/misc/sbt-launch-0.7.4.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
