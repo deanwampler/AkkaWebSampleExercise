@@ -8,9 +8,6 @@ import com.mongodb.casbah.commons.conversions.scala._
 
 /**
  * A Utility that handles conversion between MongoDB JSON objects and JSONRecords.
- * @note I attempted to use scala-mongo-driver's protocol for wrapping DBObject, 
- * but it seems to only work for fixed "schema" objects, not arbitrary maps, which
- * we prefer to use (TODO - fix?).
  */
 object MongoDBJSONRecord {
 
@@ -26,20 +23,9 @@ object MongoDBJSONRecord {
    * Convert a Lift JSON JValue to a DBObject.
    */ 
   implicit def toDBObject(json: JValue): DBObject = JSONMap.jsonToMap(json)
-  //implicit def toDBObject(json: JValue): DBObject = mapToDBObject(JSONMap.jsonToMap(json))
-  
+
   def apply(dbo: DBObject): JSONRecord = JSONRecord(dbo.toMap.asInstanceOf[java.util.Map[String,Any]])
       
-  // def mapToDBObject(map: Map[String,Any]): DBObject = {
-  // 	val dbo = new BasicDBObject
-  // 	map map { kv => kv._2 match {
-  // 	  case map2: Map[_,_] => dbo.put(kv._1, mapToDBObject(map2.asInstanceOf[Map[String,Any]]))
-  // 		case iter:Iterable[_] => dbo.put(kv._1, iterToDBObject(iter))
-  // 		case _ => dbo.put(kv._1, otherToDBValue(kv._2))
-  // 	}}
-  // 	dbo
-  // }
-
   def iterToDBObject(iter: Iterable[Any]): DBObject = {
   	val dbl = new BasicDBList
   	iter map {
